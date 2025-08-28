@@ -194,10 +194,10 @@ class TelegramBot:
                 "Please try again later or contact support."
             )
     
-    def setup_webhook(self, webhook_url: str):
+    async def setup_webhook(self, webhook_url: str):
         """Setup webhook for the bot"""
         try:
-            self.application.bot.set_webhook(url=webhook_url)
+            await self.application.bot.set_webhook(url=webhook_url)
             logger.info(f"Webhook set to: {webhook_url}")
         except Exception as e:
             logger.error(f"Failed to set webhook: {e}")
