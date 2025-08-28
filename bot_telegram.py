@@ -210,7 +210,6 @@ class TelegramBot:
     def run_webhook(self, webhook_url: str, port: int = 8000):
         """Start the bot in webhook mode (for production)"""
         logger.info("Starting Telegram bot in webhook mode...")
-        self.setup_webhook(webhook_url)
         
         # Start Flask app in a separate thread
         def run_flask():
