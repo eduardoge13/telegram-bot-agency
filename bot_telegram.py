@@ -7,6 +7,8 @@ from telegram.ext import Application, CommandHandler, MessageHandler, filters, C
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
 import json
+from flask import Flask, request
+import threading
 
 # Load environment variables
 load_dotenv()
@@ -22,6 +24,9 @@ logger = logging.getLogger(__name__)
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
 SPREADSHEET_ID = os.getenv('SPREADSHEET_ID')
 CREDENTIALS_FILE = 'credentials.json'
+
+# Flask app for webhook
+app = Flask(__name__)
 
 class GoogleSheetsManager:
     def __init__(self):
@@ -188,16 +193,89 @@ class TelegramBot:
                 "Please try again later or contact support."
             )
     
-    def run(self):
-        """Start the bot"""
-        logger.info("Starting Telegram bot...")
+    def setup_webhook(self, webhook_url: str):
+        """Setup webhook for the bot"""
+        try:
+            self.application.bot.set_webhook(url=webhook_url)
+            logger.info(f"Webhook set to: {webhook_url}")
+        except Exception as e:
+            logger.error(f"Failed to set webhook: {e}")
+    
+    def run_polling(self):
+        """Start the bot in polling mode (for local development)"""
+        logger.info("Starting Telegram bot in polling mode...")
         self.application.run_polling(allowed_updates=Update.ALL_TYPES)
+    
+    def run_webhook(self, webhook_url: str, port: int = 8000):
+        """Start the bot in webhook mode (for production)"""
+        logger.info("Starting Telegram bot in webhook mode...")
+        self.setup_webhook(webhook_url)
+        
+        # Start Flask app in a separate thread
+        def run_flask():
+            app.run(host='0.0.0.0', port=port)
+        
+        flask_thread = threading.Thread(target=run_flask)
+        flask_thread.daemon = True
+        flask_thread.start()
+        
+        # Start webhook
+        self.application.run_webhook(
+            listen='0.0.0.0',
+            port=port,
+            webhook_url=webhook_url,
+            secret_token=os.getenv('WEBHOOK_SECRET_TOKEN', 'your-secret-token')
+        )
+
+# Webhook endpoint
+@app.route('/webhook', methods=['POST'])
+def webhook():
+    """Handle incoming webhook from Telegram"""
+    try:
+        update = Update.de_json(request.get_json(), bot.application.bot)
+        bot.application.process_update(update)
+        return 'OK'
+    except Exception as e:
+        logger.error(f"Webhook error: {e}")
+        return 'Error', 500
+
+# Health check endpoint
+@app.route('/health', methods=['GET'])
+def health_check():
+    """Health check endpoint for Railway"""
+    return 'OK', 200
 
 def main():
     """Main function to run the bot"""
     try:
+        global bot
         bot = TelegramBot()
-        bot.run()
+        
+        # Check if running in production (Railway) or development
+        is_production = os.getenv('RAILWAY_ENVIRONMENT') or os.getenv('PORT')
+        
+        if is_production:
+            # Production mode - use webhook
+            port = int(os.getenv('PORT', 8000))
+            webhook_url = os.getenv('WEBHOOK_URL')
+            
+            if not webhook_url:
+                # Generate webhook URL from Railway domain
+                railway_public_url = os.getenv('RAILWAY_PUBLIC_DOMAIN')
+                if railway_public_url:
+                    webhook_url = f"https://{railway_public_url}/webhook"
+                else:
+                    logger.warning("WEBHOOK_URL not set, using polling mode as fallback")
+                    bot.run_polling()
+                    return
+            
+            logger.info(f"Starting in production mode with webhook: {webhook_url}")
+            bot.run_webhook(webhook_url, port)
+        else:
+            # Development mode - use polling
+            logger.info("Starting in development mode with polling")
+            bot.run_polling()
+            
     except Exception as e:
         logger.error(f"Failed to start bot: {e}")
         print(f"Error: {e}")
