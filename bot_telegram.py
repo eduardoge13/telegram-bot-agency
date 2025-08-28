@@ -251,37 +251,9 @@ def main():
         global bot
         bot = TelegramBot()
         
-        # Check if running in production (Railway) or development
-        is_production = os.getenv('RAILWAY_ENVIRONMENT') or os.getenv('PORT')
-        
-        if is_production:
-            # Production mode - use webhook
-            port = int(os.getenv('PORT', 8000))
-            webhook_url = os.getenv('WEBHOOK_URL')
-            
-            if not webhook_url:
-                # Generate webhook URL from Railway domain
-                railway_public_url = os.getenv('RAILWAY_PUBLIC_DOMAIN')
-                if railway_public_url:
-                    webhook_url = f"https://{railway_public_url}/webhook"
-                else:
-                    logger.warning("WEBHOOK_URL not set, using polling mode as fallback")
-                    bot.run_polling()
-                    return
-            
-            logger.info(f"Starting in production mode with webhook: {webhook_url}")
-            
-            # Run webhook setup in async context
-            async def setup_and_run():
-                await bot.setup_webhook(webhook_url)
-                bot.run_webhook(webhook_url, port)
-            
-            # Run the async setup
-            asyncio.run(setup_and_run())
-        else:
-            # Development mode - use polling
-            logger.info("Starting in development mode with polling")
-            bot.run_polling()
+        # Use polling mode for both development and production (simpler and more reliable)
+        logger.info("Starting Telegram bot in polling mode...")
+        bot.run_polling()
             
     except Exception as e:
         logger.error(f"Failed to start bot: {e}")
