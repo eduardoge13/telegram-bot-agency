@@ -9,6 +9,7 @@ from googleapiclient.discovery import build
 import json
 from flask import Flask, request
 import threading
+import asyncio
 
 # Load environment variables
 load_dotenv()
@@ -270,7 +271,14 @@ def main():
                     return
             
             logger.info(f"Starting in production mode with webhook: {webhook_url}")
-            bot.run_webhook(webhook_url, port)
+            
+            # Run webhook setup in async context
+            async def setup_and_run():
+                await bot.setup_webhook(webhook_url)
+                bot.run_webhook(webhook_url, port)
+            
+            # Run the async setup
+            asyncio.run(setup_and_run())
         else:
             # Development mode - use polling
             logger.info("Starting in development mode with polling")
