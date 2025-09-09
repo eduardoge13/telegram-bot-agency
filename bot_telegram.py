@@ -987,122 +987,122 @@ class TelegramBot:
         
         await update.message.reply_text(status_message, parse_mode='Markdown')
 
-async def handle_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Handle client number searches - only respond to mentions in groups"""
-    
-    # OPCIÓN 1: Solo responder cuando mencionen al bot en grupos
-    chat = update.effective_chat
-    message_text = update.message.text.strip()
-    user = update.effective_user
-    
-    # Si es un grupo/supergrupo, verificar si el bot fue mencionado
-    if chat.type in [Chat.GROUP, Chat.SUPERGROUP]:
-        # Obtener información del bot
-        bot_info = await context.bot.get_me()
-        bot_username = bot_info.username.lower()
+    async def handle_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Handle client number searches - only respond to mentions in groups"""
         
-        # Verificar si el bot fue mencionado
-        is_mentioned = False
+        # OPCIÓN 1: Solo responder cuando mencionen al bot en grupos
+        chat = update.effective_chat
+        message_text = update.message.text.strip()
+        user = update.effective_user
         
-        # Verificar menciones en el texto
-        if f"@{bot_username}" in message_text.lower():
-            is_mentioned = True
-            # Remover la mención del texto para procesarlo
-            message_text = message_text.replace(f"@{bot_username}", "").replace(f"@{bot_info.username}", "").strip()
-        
-        # Verificar si el mensaje es una respuesta al bot
-        if update.message.reply_to_message:
-            replied_user = update.message.reply_to_message.from_user
-            if replied_user and replied_user.is_bot and replied_user.id == context.bot.id:
+        # Si es un grupo/supergrupo, verificar si el bot fue mencionado
+        if chat.type in [Chat.GROUP, Chat.SUPERGROUP]:
+            # Obtener información del bot
+            bot_info = await context.bot.get_me()
+            bot_username = bot_info.username.lower()
+            
+            # Verificar si el bot fue mencionado
+            is_mentioned = False
+            
+            # Verificar menciones en el texto
+            if f"@{bot_username}" in message_text.lower():
                 is_mentioned = True
+                # Remover la mención del texto para procesarlo
+                message_text = message_text.replace(f"@{bot_username}", "").replace(f"@{bot_info.username}", "").strip()
+            
+            # Verificar si el mensaje es una respuesta al bot
+            if update.message.reply_to_message:
+                replied_user = update.message.reply_to_message.from_user
+                if replied_user and replied_user.is_bot and replied_user.id == context.bot.id:
+                    is_mentioned = True
+            
+            # Verificar entidades de mención
+            if update.message.entities:
+                for entity in update.message.entities:
+                    if entity.type == "mention":
+                        mentioned_text = message_text[entity.offset:entity.offset + entity.length]
+                        if mentioned_text.lower() == f"@{bot_username}":
+                            is_mentioned = True
+                            break
+            
+            # Si no fue mencionado, no responder
+            if not is_mentioned:
+                return
         
-        # Verificar entidades de mención
-        if update.message.entities:
-            for entity in update.message.entities:
-                if entity.type == "mention":
-                    mentioned_text = message_text[entity.offset:entity.offset + entity.length]
-                    if mentioned_text.lower() == f"@{bot_username}":
-                        is_mentioned = True
-                        break
+        # Si llegamos aquí, es chat privado O el bot fue mencionado en grupo
+        client_number = message_text
+        chat_context = self._get_chat_context(update)
         
-        # Si no fue mencionado, no responder
-        if not is_mentioned:
-            return
-    
-    # Si llegamos aquí, es chat privado O el bot fue mencionado en grupo
-    client_number = message_text
-    chat_context = self._get_chat_context(update)
-    
-    if not client_number:
-        await update.message.reply_text(
-            "Por favor envíame un número de cliente para buscar.\n"
-            "Ejemplo: `12345` o `CLIENT-001`",
-            parse_mode='Markdown'
-        )
-        return
-    
-    # Mostrar indicador de escritura mientras busca
-    await context.bot.send_chat_action(chat_id=update.effective_chat.id, action="typing")
-    
-    logger.info(f"Search request from {user.first_name} in {chat_context}: '{client_number}'")
-    
-    try:
-        # Buscar cliente
-        client_data = self.sheets_manager.get_client_data(client_number)
-        
-        if client_data:
-            # Log successful search
-            EnhancedUserActivityLogger.log_search_result(update, client_number, True, len(client_data))
-            
-            # Formatear respuesta exitosa
-            response = f"✅ **Cliente encontrado: `{client_number}`**\n\n"
-            
-            # Mostrar datos en formato bonito
-            for key, value in client_data.items():
-                if value and str(value).strip():  # Solo mostrar valores no vacíos
-                    response += f"**{key}:** {value}\n"
-            
-            # Agregar pie de página con contexto
-            if update.effective_chat.type != Chat.PRIVATE:
-                response += f"\n📋 *{len(client_data)} campos encontrados | Solicitado por {user.first_name}*"
-            else:
-                response += f"\n📋 *{len(client_data)} campos con datos*"
-            
-            await update.message.reply_text(response, parse_mode='Markdown')
-            logger.info(f"✅ Successfully sent data for client: {client_number} to {user.first_name}")
-        
-        else:
-            # Log failed search
-            EnhancedUserActivityLogger.log_search_result(update, client_number, False)
-            
-            # Cliente no encontrado
-            suggestion_msg = (
-                f"❌ **No se encontró cliente con número:** `{client_number}`\n\n"
-                f"**Sugerencias:**\n"
-                f"• Verifica la ortografía e intenta de nuevo\n"
-                f"• Prueba diferentes formatos (con/sin prefijos)\n"
-                f"• Usa `/info` para ver campos disponibles\n"
-                f"• Contacta al administrador si el cliente debería existir\n\n"
-                f"💡 *La búsqueda no distingue mayúsculas/minúsculas*"
+        if not client_number:
+            await update.message.reply_text(
+                "Por favor envíame un número de cliente para buscar.\n"
+                "Ejemplo: `12345` o `CLIENT-001`",
+                parse_mode='Markdown'
             )
-            await update.message.reply_text(suggestion_msg, parse_mode='Markdown')
-            logger.info(f"❌ Client not found: {client_number} (requested by {user.first_name})")
-    
-    except Exception as e:
-        # Log error
-        EnhancedUserActivityLogger.log_user_action(update, "SEARCH_ERROR", f"Client: {client_number}, Error: {str(e)}")
+            return
         
-        error_msg = (
-            f"❌ **¡Lo siento, algo salió mal!**\n\n"
-            f"Encontré un error al buscar `{client_number}`.\n\n"
-            f"**Qué intentar:**\n"
-            f"• Espera un momento e intenta de nuevo\n"
-            f"• Verifica `/status` para ver si los sistemas funcionan\n"
-            f"• Contacta soporte si el problema persiste\n\n"
-            f"🔧 *Error registrado para revisión técnica*"
-        )
-        await update.message.reply_text(error_msg, parse_mode='Markdown')
-        logger.error(f"❌ Error processing search for '{client_number}' by {user.first_name}: {e}")
+        # Mostrar indicador de escritura mientras busca
+        await context.bot.send_chat_action(chat_id=update.effective_chat.id, action="typing")
+        
+        logger.info(f"Search request from {user.first_name} in {chat_context}: '{client_number}'")
+        
+        try:
+            # Buscar cliente
+            client_data = self.sheets_manager.get_client_data(client_number)
+            
+            if client_data:
+                # Log successful search
+                EnhancedUserActivityLogger.log_search_result(update, client_number, True, len(client_data))
+                
+                # Formatear respuesta exitosa
+                response = f"✅ **Cliente encontrado: `{client_number}`**\n\n"
+                
+                # Mostrar datos en formato bonito
+                for key, value in client_data.items():
+                    if value and str(value).strip():  # Solo mostrar valores no vacíos
+                        response += f"**{key}:** {value}\n"
+                
+                # Agregar pie de página con contexto
+                if update.effective_chat.type != Chat.PRIVATE:
+                    response += f"\n📋 *{len(client_data)} campos encontrados | Solicitado por {user.first_name}*"
+                else:
+                    response += f"\n📋 *{len(client_data)} campos con datos*"
+                
+                await update.message.reply_text(response, parse_mode='Markdown')
+                logger.info(f"✅ Successfully sent data for client: {client_number} to {user.first_name}")
+            
+            else:
+                # Log failed search
+                EnhancedUserActivityLogger.log_search_result(update, client_number, False)
+                
+                # Cliente no encontrado
+                suggestion_msg = (
+                    f"❌ **No se encontró cliente con número:** `{client_number}`\n\n"
+                    f"**Sugerencias:**\n"
+                    f"• Verifica la ortografía e intenta de nuevo\n"
+                    f"• Prueba diferentes formatos (con/sin prefijos)\n"
+                    f"• Usa `/info` para ver campos disponibles\n"
+                    f"• Contacta al administrador si el cliente debería existir\n\n"
+                    f"💡 *La búsqueda no distingue mayúsculas/minúsculas*"
+                )
+                await update.message.reply_text(suggestion_msg, parse_mode='Markdown')
+                logger.info(f"❌ Client not found: {client_number} (requested by {user.first_name})")
+        
+        except Exception as e:
+            # Log error
+            EnhancedUserActivityLogger.log_user_action(update, "SEARCH_ERROR", f"Client: {client_number}, Error: {str(e)}")
+            
+            error_msg = (
+                f"❌ **¡Lo siento, algo salió mal!**\n\n"
+                f"Encontré un error al buscar `{client_number}`.\n\n"
+                f"**Qué intentar:**\n"
+                f"• Espera un momento e intenta de nuevo\n"
+                f"• Verifica `/status` para ver si los sistemas funcionan\n"
+                f"• Contacta soporte si el problema persiste\n\n"
+                f"🔧 *Error registrado para revisión técnica*"
+            )
+            await update.message.reply_text(error_msg, parse_mode='Markdown')
+            logger.error(f"❌ Error processing search for '{client_number}' by {user.first_name}: {e}")
 
 
     def run(self):
