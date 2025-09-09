@@ -653,13 +653,8 @@ class TelegramBot:
             return
         
         try:
-            # Get number of entries (default 20)
-            args = context.args
-            limit = int(args[0]) if args and args[0].isdigit() else 20
-            limit = min(limit, 50)  # Max 50 entries
-            
-            # Get persistent logs
-            persistent_logs = persistent_logger.get_recent_logs(limit)
+            # Always show last 20 entries (simplified)
+            persistent_logs = persistent_logger.get_recent_logs(20)
             
             if not persistent_logs:
                 await update.message.reply_text(
@@ -683,7 +678,7 @@ class TelegramBot:
                     text = text.replace(char, f'\\{char}')
                 return text
             
-            log_message = f"📊 **Persistent Logs \\(Last {len(persistent_logs)} entries\\):**\n\n"
+            log_message = f"📊 **Recent Persistent Logs \\({len(persistent_logs)} entries\\):**\n\n"
             
             for log_entry in persistent_logs[-15:]:  # Show last 15 for readability
                 if len(log_entry) >= 5:
@@ -698,9 +693,7 @@ class TelegramBot:
                     log_message += "\n"
             
             log_message += (
-                f"\n📋 **Total entries shown:** {len(persistent_logs[-15:])}\n"
-                f"📊 **Available in database:** {len(persistent_logs)}\n"
-                f"💡 **Usage:** `/plogs 30` to see more entries\n"
+                f"\n📋 **Showing:** {len(persistent_logs[-15:])}/{len(persistent_logs)} entries\n"
                 f"🕐 **Generated:** {datetime.now().strftime('%H:%M:%S')}"
             )
             
