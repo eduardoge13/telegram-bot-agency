@@ -13,256 +13,6 @@ import sys
 # Load environment variables
 load_dotenv()
 
-class TelegramBot:
-    def __init__(self):
-        self.token = os.getenv('TELEGRAM_BOT_TOKEN')
-        if not self.token:
-            raise ValueError("❌ TELEGRAM_BOT_TOKEN not found in environment variables")
-        
-        self.sheets_manager = GoogleSheetsManager()
-        self.application = Application.builder().token(self.token).build()
-        self._setup_handlers()
-        
-        # Get sheet info for bot status
-        self.sheet_info = self.sheets_manager.get_sheet_info()
-        logger.info(f"📊 Sheet loaded: {self.sheet_info['total_clients']} clients available")
-        
-        # Log bot startup
-        EnhancedUserActivityLogger.log_system_event("BOT_STARTUP", f"Bot initialized with {self.sheet_info['total_clients']} clients")
-    
-    def _setup_handlers(self):
-        """Setup bot command and message handlers"""
-        self.application.add_handler(CommandHandler("start", self.start_command))
-        self.application.add_handler(CommandHandler("help", self.help_command))
-        self.application.add_handler(CommandHandler("info", self.info_command))
-        self.application.add_handler(CommandHandler("status", self.status_command))
-        self.application.add_handler(CommandHandler("stats", self.stats_command))
-        self.application.add_handler(CommandHandler("groupinfo", self.group_info_command))
-        self.application.add_handler(CommandHandler("whoami", self.whoami_command))
-        self.application.add_handler(CommandHandler("logs", self.logs_command))
-        self.application.add_handler(CommandHandler("plogs", self.persistent_logs_command))
-        self.application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, self.handle_message))
-    
-    def _is_authorized_user(self, user_id: int) -> bool:
-        """Check if user is authorized"""
-        authorized_users = os.getenv('AUTHORIZED_USERS', '').split(',')
-        if authorized_users == ['']:
-            return True  # If no specific users set, allow all
-        return str(user_id) in authorized_users
-    
-    def _get_chat_context(self, update: Update) -> str:
-        """Get chat context for logging and responses"""
-        chat = update.effective_chat
-        if chat.type == Chat.PRIVATE:
-            return "private chat"
-        else:
-            return f"group '{chat.title}' (ID: {chat.id})"
-    
-    async def start_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        """Handle /start command"""
-        user = update.effective_user
-        chat = update.effective_chat
-        
-        # Log the action
-        EnhancedUserActivityLogger.log_user_action(update, "START_COMMAND")
-        
-        user_name = user.first_name or "there"
-        chat_context = self._get_chat_context(update)
-        
-        if chat.type == Chat.PRIVATE:
-            welcome_message = (
-                f"👋 Hi {user_name}! Welcome to the **Client Data Bot**!\n\n"
-                f"🔍 I can help you find client information from our database.\n"
-                f"📊 Currently tracking **{self.sheet_info['total_clients']} clients**\n\n"
-                f"**Available commands:**\n"
-                f"• `/help` - Show detailed instructions\n"
-                f"• `/info` - Show sheet information\n"
-                f"• `/status` - Check bot status\n"
-                f"• `/whoami` - Get your User ID and info\n\n"
-                f"💡 **Quick start:** Just send me any client number and I'll find their data!\n\n"
-                f"👥 **For groups:** Add me to a group and I'll work there too!"
-            )
-        else:
-            welcome_message = (
-                f"👋 Hi everyone! **Client Data Bot** is now active in this group!\n\n"
-                f"🔍 I can help you find client information from our database.\n"
-                f"📊 Currently tracking **{self.sheet_info['total_clients']} clients**\n\n"
-                f"**Usage in groups:**\n"
-                f"• Send client numbers directly: `12345`\n"
-                f"• Use commands: `/help`, `/info`, `/status`\n"
-                f"• Get group info: `/groupinfo`\n\n"
-                f"💡 I'll respond to everyone's queries in this group!"
-            )
-        
-        await update.message.reply_text(welcome_message, parse_mode='Markdown')
-        logger.info(f"Start command executed by {user_name} in {chat_context}")
-    
-    async def whoami_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        """Get user ID and information"""
-        user = update.effective_user
-        chat = update.effective_chat
-        
-        # Log the action
-        EnhancedUserActivityLogger.log_user_action(update, "WHOAMI_COMMAND")
-        
-        user_info = (
-            f"👤 **Your Telegram Info:**\n\n"
-            f"🆔 **User ID:** `{user.id}`\n"
-            f"👤 **Name:** {user.first_name} {user.last_name or ''}\n"
-            f"📱 **Username:** @{user.username or 'No username'}\n"
-            f"💬 **Chat Type:** {chat.type}\n"
-            f"🔢 **Chat ID:** `{chat.id}`"
-        )
-        
-        if chat.type != Chat.PRIVATE:
-            user_info += f"\n🏷️ **Group:** {chat.title}"
-        
-        # Check if user is authorized
-        is_authorized = self._is_authorized_user(user.id)
-        user_info += f"\n🔐 **Authorized:** {'✅ Yes' if is_authorized else '❌ No'}"
-        
-        user_info += f"\n\n💡 **To authorize this user, add:** `{user.id}` to AUTHORIZED_USERS"
-        
-        await update.message.reply_text(user_info, parse_mode='Markdown')
-        
-        # Also print to console for admin
-        logger.info(f"👤 User ID Request: {user.first_name} (@{user.username}) = {user.id}")
-    
-    async def logs_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        """Show recent local logs"""
-        user = update.effective_user
-        
-        # Log the action
-        EnhancedUserActivityLogger.log_user_action(update, "LOGS_COMMAND")
-        
-        # Check if user is authorized
-        if not self._is_authorized_user(user.id):
-            await update.message.reply_text(
-                "⛔ You're not authorized to view bot logs.\n"
-                f"💡 Your User ID is: `{user.id}`",
-                parse_mode='Markdown'
-            )
-            return
-        
-        try:
-            # Get recent local activity logs
-            recent_logs = self._get_recent_logs(lines=15)
-            
-            if not recent_logs:
-                await update.message.reply_text(
-                    "📝 No recent local activity logs found.\n"
-                    "💡 Use `/plogs` for persistent logs from Google Sheets."
-                )
-                return
-            
-            log_message = (
-                f"📝 **Recent Local Logs (Last 15 entries):**\n\n"
-                f"```\n{recent_logs}\n```\n\n"
-                f"📁 **Note:** Local logs are temporary in Railway\n"
-                f"💡 Use `/plogs` for complete persistent history\n"
-                f"🕐 **Generated:** {datetime.now().strftime('%H:%M:%S')}"
-            )
-            
-            await update.message.reply_text(log_message, parse_mode='Markdown')
-            
-        except Exception as e:
-            logger.error(f"Error retrieving local logs: {e}")
-            await update.message.reply_text(
-                "❌ Error retrieving local logs.\n"
-                "💡 Try `/plogs` for persistent logs."
-            )
-    
-    async def persistent_logs_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        """Show persistent logs from Google Sheets"""
-        user = update.effective_user
-        
-        # Log the action
-        EnhancedUserActivityLogger.log_user_action(update, "PLOGS_COMMAND")
-        
-        # Check if user is authorized
-        if not self._is_authorized_user(user.id):
-            await update.message.reply_text(
-                "⛔ You're not authorized to view persistent logs."
-            )
-            return
-        
-        try:
-            # Get number of entries (default 20)
-            args = context.args
-            limit = int(args[0]) if args and args[0].isdigit() else 20
-            limit = min(limit, 50)  # Max 50 entries
-            
-            # Get persistent logs
-            persistent_logs = persistent_logger.get_recent_logs(limit)
-            
-            if not persistent_logs:
-                await update.message.reply_text(
-                    "📊 **No persistent logs found**\n\n"
-                    "**Possible reasons:**\n"
-                    "• LOGS_SPREADSHEET_ID not configured\n"
-                    "• Google Sheets connection issue\n"
-                    "• No activity logged yet\n\n"
-                    "💡 Check your configuration and try again."
-                )
-                return
-            
-            # Format logs for display
-            log_message = f"📊 **Persistent Logs (Last {len(persistent_logs)} entries):**\n\n"
-            
-            for log_entry in persistent_logs[-15:]:  # Show last 15 for readability
-                if len(log_entry) >= 5:
-                    timestamp = log_entry[0][:16]  # Truncate timestamp
-                    action = log_entry[4]
-                    username = log_entry[3][:20]  # Truncate username
-                    details = log_entry[5][:40] if len(log_entry) > 5 else ""  # Truncate details
-                    
-                    log_message += f"`{timestamp}` | **{action}** | {username}"
-                    if details:
-                        log_message += f" | {details}..."
-                    log_message += "\n"
-            
-            log_message += (
-                f"\n📋 **Total entries shown:** {len(persistent_logs[-15:])}\n"
-                f"📊 **Available in database:** {len(persistent_logs)}\n"
-                f"💡 **Usage:** `/plogs 30` to see more entries\n"
-                f"🕐 **Generated:** {datetime.now().strftime('%H:%M:%S')}"
-            )
-            
-            await update.message.reply_text(log_message, parse_mode='Markdown')
-            
-        except Exception as e:
-            logger.error(f"Error retrieving persistent logs: {e}")
-            await update.message.reply_text(
-                "❌ Error retrieving persistent logs.\n"
-                "Check Google Sheets connection and LOGS_SPREADSHEET_ID."
-            )
-    
-    def _get_recent_logs(self, lines: int = 20) -> str:
-        """Get recent log entries from local files"""
-        try:
-            if not os.path.exists('logs/user_activity.log'):
-                return "No local activity log file found."
-            
-            with open('logs/user_activity.log', 'r', encoding='utf-8') as f:
-                log_lines = f.readlines()
-            
-            # Get last N lines
-            recent_lines = log_lines[-lines:] if len(log_lines) > lines else log_lines
-            
-            # Format for display (truncate long lines)
-            formatted_lines = []
-            for line in recent_lines:
-                if len(line) > 100:
-                    formatted_lines.append(line[:97] + "...")
-                else:
-                    formatted_lines.append(line.rstrip())
-            
-            return '\n'.join(formatted_lines)
-            
-        except Exception as e:
-            logger.error(f"Error reading recent logs: {e}")
-            return "❌ Error reading local logs."
-            
 class PersistentLogger:
     """Store all logs permanently in Google Sheets"""
     
@@ -600,8 +350,363 @@ class GoogleSheetsManager:
             logger.error("❌ Invalid JSON in GOOGLE_CREDENTIALS_JSON")
             raise ValueError("GOOGLE_CREDENTIALS_JSON contains invalid JSON")
         except Exception as e:
+            logger.error(f"❌ Authentication failed: {e}")
+            EnhancedUserActivityLogger.log_system_event("SHEETS_ERROR", f"Authentication failed: {e}")
+            raise
+    
+    def _find_client_column(self):
+        """Find which column contains client numbers"""
+        try:
+            if not SPREADSHEET_ID:
+                raise ValueError("❌ SPREADSHEET_ID not found in environment variables")
+            
+            # Get the first row to find headers
+            result = self.service.spreadsheets().values().get(
+                spreadsheetId=SPREADSHEET_ID,
+                range='Sheet1!1:1'
+            ).execute()
+            
+            self.headers = result.get('values', [[]])[0]
+            
+            if not self.headers:
+                logger.warning("⚠️ No headers found in spreadsheet")
+                return
+            
+            # Look for client number column
+            client_keywords = ['client', 'number', 'id', 'code']
+            
+            for i, header in enumerate(self.headers):
+                header_lower = header.lower().strip()
+                for keyword in client_keywords:
+                    if keyword in header_lower:
+                        self.client_column = i
+                        logger.info(f"📋 Found client column: '{header}' at position {i}")
+                        EnhancedUserActivityLogger.log_system_event("COLUMN_FOUND", f"Client column: {header} at position {i}")
+                        return
+            
+            # Default to first column if no match found
+            self.client_column = 0
+            logger.info("📋 Using first column as client column (no specific match found)")
+            
+        except Exception as e:
+            logger.error(f"❌ Error finding client column: {e}")
+            self.client_column = 0
+    
+    def get_client_data(self, client_number: str) -> Optional[Dict[str, Any]]:
+        """Search for client data by client number"""
+        try:
+            if not SPREADSHEET_ID:
+                return None
+            
+            logger.info(f"🔍 Searching for client: {client_number}")
+            
+            # Get all data from the sheet
+            result = self.service.spreadsheets().values().get(
+                spreadsheetId=SPREADSHEET_ID,
+                range='Sheet1!A:Z'
+            ).execute()
+            
+            values = result.get('values', [])
+            if len(values) < 2:  # Need at least headers + 1 data row
+                logger.warning("⚠️ Not enough data in spreadsheet")
+                return None
+            
+            # Skip header row and search through data
+            for row_index, row in enumerate(values[1:], start=2):
+                if not row or len(row) <= self.client_column:
+                    continue
+                
+                # Check if client number matches (case-insensitive, stripped)
+                cell_value = str(row[self.client_column]).strip().lower()
+                search_value = str(client_number).strip().lower()
+                
+                if cell_value == search_value:
+                    logger.info(f"✅ Found client at row {row_index}")
+                    
+                    # Create result dictionary
+                    client_data = {}
+                    for i, header in enumerate(self.headers):
+                        if i < len(row) and row[i].strip():  # Only include non-empty values
+                            client_data[header] = row[i].strip()
+                    
+                    return client_data
+            
+            logger.info(f"❌ Client '{client_number}' not found")
+            return None
+            
+        except Exception as e:
+            logger.error(f"❌ Error searching for client: {e}")
+            return None
+    
+    def get_sheet_info(self) -> Dict[str, Any]:
+        """Get basic information about the spreadsheet"""
+        try:
+            result = self.service.spreadsheets().values().get(
+                spreadsheetId=SPREADSHEET_ID,
+                range='Sheet1!A:A'
+            ).execute()
+            
+            values = result.get('values', [])
+            total_rows = len(values) - 1  # Exclude header row
+            
+            return {
+                'total_clients': max(0, total_rows),
+                'headers': self.headers,
+                'client_column': self.headers[self.client_column] if self.headers else 'Unknown'
+            }
+        except Exception as e:
+            logger.error(f"Error getting sheet info: {e}")
+            return {'total_clients': 0, 'headers': [], 'client_column': 'Unknown'}
+
+class TelegramBot:
+    def __init__(self):
+        self.token = os.getenv('TELEGRAM_BOT_TOKEN')
+        if not self.token:
+            raise ValueError("❌ TELEGRAM_BOT_TOKEN not found in environment variables")
+        
+        self.sheets_manager = GoogleSheetsManager()
+        self.application = Application.builder().token(self.token).build()
+        self._setup_handlers()
+        
+        # Get sheet info for bot status
+        self.sheet_info = self.sheets_manager.get_sheet_info()
+        logger.info(f"📊 Sheet loaded: {self.sheet_info['total_clients']} clients available")
+        
+        # Log bot startup
+        EnhancedUserActivityLogger.log_system_event("BOT_STARTUP", f"Bot initialized with {self.sheet_info['total_clients']} clients")
+    
+    def _setup_handlers(self):
+        """Setup bot command and message handlers"""
+        self.application.add_handler(CommandHandler("start", self.start_command))
+        self.application.add_handler(CommandHandler("help", self.help_command))
+        self.application.add_handler(CommandHandler("info", self.info_command))
+        self.application.add_handler(CommandHandler("status", self.status_command))
+        self.application.add_handler(CommandHandler("stats", self.stats_command))
+        self.application.add_handler(CommandHandler("groupinfo", self.group_info_command))
+        self.application.add_handler(CommandHandler("whoami", self.whoami_command))
+        self.application.add_handler(CommandHandler("logs", self.logs_command))
+        self.application.add_handler(CommandHandler("plogs", self.persistent_logs_command))
+        self.application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, self.handle_message))
+    
+    def _is_authorized_user(self, user_id: int) -> bool:
+        """Check if user is authorized"""
+        authorized_users = os.getenv('AUTHORIZED_USERS', '').split(',')
+        if authorized_users == ['']:
+            return True  # If no specific users set, allow all
+        return str(user_id) in authorized_users
+    
+    def _get_chat_context(self, update: Update) -> str:
+        """Get chat context for logging and responses"""
+        chat = update.effective_chat
+        if chat.type == Chat.PRIVATE:
+            return "private chat"
+        else:
+            return f"group '{chat.title}' (ID: {chat.id})"
+    
+    async def start_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Handle /start command"""
+        user = update.effective_user
+        chat = update.effective_chat
+        
+        # Log the action
+        EnhancedUserActivityLogger.log_user_action(update, "START_COMMAND")
+        
+        user_name = user.first_name or "there"
+        chat_context = self._get_chat_context(update)
+        
+        if chat.type == Chat.PRIVATE:
+            welcome_message = (
+                f"👋 Hi {user_name}! Welcome to the **Client Data Bot**!\n\n"
+                f"🔍 I can help you find client information from our database.\n"
+                f"📊 Currently tracking **{self.sheet_info['total_clients']} clients**\n\n"
+                f"**Available commands:**\n"
+                f"• `/help` - Show detailed instructions\n"
+                f"• `/info` - Show sheet information\n"
+                f"• `/status` - Check bot status\n"
+                f"• `/whoami` - Get your User ID and info\n\n"
+                f"💡 **Quick start:** Just send me any client number and I'll find their data!\n\n"
+                f"👥 **For groups:** Add me to a group and I'll work there too!"
+            )
+        else:
+            welcome_message = (
+                f"👋 Hi everyone! **Client Data Bot** is now active in this group!\n\n"
+                f"🔍 I can help you find client information from our database.\n"
+                f"📊 Currently tracking **{self.sheet_info['total_clients']} clients**\n\n"
+                f"**Usage in groups:**\n"
+                f"• Send client numbers directly: `12345`\n"
+                f"• Use commands: `/help`, `/info`, `/status`\n"
+                f"• Get group info: `/groupinfo`\n\n"
+                f"💡 I'll respond to everyone's queries in this group!"
+            )
+        
+        await update.message.reply_text(welcome_message, parse_mode='Markdown')
+        logger.info(f"Start command executed by {user_name} in {chat_context}")
+    
+    async def whoami_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Get user ID and information"""
+        user = update.effective_user
+        chat = update.effective_chat
+        
+        # Log the action
+        EnhancedUserActivityLogger.log_user_action(update, "WHOAMI_COMMAND")
+        
+        user_info = (
+            f"👤 **Your Telegram Info:**\n\n"
+            f"🆔 **User ID:** `{user.id}`\n"
+            f"👤 **Name:** {user.first_name} {user.last_name or ''}\n"
+            f"📱 **Username:** @{user.username or 'No username'}\n"
+            f"💬 **Chat Type:** {chat.type}\n"
+            f"🔢 **Chat ID:** `{chat.id}`"
+        )
+        
+        if chat.type != Chat.PRIVATE:
+            user_info += f"\n🏷️ **Group:** {chat.title}"
+        
+        # Check if user is authorized
+        is_authorized = self._is_authorized_user(user.id)
+        user_info += f"\n🔐 **Authorized:** {'✅ Yes' if is_authorized else '❌ No'}"
+        
+        user_info += f"\n\n💡 **To authorize this user, add:** `{user.id}` to AUTHORIZED_USERS"
+        
+        await update.message.reply_text(user_info, parse_mode='Markdown')
+        
+        # Also print to console for admin
+        logger.info(f"👤 User ID Request: {user.first_name} (@{user.username}) = {user.id}")
+    
+    async def logs_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Show recent local logs"""
+        user = update.effective_user
+        
+        # Log the action
+        EnhancedUserActivityLogger.log_user_action(update, "LOGS_COMMAND")
+        
+        # Check if user is authorized
+        if not self._is_authorized_user(user.id):
+            await update.message.reply_text(
+                "⛔ You're not authorized to view bot logs.\n"
+                f"💡 Your User ID is: `{user.id}`",
+                parse_mode='Markdown'
+            )
+            return
+        
+        try:
+            # Get recent local activity logs
+            recent_logs = self._get_recent_logs(lines=15)
+            
+            if not recent_logs:
+                await update.message.reply_text(
+                    "📝 No recent local activity logs found.\n"
+                    "💡 Use `/plogs` for persistent logs from Google Sheets."
+                )
+                return
+            
+            log_message = (
+                f"📝 **Recent Local Logs (Last 15 entries):**\n\n"
+                f"```\n{recent_logs}\n```\n\n"
+                f"📁 **Note:** Local logs are temporary in Railway\n"
+                f"💡 Use `/plogs` for complete persistent history\n"
+                f"🕐 **Generated:** {datetime.now().strftime('%H:%M:%S')}"
+            )
+            
+            await update.message.reply_text(log_message, parse_mode='Markdown')
+            
+        except Exception as e:
+            logger.error(f"Error retrieving local logs: {e}")
+            await update.message.reply_text(
+                "❌ Error retrieving local logs.\n"
+                "💡 Try `/plogs` for persistent logs."
+            )
+    
+    async def persistent_logs_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Show persistent logs from Google Sheets"""
+        user = update.effective_user
+        
+        # Log the action
+        EnhancedUserActivityLogger.log_user_action(update, "PLOGS_COMMAND")
+        
+        # Check if user is authorized
+        if not self._is_authorized_user(user.id):
+            await update.message.reply_text(
+                "⛔ You're not authorized to view persistent logs."
+            )
+            return
+        
+        try:
+            # Get number of entries (default 20)
+            args = context.args
+            limit = int(args[0]) if args and args[0].isdigit() else 20
+            limit = min(limit, 50)  # Max 50 entries
+            
+            # Get persistent logs
+            persistent_logs = persistent_logger.get_recent_logs(limit)
+            
+            if not persistent_logs:
+                await update.message.reply_text(
+                    "📊 **No persistent logs found**\n\n"
+                    "**Possible reasons:**\n"
+                    "• LOGS_SPREADSHEET_ID not configured\n"
+                    "• Google Sheets connection issue\n"
+                    "• No activity logged yet\n\n"
+                    "💡 Check your configuration and try again."
+                )
+                return
+            
+            # Format logs for display
+            log_message = f"📊 **Persistent Logs (Last {len(persistent_logs)} entries):**\n\n"
+            
+            for log_entry in persistent_logs[-15:]:  # Show last 15 for readability
+                if len(log_entry) >= 5:
+                    timestamp = log_entry[0][:16]  # Truncate timestamp
+                    action = log_entry[4]
+                    username = log_entry[3][:20]  # Truncate username
+                    details = log_entry[5][:40] if len(log_entry) > 5 else ""  # Truncate details
+                    
+                    log_message += f"`{timestamp}` | **{action}** | {username}"
+                    if details:
+                        log_message += f" | {details}..."
+                    log_message += "\n"
+            
+            log_message += (
+                f"\n📋 **Total entries shown:** {len(persistent_logs[-15:])}\n"
+                f"📊 **Available in database:** {len(persistent_logs)}\n"
+                f"💡 **Usage:** `/plogs 30` to see more entries\n"
+                f"🕐 **Generated:** {datetime.now().strftime('%H:%M:%S')}"
+            )
+            
+            await update.message.reply_text(log_message, parse_mode='Markdown')
+            
+        except Exception as e:
+            logger.error(f"Error retrieving persistent logs: {e}")
+            await update.message.reply_text(
+                "❌ Error retrieving persistent logs.\n"
+                "Check Google Sheets connection and LOGS_SPREADSHEET_ID."
+            )
+    
+    def _get_recent_logs(self, lines: int = 20) -> str:
+        """Get recent log entries from local files"""
+        try:
+            if not os.path.exists('logs/user_activity.log'):
+                return "No local activity log file found."
+            
+            with open('logs/user_activity.log', 'r', encoding='utf-8') as f:
+                log_lines = f.readlines()
+            
+            # Get last N lines
+            recent_lines = log_lines[-lines:] if len(log_lines) > lines else log_lines
+            
+            # Format for display (truncate long lines)
+            formatted_lines = []
+            for line in recent_lines:
+                if len(line) > 100:
+                    formatted_lines.append(line[:97] + "...")
+                else:
+                    formatted_lines.append(line.rstrip())
+            
+            return '\n'.join(formatted_lines)
+            
+        except Exception as e:
             logger.error(f"Error reading recent logs: {e}")
-            return f"Error reading logs: {e}"
+            return "❌ Error reading local logs."
     
     async def stats_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Show comprehensive bot usage statistics"""
