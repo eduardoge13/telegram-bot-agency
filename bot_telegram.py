@@ -626,7 +626,7 @@ class TelegramBot:
                 f"```\n{recent_logs}\n```\n\n"
                 f"📁 **Note:** Local logs are temporary in Railway\n"
                 f"💡 Use `/plogs` for complete persistent history\n"
-                f"🕐 **Generated:** {datetime.now().strftime('%H:%M:%S')}"
+                f"🕐 **Generated:** {datetime.now(MEXICO_CITY_TZ).strftime('%H:%M:%S')}"
             )
             
             await update.message.reply_text(log_message, parse_mode='Markdown')
