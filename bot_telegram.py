@@ -980,7 +980,7 @@ class TelegramBot:
             f"💬 **Chat Type:** {chat_context}\n"
             f"📝 **Local Logging:** ✅ Active\n"
             f"💾 **Persistent Logging:** {persistent_status}\n\n"
-            f"**Mexico City Time:** {get_mexico_time()}"
+            f"**Mexico City Time:** {datetime.now(MEXICO_CITY_TZ).strftime('%H:%M:%S')}"
         )
         
         await update.message.reply_text(status_message, parse_mode='Markdown')
