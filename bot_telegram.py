@@ -9,6 +9,8 @@ from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
 import json
 import sys
+import pytz
+MEXICO_CITY_TZ = pytz.timezone("America/Mexico_City")
 
 # Load environment variables
 load_dotenv()
