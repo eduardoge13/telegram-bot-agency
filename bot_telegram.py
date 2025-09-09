@@ -672,19 +672,29 @@ class TelegramBot:
                 )
                 return
             
-            # Format logs for display
-            log_message = f"📊 **Persistent Logs (Last {len(persistent_logs)} entries):**\n\n"
+            # Format logs for display - escape markdown characters
+            def escape_markdown_v2(text):
+                if text is None:
+                    return ""
+                # Escape special characters for Markdown
+                special_chars = ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!']
+                text = str(text)
+                for char in special_chars:
+                    text = text.replace(char, f'\\{char}')
+                return text
+            
+            log_message = f"📊 **Persistent Logs \\(Last {len(persistent_logs)} entries\\):**\n\n"
             
             for log_entry in persistent_logs[-15:]:  # Show last 15 for readability
                 if len(log_entry) >= 5:
-                    timestamp = log_entry[0][:16]  # Truncate timestamp
-                    action = log_entry[4]
-                    username = log_entry[3][:20]  # Truncate username
-                    details = log_entry[5][:40] if len(log_entry) > 5 else ""  # Truncate details
+                    timestamp = escape_markdown_v2(log_entry[0][:16])  # Truncate timestamp
+                    action = escape_markdown_v2(log_entry[4])
+                    username = escape_markdown_v2(log_entry[3][:20])  # Truncate username
+                    details = escape_markdown_v2(log_entry[5][:40]) if len(log_entry) > 5 else ""  # Truncate details
                     
-                    log_message += f"`{timestamp}` | **{action}** | {username}"
+                    log_message += f"`{timestamp}` \\| **{action}** \\| {username}"
                     if details:
-                        log_message += f" | {details}..."
+                        log_message += f" \\| {details}\\.\\.\\."
                     log_message += "\n"
             
             log_message += (
@@ -694,7 +704,16 @@ class TelegramBot:
                 f"🕐 **Generated:** {datetime.now().strftime('%H:%M:%S')}"
             )
             
-            await update.message.reply_text(log_message, parse_mode='Markdown')
+            try:
+                await update.message.reply_text(log_message, parse_mode='Markdown')
+            except Exception as e:
+                logger.error(f"Markdown error in plogs: {e}")
+                # Fallback without markdown
+                simple_message = f"Recent Logs ({len(persistent_logs)} total):\n\n"
+                for log_entry in persistent_logs[-10:]:
+                    if len(log_entry) >= 5:
+                        simple_message += f"{log_entry[0][:16]} | {log_entry[4]} | {log_entry[3][:15]}\n"
+                await update.message.reply_text(simple_message)
             
         except Exception as e:
             logger.error(f"Error retrieving persistent logs: {e}")
