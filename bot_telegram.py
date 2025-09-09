@@ -550,17 +550,32 @@ class TelegramBot:
         # Log the action
         EnhancedUserActivityLogger.log_user_action(update, "WHOAMI_COMMAND")
         
+        # Escape special characters for Markdown
+        def escape_markdown(text):
+            if text is None:
+                return ""
+            # Escape special Markdown characters
+            special_chars = ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!']
+            for char in special_chars:
+                text = str(text).replace(char, f'\\{char}')
+            return text
+        
+        safe_first_name = escape_markdown(user.first_name)
+        safe_last_name = escape_markdown(user.last_name) if user.last_name else ""
+        safe_username = escape_markdown(user.username) if user.username else "No username"
+        safe_chat_title = escape_markdown(chat.title) if hasattr(chat, 'title') and chat.title else ""
+        
         user_info = (
             f"👤 **Your Telegram Info:**\n\n"
             f"🆔 **User ID:** `{user.id}`\n"
-            f"👤 **Name:** {user.first_name} {user.last_name or ''}\n"
-            f"📱 **Username:** @{user.username or 'No username'}\n"
+            f"👤 **Name:** {safe_first_name} {safe_last_name}\n"
+            f"📱 **Username:** @{safe_username}\n"
             f"💬 **Chat Type:** {chat.type}\n"
             f"🔢 **Chat ID:** `{chat.id}`"
         )
         
         if chat.type != Chat.PRIVATE:
-            user_info += f"\n🏷️ **Group:** {chat.title}"
+            user_info += f"\n🏷️ **Group:** {safe_chat_title}"
         
         # Check if user is authorized
         is_authorized = self._is_authorized_user(user.id)
@@ -568,7 +583,13 @@ class TelegramBot:
         
         user_info += f"\n\n💡 **To authorize this user, add:** `{user.id}` to AUTHORIZED_USERS"
         
-        await update.message.reply_text(user_info, parse_mode='Markdown')
+        try:
+            await update.message.reply_text(user_info, parse_mode='Markdown')
+        except Exception as e:
+            logger.error(f"Markdown error in whoami: {e}")
+            # Fallback without markdown
+            simple_info = f"Your User ID: {user.id}\nName: {user.first_name or 'Unknown'}\nAuthorized: {'Yes' if is_authorized else 'No'}"
+            await update.message.reply_text(simple_info)
         
         # Also print to console for admin
         logger.info(f"👤 User ID Request: {user.first_name} (@{user.username}) = {user.id}")
