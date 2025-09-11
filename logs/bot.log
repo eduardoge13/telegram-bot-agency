@@ -1,0 +1,435 @@
+[2025-09-11 01:28:21] INFO | root | _authenticate:327 | Using credentials from environment variable
+[2025-09-11 01:28:21] ERROR | root | _authenticate:352 | ❌ Invalid JSON in GOOGLE_CREDENTIALS_JSON
+[2025-09-11 01:28:21] INFO | root | log_system_event:299 | SYSTEM EVENT: STARTUP_ERROR | Configuration error: GOOGLE_CREDENTIALS_JSON contains invalid JSON
+[2025-09-11 01:32:05] INFO | root | _authenticate:327 | Using credentials from environment variable
+[2025-09-11 01:32:05] ERROR | root | _authenticate:352 | ❌ Invalid JSON in GOOGLE_CREDENTIALS_JSON
+[2025-09-11 01:32:05] INFO | root | log_system_event:299 | SYSTEM EVENT: STARTUP_ERROR | Configuration error: GOOGLE_CREDENTIALS_JSON contains invalid JSON
+[2025-09-11 01:37:44] INFO | root | _authenticate:327 | Using credentials from environment variable
+[2025-09-11 01:37:44] ERROR | root | _authenticate:352 | ❌ Invalid JSON in GOOGLE_CREDENTIALS_JSON
+[2025-09-11 01:37:44] INFO | root | log_system_event:299 | SYSTEM EVENT: STARTUP_ERROR | Configuration error: GOOGLE_CREDENTIALS_JSON contains invalid JSON
+[2025-09-11 01:38:04] INFO | root | _authenticate:327 | Using credentials from environment variable
+[2025-09-11 01:38:04] ERROR | root | _authenticate:352 | ❌ Invalid JSON in GOOGLE_CREDENTIALS_JSON
+[2025-09-11 01:38:04] INFO | root | log_system_event:299 | SYSTEM EVENT: STARTUP_ERROR | Configuration error: GOOGLE_CREDENTIALS_JSON contains invalid JSON
+[2025-09-11 01:38:22] INFO | root | _authenticate:334 | Using credentials from file
+[2025-09-11 01:38:22] INFO | googleapiclient.discovery_cache | autodetect:49 | file_cache is only supported with oauth2client<4.0.0
+[2025-09-11 01:38:22] INFO | root | _authenticate:346 | ✅ Successfully connected to Google Sheets API
+[2025-09-11 01:38:22] INFO | root | log_system_event:299 | SYSTEM EVENT: SHEETS_CONNECTED | Successfully connected to Google Sheets API
+[2025-09-11 01:38:24] INFO | root | _find_client_column:385 | 📋 Found client column: 'Client phone number' at position 0
+[2025-09-11 01:38:24] INFO | root | log_system_event:299 | SYSTEM EVENT: COLUMN_FOUND | Client column: Client phone number at position 0
+[2025-09-11 01:38:25] INFO | root | log_system_event:299 | SYSTEM EVENT: STARTUP_FAILED | Startup failed: 'Updater' object has no attribute '_Updater__polling_cleanup_cb' and no __dict__ for setting new attributes
+[2025-09-11 01:39:57] INFO | root | _authenticate:334 | Using credentials from file
+[2025-09-11 01:39:57] INFO | googleapiclient.discovery_cache | autodetect:49 | file_cache is only supported with oauth2client<4.0.0
+[2025-09-11 01:39:57] INFO | root | _authenticate:346 | ✅ Successfully connected to Google Sheets API
+[2025-09-11 01:39:57] INFO | root | log_system_event:299 | SYSTEM EVENT: SHEETS_CONNECTED | Successfully connected to Google Sheets API
+[2025-09-11 01:39:58] INFO | root | _find_client_column:385 | 📋 Found client column: 'Client phone number' at position 0
+[2025-09-11 01:39:58] INFO | root | log_system_event:299 | SYSTEM EVENT: COLUMN_FOUND | Client column: Client phone number at position 0
+[2025-09-11 01:39:59] INFO | root | log_system_event:299 | SYSTEM EVENT: STARTUP_FAILED | Startup failed: 'Updater' object has no attribute '_Updater__polling_cleanup_cb' and no __dict__ for setting new attributes
+[2025-09-11 01:41:09] INFO | root | _authenticate:334 | Using credentials from file
+[2025-09-11 01:41:09] INFO | googleapiclient.discovery_cache | autodetect:49 | file_cache is only supported with oauth2client<4.0.0
+[2025-09-11 01:41:09] INFO | root | _authenticate:346 | ✅ Successfully connected to Google Sheets API
+[2025-09-11 01:41:09] INFO | root | log_system_event:299 | SYSTEM EVENT: SHEETS_CONNECTED | Successfully connected to Google Sheets API
+[2025-09-11 01:41:11] INFO | root | _find_client_column:385 | 📋 Found client column: 'Client phone number' at position 0
+[2025-09-11 01:41:11] INFO | root | log_system_event:299 | SYSTEM EVENT: COLUMN_FOUND | Client column: Client phone number at position 0
+[2025-09-11 01:41:11] INFO | root | log_system_event:299 | SYSTEM EVENT: STARTUP_FAILED | Startup failed: 'TelegramBot' object has no attribute 'handle_message'
+[2025-09-11 01:42:02] INFO | root | _authenticate:334 | Using credentials from file
+[2025-09-11 01:42:02] INFO | googleapiclient.discovery_cache | autodetect:49 | file_cache is only supported with oauth2client<4.0.0
+[2025-09-11 01:42:02] INFO | root | _authenticate:346 | ✅ Successfully connected to Google Sheets API
+[2025-09-11 01:42:02] INFO | root | log_system_event:299 | SYSTEM EVENT: SHEETS_CONNECTED | Successfully connected to Google Sheets API
+[2025-09-11 01:42:03] INFO | root | _find_client_column:385 | 📋 Found client column: 'Client phone number' at position 0
+[2025-09-11 01:42:03] INFO | root | log_system_event:299 | SYSTEM EVENT: COLUMN_FOUND | Client column: Client phone number at position 0
+[2025-09-11 01:42:04] INFO | root | __init__:475 | 📊 Sheet loaded: 52040 clients available
+[2025-09-11 01:42:04] INFO | root | log_system_event:299 | SYSTEM EVENT: BOT_STARTUP | Bot initialized with 52040 clients
+[2025-09-11 01:42:04] INFO | root | run:1139 | 🚀 Starting Enhanced Telegram Bot with Persistent Logging...
+[2025-09-11 01:42:04] INFO | root | run:1140 | 📊 Ready to serve 52040 clients
+[2025-09-11 01:42:04] INFO | root | run:1141 | 👥 Group functionality: ENABLED
+[2025-09-11 01:42:04] INFO | root | run:1142 | 📝 Local logging: ENABLED
+[2025-09-11 01:42:04] INFO | root | run:1143 | 💾 Persistent logging: DISABLED
+[2025-09-11 01:42:04] INFO | root | run:1144 | ✅ Bot is running in polling mode
+[2025-09-11 01:42:04] INFO | root | log_system_event:299 | SYSTEM EVENT: BOT_STARTED | Bot started successfully with 52040 clients loaded
+[2025-09-11 01:42:04] ERROR | root | run:1159 | ❌ Bot crashed: Cannot close a running event loop
+[2025-09-11 01:42:04] INFO | root | log_system_event:299 | SYSTEM EVENT: BOT_CRASHED | Bot crashed: Cannot close a running event loop
+[2025-09-11 01:42:04] INFO | root | log_system_event:299 | SYSTEM EVENT: STARTUP_FAILED | Startup failed: Cannot close a running event loop
+[2025-09-11 01:42:52] INFO | root | _authenticate:334 | Using credentials from file
+[2025-09-11 01:42:52] INFO | googleapiclient.discovery_cache | autodetect:49 | file_cache is only supported with oauth2client<4.0.0
+[2025-09-11 01:42:52] INFO | root | _authenticate:346 | ✅ Successfully connected to Google Sheets API
+[2025-09-11 01:42:52] INFO | root | log_system_event:299 | SYSTEM EVENT: SHEETS_CONNECTED | Successfully connected to Google Sheets API
+[2025-09-11 01:42:53] INFO | root | _find_client_column:385 | 📋 Found client column: 'Client phone number' at position 0
+[2025-09-11 01:42:53] INFO | root | log_system_event:299 | SYSTEM EVENT: COLUMN_FOUND | Client column: Client phone number at position 0
+[2025-09-11 01:42:54] INFO | root | __init__:475 | 📊 Sheet loaded: 52040 clients available
+[2025-09-11 01:42:54] INFO | root | log_system_event:299 | SYSTEM EVENT: BOT_STARTUP | Bot initialized with 52040 clients
+[2025-09-11 01:42:54] INFO | root | run:1139 | 🚀 Starting Enhanced Telegram Bot with Persistent Logging...
+[2025-09-11 01:42:54] INFO | root | run:1140 | 📊 Ready to serve 52040 clients
+[2025-09-11 01:42:54] INFO | root | run:1141 | 👥 Group functionality: ENABLED
+[2025-09-11 01:42:54] INFO | root | run:1142 | 📝 Local logging: ENABLED
+[2025-09-11 01:42:54] INFO | root | run:1143 | 💾 Persistent logging: DISABLED
+[2025-09-11 01:42:54] INFO | root | run:1144 | ✅ Bot is running in polling mode
+[2025-09-11 01:42:54] INFO | root | log_system_event:299 | SYSTEM EVENT: BOT_STARTED | Bot started successfully with 52040 clients loaded
+[2025-09-11 01:42:55] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getMe "HTTP/1.1 200 OK"
+[2025-09-11 01:42:55] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/deleteWebhook "HTTP/1.1 200 OK"
+[2025-09-11 01:42:55] INFO | telegram.ext.Application | start:571 | Application started
+[2025-09-11 01:43:06] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:43:16] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:43:26] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:43:36] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:43:46] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:43:57] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:44:07] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:44:17] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:44:27] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:44:37] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:44:48] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:44:58] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:45:08] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:45:18] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:45:28] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:45:39] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:45:49] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:45:59] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:46:09] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:46:19] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:46:30] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:46:40] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:46:50] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:47:00] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:47:10] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:47:21] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:47:31] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:47:41] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:47:49] INFO | telegram.ext.Application | stop:604 | Application is stopping. This might take a moment.
+[2025-09-11 01:47:49] INFO | telegram.ext.Application | stop:629 | Application.stop() complete
+[2025-09-11 01:48:11] INFO | googleapiclient.discovery_cache | autodetect:49 | file_cache is only supported with oauth2client<4.0.0
+[2025-09-11 01:48:12] INFO | root | _authenticate:350 | Using credentials from file
+[2025-09-11 01:48:12] INFO | googleapiclient.discovery_cache | autodetect:49 | file_cache is only supported with oauth2client<4.0.0
+[2025-09-11 01:48:12] INFO | root | _authenticate:362 | ✅ Successfully connected to Google Sheets API
+[2025-09-11 01:48:12] INFO | root | log_system_event:315 | SYSTEM EVENT: SHEETS_CONNECTED | Successfully connected to Google Sheets API
+[2025-09-11 01:48:15] INFO | root | _find_client_column:401 | 📋 Found client column: 'Client phone number' at position 0
+[2025-09-11 01:48:15] INFO | root | log_system_event:315 | SYSTEM EVENT: COLUMN_FOUND | Client column: Client phone number at position 0
+[2025-09-11 01:48:16] INFO | root | __init__:491 | 📊 Sheet loaded: 52040 clients available
+[2025-09-11 01:48:16] INFO | root | log_system_event:315 | SYSTEM EVENT: BOT_STARTUP | Bot initialized with 52040 clients
+[2025-09-11 01:48:17] INFO | root | run:1155 | 🚀 Starting Enhanced Telegram Bot with Persistent Logging...
+[2025-09-11 01:48:17] INFO | root | run:1156 | 📊 Ready to serve 52040 clients
+[2025-09-11 01:48:17] INFO | root | run:1157 | 👥 Group functionality: ENABLED
+[2025-09-11 01:48:17] INFO | root | run:1158 | 📝 Local logging: ENABLED
+[2025-09-11 01:48:17] INFO | root | run:1159 | 💾 Persistent logging: ENABLED
+[2025-09-11 01:48:17] INFO | root | run:1160 | ✅ Bot is running in polling mode
+[2025-09-11 01:48:17] INFO | root | log_system_event:315 | SYSTEM EVENT: BOT_STARTED | Bot started successfully with 52040 clients loaded
+[2025-09-11 01:48:17] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getMe "HTTP/1.1 200 OK"
+[2025-09-11 01:48:18] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/deleteWebhook "HTTP/1.1 200 OK"
+[2025-09-11 01:48:18] INFO | telegram.ext.Application | start:571 | Application started
+[2025-09-11 01:48:28] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:48:38] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:48:49] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:48:59] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:49:09] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:49:19] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:49:29] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:49:40] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:49:50] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:50:00] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:50:10] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:50:20] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:50:31] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:50:41] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:50:41] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:50:42] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/sendMessage "HTTP/1.1 200 OK"
+[2025-09-11 01:50:42] INFO | root | start_command:561 | Start command executed by Eduardo in group 'P. BOT 1' (ID: -4935467902)
+[2025-09-11 01:50:51] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:51:02] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:51:12] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:51:22] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:51:32] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:51:42] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:51:53] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:52:03] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:52:13] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:52:23] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:52:33] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:52:44] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:52:54] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:53:04] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:53:14] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:53:24] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:53:35] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:53:45] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:53:55] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:54:05] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:54:15] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:54:25] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:54:36] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:54:46] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:54:56] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:55:06] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:55:16] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:55:27] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:55:37] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:55:47] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:55:57] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:56:07] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:56:18] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:56:28] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:56:38] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:56:48] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:56:58] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:57:09] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:57:19] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:57:29] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:57:39] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:57:49] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:58:00] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:58:10] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:58:20] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:58:30] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:58:40] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:58:51] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:59:01] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:59:11] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:59:21] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:59:31] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:59:42] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 01:59:52] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:00:02] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:00:12] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:00:17] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:00:18] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/sendMessage "HTTP/1.1 400 Bad Request"
+[2025-09-11 02:00:18] ERROR | root | whoami_command:607 | Markdown error in whoami: Can't parse entities: can't find end of the entity starting at byte offset 315
+[2025-09-11 02:00:18] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/sendMessage "HTTP/1.1 200 OK"
+[2025-09-11 02:00:18] INFO | root | whoami_command:613 | 👤 User ID Request: Eduardo (@None) = 8380841505
+[2025-09-11 02:00:27] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:00:37] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:00:47] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:00:58] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:01:08] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:01:18] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:01:28] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:01:38] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:01:49] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:01:59] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:02:09] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:02:19] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:02:29] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:02:40] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:02:50] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:03:00] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:03:10] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:03:20] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:03:31] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:03:41] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:03:51] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:04:01] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:04:11] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:04:22] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:04:22] INFO | telegram.ext.Application | stop:604 | Application is stopping. This might take a moment.
+[2025-09-11 02:04:22] INFO | telegram.ext.Application | stop:629 | Application.stop() complete
+[2025-09-11 02:05:23] INFO | googleapiclient.discovery_cache | autodetect:49 | file_cache is only supported with oauth2client<4.0.0
+[2025-09-11 02:05:23] INFO | root | _authenticate:350 | Using credentials from file
+[2025-09-11 02:05:23] INFO | googleapiclient.discovery_cache | autodetect:49 | file_cache is only supported with oauth2client<4.0.0
+[2025-09-11 02:05:23] INFO | root | _authenticate:362 | ✅ Successfully connected to Google Sheets API
+[2025-09-11 02:05:23] INFO | root | log_system_event:315 | SYSTEM EVENT: SHEETS_CONNECTED | Successfully connected to Google Sheets API
+[2025-09-11 02:05:27] INFO | root | _find_client_column:401 | 📋 Found client column: 'Client phone number' at position 0
+[2025-09-11 02:05:27] INFO | root | log_system_event:315 | SYSTEM EVENT: COLUMN_FOUND | Client column: Client phone number at position 0
+[2025-09-11 02:05:28] INFO | root | __init__:491 | 📊 Sheet loaded: 52040 clients available
+[2025-09-11 02:05:28] INFO | root | log_system_event:315 | SYSTEM EVENT: BOT_STARTUP | Bot initialized with 52040 clients
+[2025-09-11 02:05:29] INFO | root | run:1194 | 🚀 Starting Enhanced Telegram Bot with Persistent Logging...
+[2025-09-11 02:05:29] INFO | root | run:1195 | 📊 Ready to serve 52040 clients
+[2025-09-11 02:05:29] INFO | root | run:1196 | 👥 Group functionality: ENABLED
+[2025-09-11 02:05:29] INFO | root | run:1197 | 📝 Local logging: ENABLED
+[2025-09-11 02:05:29] INFO | root | run:1198 | 💾 Persistent logging: ENABLED
+[2025-09-11 02:05:29] INFO | root | run:1199 | ✅ Bot is running in polling mode
+[2025-09-11 02:05:29] INFO | root | log_system_event:315 | SYSTEM EVENT: BOT_STARTED | Bot started successfully with 52040 clients loaded
+[2025-09-11 02:05:30] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getMe "HTTP/1.1 200 OK"
+[2025-09-11 02:05:30] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/deleteWebhook "HTTP/1.1 200 OK"
+[2025-09-11 02:05:30] INFO | telegram.ext.Application | start:571 | Application started
+[2025-09-11 02:05:40] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:05:51] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:06:01] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:06:11] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:06:21] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:06:31] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:06:42] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:06:52] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:07:02] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:07:10] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:07:11] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/sendMessage "HTTP/1.1 200 OK"
+[2025-09-11 02:07:20] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:07:31] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:07:41] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:07:51] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:08:01] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:08:11] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:08:22] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:08:32] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:08:42] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:08:52] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:09:02] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:09:12] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:09:23] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:09:33] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:09:43] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:09:53] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:10:00] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:10:01] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:10:11] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:10:21] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:10:31] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:10:42] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:10:52] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:10:57] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:10:57] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:11:07] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:11:17] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:11:28] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:11:38] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:11:48] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:11:58] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:12:08] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:12:19] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:12:29] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:12:39] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:12:49] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:12:59] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:13:10] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:13:20] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:13:30] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:13:40] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:13:50] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:14:00] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:14:11] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:14:21] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:14:31] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:14:41] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:14:51] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:15:02] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:15:12] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:15:22] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:15:32] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:15:42] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:15:53] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:16:03] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:16:13] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:16:23] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:16:33] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:16:43] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:16:54] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:17:04] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:17:14] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:17:24] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:17:26] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:17:36] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:17:37] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/sendMessage "HTTP/1.1 200 OK"
+[2025-09-11 02:17:37] INFO | root | start_command:561 | Start command executed by Eduardo in group 'Eduardo, Trade and agencia-query-bot' (ID: -1003094669472)
+[2025-09-11 02:17:45] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:17:47] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/sendMessage "HTTP/1.1 200 OK"
+[2025-09-11 02:17:51] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:17:51] INFO | root | handle_message:1014 | 📨 MESSAGE RECEIVED: '2038725' from Eduardo (@None) in supergroup chat
+[2025-09-11 02:17:51] INFO | root | handle_message:1018 | 🔍 GROUP MESSAGE - Checking for mentions...
+[2025-09-11 02:17:51] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getMe "HTTP/1.1 200 OK"
+[2025-09-11 02:17:51] INFO | root | handle_message:1024 | 🤖 Bot username: @dbagenciabot
+[2025-09-11 02:17:51] INFO | root | handle_message:1066 | ℹ️ No entities in message
+[2025-09-11 02:17:51] INFO | root | handle_message:1072 | ❌ BOT NOT MENTIONED. Ignoring message.
+[2025-09-11 02:18:00] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:18:00] INFO | root | handle_message:1014 | 📨 MESSAGE RECEIVED: '@DBagenciabot 39392999' from Eduardo (@None) in supergroup chat
+[2025-09-11 02:18:00] INFO | root | handle_message:1018 | 🔍 GROUP MESSAGE - Checking for mentions...
+[2025-09-11 02:18:00] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getMe "HTTP/1.1 200 OK"
+[2025-09-11 02:18:00] INFO | root | handle_message:1024 | 🤖 Bot username: @dbagenciabot
+[2025-09-11 02:18:00] INFO | root | handle_message:1037 | ✅ Found mention in text: @dbagenciabot
+[2025-09-11 02:18:00] INFO | root | handle_message:1052 | 🔍 Checking 1 entities...
+[2025-09-11 02:18:00] INFO | root | handle_message:1054 |    Entity 0: type=mention, offset=0, length=13
+[2025-09-11 02:18:00] INFO | root | handle_message:1057 |    Mention found: '39392999'
+[2025-09-11 02:18:00] INFO | root | handle_message:1070 | ✅ BOT MENTIONED via text_mention. Processing message: '39392999'
+[2025-09-11 02:18:00] INFO | root | handle_message:1081 | 🔢 Processing client number: '39392999'
+[2025-09-11 02:18:00] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/sendChatAction "HTTP/1.1 200 OK"
+[2025-09-11 02:18:00] INFO | root | handle_message:1109 | 🔍 Search request from Eduardo in group 'Eduardo, Trade and agencia-query-bot' (ID: -1003094669472): '39392999'
+[2025-09-11 02:18:00] INFO | root | handle_message:1113 | 📋 Searching in spreadsheet...
+[2025-09-11 02:18:00] INFO | root | get_client_data:419 | 🔍 Searching for client: 39392999
+[2025-09-11 02:18:01] INFO | root | get_client_data:452 | ❌ Client '39392999' not found
+[2025-09-11 02:18:01] INFO | root | handle_message:1146 | ❌ Client not found: 39392999
+[2025-09-11 02:18:02] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/sendMessage "HTTP/1.1 200 OK"
+[2025-09-11 02:18:02] INFO | root | handle_message:1167 | ❌ Client not found: 39392999 (requested by Eduardo)
+[2025-09-11 02:18:05] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:18:05] INFO | root | handle_message:1014 | 📨 MESSAGE RECEIVED: 'Nice' from Eduardo (@None) in supergroup chat
+[2025-09-11 02:18:05] INFO | root | handle_message:1018 | 🔍 GROUP MESSAGE - Checking for mentions...
+[2025-09-11 02:18:05] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getMe "HTTP/1.1 200 OK"
+[2025-09-11 02:18:05] INFO | root | handle_message:1024 | 🤖 Bot username: @dbagenciabot
+[2025-09-11 02:18:05] INFO | root | handle_message:1066 | ℹ️ No entities in message
+[2025-09-11 02:18:05] INFO | root | handle_message:1072 | ❌ BOT NOT MENTIONED. Ignoring message.
+[2025-09-11 02:18:15] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:18:17] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:18:19] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getChatMemberCount "HTTP/1.1 200 OK"
+[2025-09-11 02:18:19] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/sendMessage "HTTP/1.1 400 Bad Request"
+[2025-09-11 02:18:19] ERROR | telegram.ext.Application | process_error:1682 | No error handlers are registered, logging exception.
+Traceback (most recent call last):
+  File "C:\Users\eduar\AppData\Local\Programs\Python\Python313\Lib\site-packages\telegram\ext\_application.py", line 1124, in process_update
+    await coroutine
+  File "C:\Users\eduar\AppData\Local\Programs\Python\Python313\Lib\site-packages\telegram\ext\_handler.py", line 141, in handle_update
+    return await self.callback(update, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\eduar\OneDrive\Documentos\Proyectos\bot-telegram\bot_telegram.py", line 891, in group_info_command
+    await update.message.reply_text(group_message, parse_mode='Markdown')
+  File "C:\Users\eduar\AppData\Local\Programs\Python\Python313\Lib\site-packages\telegram\_message.py", line 1074, in reply_text
+    return await self.get_bot().send_message(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<16 lines>...
+    )
+    ^
+  File "C:\Users\eduar\AppData\Local\Programs\Python\Python313\Lib\site-packages\telegram\ext\_extbot.py", line 2633, in send_message
+    return await super().send_message(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<16 lines>...
+    )
+    ^
+  File "C:\Users\eduar\AppData\Local\Programs\Python\Python313\Lib\site-packages\telegram\_bot.py", line 381, in decorator
+    result = await func(self, *args, **kwargs)  # skipcq: PYL-E1102
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\eduar\AppData\Local\Programs\Python\Python313\Lib\site-packages\telegram\_bot.py", line 807, in send_message
+    return await self._send_message(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<15 lines>...
+    )
+    ^
+  File "C:\Users\eduar\AppData\Local\Programs\Python\Python313\Lib\site-packages\telegram\ext\_extbot.py", line 507, in _send_message
+    result = await super()._send_message(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<17 lines>...
+    )
+    ^
+  File "C:\Users\eduar\AppData\Local\Programs\Python\Python313\Lib\site-packages\telegram\_bot.py", line 559, in _send_message
+    result = await self._post(
+             ^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "C:\Users\eduar\AppData\Local\Programs\Python\Python313\Lib\site-packages\telegram\_bot.py", line 469, in _post
+    return await self._do_post(
+           ^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\eduar\AppData\Local\Programs\Python\Python313\Lib\site-packages\telegram\ext\_extbot.py", line 325, in _do_post
+    return await super()._do_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\eduar\AppData\Local\Programs\Python\Python313\Lib\site-packages\telegram\_bot.py", line 497, in _do_post
+    return await request.post(
+           ^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\eduar\AppData\Local\Programs\Python\Python313\Lib\site-packages\telegram\request\_baserequest.py", line 168, in post
+    result = await self._request_wrapper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "C:\Users\eduar\AppData\Local\Programs\Python\Python313\Lib\site-packages\telegram\request\_baserequest.py", line 328, in _request_wrapper
+    raise BadRequest(message)
+telegram.error.BadRequest: Can't parse entities: can't find end of the entity starting at byte offset 240
+[2025-09-11 02:18:24] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:18:24] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/sendMessage "HTTP/1.1 200 OK"
+[2025-09-11 02:18:34] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:18:44] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:18:54] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:18:57] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"
+[2025-09-11 02:18:58] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/sendMessage "HTTP/1.1 200 OK"
+[2025-09-11 02:19:08] INFO | httpx | _send_single_request:1729 | HTTP Request: POST https://api.telegram.org/bot8238662466:AAFjWqKDpLPZyJLOo7GTX5Tt2YlUiC3Nb-Q/getUpdates "HTTP/1.1 200 OK"

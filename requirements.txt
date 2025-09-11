@@ -1,5 +1,5 @@
 # Telegram Bot Dependencies
-python-telegram-bot==20.7
+python-telegram-bot==20.8
 
 # Google Sheets API
 google-auth==2.23.4
