@@ -500,7 +500,6 @@ class TelegramBot:
         self.application.add_handler(CommandHandler("info", self.info_command))
         self.application.add_handler(CommandHandler("status", self.status_command))
         self.application.add_handler(CommandHandler("stats", self.stats_command))
-        self.application.add_handler(CommandHandler("groupinfo", self.group_info_command))
         self.application.add_handler(CommandHandler("whoami", self.whoami_command))
         self.application.add_handler(CommandHandler("logs", self.logs_command))
         self.application.add_handler(CommandHandler("plogs", self.persistent_logs_command))
@@ -534,27 +533,24 @@ class TelegramBot:
         
         if chat.type == Chat.PRIVATE:
             welcome_message = (
-                f"👋 Hi {user_name}! Welcome to the **Client Data Bot**!\n\n"
-                f"🔍 I can help you find client information from our database.\n"
-                f"📊 Currently tracking **{self.sheet_info['total_clients']} clients**\n\n"
-                f"**Available commands:**\n"
-                f"• `/help` - Show detailed instructions\n"
-                f"• `/info` - Show sheet information\n"
-                f"• `/status` - Check bot status\n"
-                f"• `/whoami` - Get your User ID and info\n\n"
-                f"💡 **Quick start:** Just send me any client number and I'll find their data!\n\n"
-                f"👥 **For groups:** Add me to a group and I'll work there too!"
+                f"👋 Hola {user_name}! Bienvenido a **Client Data Bot**!\n\n"
+                f"🔍 Te puedo ayudar a buscar cualquier cliente :).\n"
+                f"**Comandos disponibles:**\n"
+                f"• `/help` - Instrucciones detalladas\n"
+                f"• `/info` - Información extra\n"
+                f"• `/status` - Estatus del bot\n"
+                f"• `/whoami` - obten tu user id e info de nombre\n\n"
+                f"💡 **Uso rapido:** Manda un mensaje y te contestare si lo encuentro!\n\n"
+                f"👥 **Para grupos:** Añademe al grupo y te contesto si me escribes (@)!"
             )
         else:
             welcome_message = (
-                f"👋 Hi everyone! **Client Data Bot** is now active in this group!\n\n"
-                f"🔍 I can help you find client information from our database.\n"
-                f"📊 Currently tracking **{self.sheet_info['total_clients']} clients**\n\n"
-                f"**Usage in groups:**\n"
-                f"• Send client numbers directly: `12345`\n"
-                f"• Use commands: `/help`, `/info`, `/status`\n"
-                f"• Get group info: `/groupinfo`\n\n"
-                f"💡 I'll respond to everyone's queries in this group!"
+                f"👋 Hola a todos! aqui **Client Data Bot**!\n\n"
+                f"🔍 Te puedo ayudar a buscar cualquier cliente :).\n"
+                f"**Uso en grupos:**\n"
+                f"• Envia los numero directamente o arroba al bot: `12345`\n"
+                f"• Otros comandos: `/help`, `/info`, `/status`\n"
+                f"💡Respondo tambien a las menciones y respuestas a mis mensajes solo asegurate que tengan el numero!"
             )
         
         await update.message.reply_text(welcome_message, parse_mode='Markdown')
@@ -856,40 +852,7 @@ class TelegramBot:
             logger.error(f"Error reading local usage stats: {e}")
             return {}
     
-    async def group_info_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        """Show information about the current group"""
-        chat = update.effective_chat
-        user = update.effective_user
-        
-        # Log the action
-        EnhancedUserActivityLogger.log_user_action(update, "GROUP_INFO_COMMAND")
-        
-        if chat.type == Chat.PRIVATE:
-            await update.message.reply_text(
-                "ℹ️ This command only works in groups.\n"
-                "Add me to a group and try again!",
-                parse_mode='Markdown'
-            )
-            return
-        
-        # Get group member count (if possible)
-        try:
-            member_count = await context.bot.get_chat_member_count(chat.id)
-        except:
-            member_count = "Unknown"
-        
-        group_message = (
-            f"👥 **Group Information:**\n\n"
-            f"📝 **Name:** {chat.title}\n"
-            f"🆔 **Group ID:** `{chat.id}`\n"
-            f"👤 **Members:** {member_count}\n"
-            f"🤖 **Bot Status:** Active and ready\n"
-            f"📊 **Available Clients:** {self.sheet_info['total_clients']}\n\n"
-            f"**Requested by:** {user.first_name} (@{user.username or 'no_username'})"
-        )
-        
-        await update.message.reply_text(group_message, parse_mode='Markdown')
-        logger.info(f"Group info requested by {user.first_name} in group {chat.title}")
+
     
     async def help_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Handle /help command"""
@@ -916,7 +879,6 @@ class TelegramBot:
                 "• `/plogs` - Show persistent logs from database (if authorized)\n\n"
                 "**Group usage:**\n"
                 "• Add me to any group and I'll work there too!\n"
-                "• Use `/groupinfo` in groups for group-specific information\n\n"
                 "**Tips:**\n"
                 "• Make sure the client number matches exactly\n"
                 "• Try different formats if first attempt fails\n"
@@ -934,7 +896,6 @@ class TelegramBot:
                 "• `/help` - This help message\n"
                 "• `/info` - Show database information\n"
                 "• `/status` - Check bot status\n"
-                "• `/groupinfo` - Show group information\n"
                 "• `/whoami` - Get your User ID\n\n"
                 "**Tips for groups:**\n"
                 "• I respond to all members equally\n"
@@ -1119,12 +1080,27 @@ class TelegramBot:
                 EnhancedUserActivityLogger.log_search_result(update, client_number, True, len(client_data))
                 
                 # Format successful response
+                field_mappings = {
+                    'client phone number': 'Número 📞',
+                    'cliente': 'Cliente 🙋🏻‍♀️', 
+                    'correo': 'Correo ✉️',
+                    'other info': 'Otra Información ℹ️'
+                }
                 response = f"✅ **Cliente encontrado: `{client_number}`**\n\n"
-                
-                # Show data
                 for key, value in client_data.items():
                     if value and str(value).strip():
-                        response += f"**{key}:** {value}\n"
+                        key_lower = key.lower().strip()
+                        
+                        # Check if it matches one of our expected fields
+                        if key_lower in field_mappings:
+                            response += f"**{field_mappings[key_lower]}** {value}\n"
+                        else:
+                            # For any unexpected fields, just show them as-is
+                            response += f"**{key} ℹ️** {value}\n"
+                
+                # Always add the user as closer
+                user_display = f"@{user.username}" if user.username else user.first_name
+                response += f"**Closer 🙋🏻‍♂️** {user_display}\n"
                 
                 # Add context based on chat type
                 if chat.type in [Chat.GROUP, Chat.SUPERGROUP]:
