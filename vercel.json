@@ -23,11 +23,6 @@
       "dest": "bot_telegram.py"
     }
   ],
-  "functions": {
-    "bot_telegram.py": {
-      "maxDuration": 30
-    }
-  },
   "env": {
     "PYTHONUNBUFFERED": "1"
   }
