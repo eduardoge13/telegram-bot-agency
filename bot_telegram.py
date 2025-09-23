@@ -1212,7 +1212,6 @@ try:
     telegram_bot_handler = TelegramBot()
 
     # Add all your handlers from the _setup_handlers method
-    # This is important, we are re-creating the logic from your class here
     application.add_handler(CommandHandler("start", telegram_bot_handler.start_command))
     application.add_handler(CommandHandler("help", telegram_bot_handler.help_command))
     application.add_handler(CommandHandler("info", telegram_bot_handler.info_command))
@@ -1223,15 +1222,18 @@ try:
     application.add_handler(CommandHandler("plogs", telegram_bot_handler.persistent_logs_command))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, telegram_bot_handler.handle_message))
 
+
+    # Manually initialize the application
+    asyncio.run(application.initialize())
     # Log startup event
-    EnhancedUserActivityLogger.log_system_event("BOT_INITIALIZED_SERVERLESS", "Handlers are set up.")
-    print("✅ Bot Handlers Initialized Successfully.")
+    EnhancedUserActivityLogger.log_system_event("BOT_INITIALIZED_SERVERLESS", "Handlers are set up and application is initialized.")
+    print("✅ Bot Handlers and Application Initialized Successfully.")
 
 except Exception as e:
     # If setup fails, log it. The function will fail to deploy.
     print(f"❌ CRITICAL SETUP FAILED: {e}")
     EnhancedUserActivityLogger.log_system_event("BOT_SETUP_FAILED", str(e))
-    application = None # none if app fails 
+    application = None # Ensure app is None if setup fails
 
 # Flask App Definition
 
