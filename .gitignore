@@ -1,5 +1,3 @@
-.env
-promising-node-469902-m2-62dfe0717166.json
+# ignore
 credentials.json
-logs/bot.log
-logs/user_activity.log
+.env

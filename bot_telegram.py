@@ -1191,37 +1191,79 @@ class TelegramBot:
             EnhancedUserActivityLogger.log_system_event("BOT_CRASHED", f"Bot crashed: {str(e)}")
             raise
 
-def main():
-    """Main function"""
-    try:
-        print("🤖 Enhanced Telegram Client Data Bot with Persistent Logging")
-        print("=" * 70)
-        print("🔧 Initializing...")
-        print("📝 Setting up logging system...")
-        print("💾 Connecting to persistent storage...")
-        print("👥 Enabling group functionality...")
-        
-        bot = TelegramBot()
-        
-        print("✅ Bot initialized successfully!")
-        print(f"📊 {bot.sheet_info['total_clients']} clients loaded")
-        print("📁 Local logs: ./logs/ directory (temporary in Railway)")
-        print(f"💾 Persistent logs: {'Google Sheets ✅' if persistent_logger.service else 'Not configured ❌'}")
-        print("👥 Groups supported: YES")
-        print("🚀 Starting bot... (Press Ctrl+C to stop)")
-        print("=" * 70)
-        
-        bot.run()
-            
-    except ValueError as e:
-        print(f"\n❌ Configuration Error: {e}")
-        print("\n🔧 Please check your .env file and make sure all required variables are set.")
-        EnhancedUserActivityLogger.log_system_event("STARTUP_ERROR", f"Configuration error: {str(e)}")
-    except Exception as e:
-        print(f"\n❌ Failed to start bot: {e}")
-        print("\n📖 Check the logs above for more details.")
-        print("💡 Make sure your Google Sheets credentials and bot token are correct.")
-        EnhancedUserActivityLogger.log_system_event("STARTUP_FAILED", f"Startup failed: {str(e)}")
+ 
+# SERVERLESS DEPLOYMENT
 
-if __name__ == '__main__':
-    main()
+import asyncio
+
+# --- Global Bot Initialization ---
+# This part runs only once when the serverless function starts up.
+try:
+    print("🤖 Initializing Bot for Serverless Environment...")
+    # Initialize the bot application
+    bot_token = os.getenv('TELEGRAM_BOT_TOKEN')
+    if not bot_token:
+        raise ValueError("❌ TELEGRAM_BOT_TOKEN not found in environment variables")
+
+    # We build the application but don't start polling
+    application = Application.builder().token(bot_token).build()
+
+    # Instantiate your bot logic class but don't call run()
+    telegram_bot_handler = TelegramBot()
+
+    # Add all your handlers from the _setup_handlers method
+    # This is important, we are re-creating the logic from your class here
+    application.add_handler(CommandHandler("start", telegram_bot_handler.start_command))
+    application.add_handler(CommandHandler("help", telegram_bot_handler.help_command))
+    application.add_handler(CommandHandler("info", telegram_bot_handler.info_command))
+    application.add_handler(CommandHandler("status", telegram_bot_handler.status_command))
+    application.add_handler(CommandHandler("stats", telegram_bot_handler.stats_command))
+    application.add_handler(CommandHandler("whoami", telegram_bot_handler.whoami_command))
+    application.add_handler(CommandHandler("logs", telegram_bot_handler.logs_command))
+    application.add_handler(CommandHandler("plogs", telegram_bot_handler.persistent_logs_command))
+    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, telegram_bot_handler.handle_message))
+
+    # Log startup event
+    EnhancedUserActivityLogger.log_system_event("BOT_INITIALIZED_SERVERLESS", "Handlers are set up.")
+    print("✅ Bot Handlers Initialized Successfully.")
+
+except Exception as e:
+    # If setup fails, log it. The function will fail to deploy.
+    print(f"❌ CRITICAL SETUP FAILED: {e}")
+    EnhancedUserActivityLogger.log_system_event("BOT_SETUP_FAILED", str(e))
+    application = None # none if app fails 
+
+# Flask App Definition
+
+from flask import Flask, request
+
+app = Flask(__name__)
+
+@app.route('/api/telegram', methods=['POST'])
+async def webhook():
+    """Webhook endpoint for Telegram"""
+    if application:
+        try:
+            # get json from telegram
+            update_data = request.get_json(force=True)
+
+            #create update object
+            update = Update.de_json(update_data, application.bot)
+
+            # Process the update
+            await application.process_update(update)
+
+            # Return a 200 OK response to Telegram
+            return 'OK', 200
+
+        except Exception as e:
+            print(f"❌ Error processing update: {e}")
+            return 'Error', 500
+    else:
+        print("❌ Application not initialized, cannot process request.")
+        return 'Setup Failed', 500
+
+@app.route('/')
+def index():
+    """A simple health check page"""
+    return "<h1>Bot is running!</h1><p>Set the webhook to /api/telegram</p>", 200
