@@ -50,6 +50,8 @@ class PersistentLogger:
                 logger.warning("⚠️ No se encontraron credenciales para el logger persistente.")
         except Exception as e:
             logger.error(f"❌ No se pudo configurar el logger persistente: {e}")
+            self.service = None
+
     def log_to_sheets(self, timestamp: str, level: str, user_id: str, username: str, 
                      action: str, details: str, chat_type: str = "", 
                      client_number: str = "", success: str = ""):
@@ -63,6 +65,8 @@ class PersistentLogger:
             ).execute()
         except Exception as e:
             logger.error(f"❌ Error al guardar en log persistente: {e}")
+            return False
+
     def get_recent_logs(self, limit: int = 20) -> List[List[str]]:
         if not self.service: return []
         try:
@@ -119,6 +123,7 @@ class EnhancedUserActivityLogger:
         EnhancedUserActivityLogger.log_user_action(update, "SEARCH", details, client_number, result)
 
 class GoogleSheetsManager:
+    # ... (Esta clase no necesita cambios)
     def __init__(self):
         self.service = None; self.headers = []; self.client_column = 0
         self._authenticate()
@@ -132,7 +137,9 @@ class GoogleSheetsManager:
             self.service = build('sheets', 'v4', credentials=creds)
             logger.info("✅ Google Sheets conectado exitosamente.")
         except Exception as e:
-            logger.error(f"❌ Falló la autenticación con Google Sheets: {e}"); self.service = None
+            logger.error(f"❌ Falló la autenticación con Google Sheets: {e}")
+            self.service = None
+
     def _find_client_column(self):
         try:
             spreadsheet_id = os.getenv('SPREADSHEET_ID')
@@ -156,7 +163,9 @@ class GoogleSheetsManager:
                 if len(row) > self.client_column and str(row[self.client_column]).strip().lower() == str(client_number).strip().lower():
                     logger.info(f"✅ Cliente '{client_number}' encontrado.")
                     return {header: row[i].strip() for i, header in enumerate(self.headers) if i < len(row) and row[i].strip()}
-            logger.warning(f"❌ Cliente '{client_number}' no encontrado."); return None
+            
+            logger.warning(f"❌ Cliente '{client_number}' no encontrado.")
+            return None
         except Exception as e:
             logger.error(f"❌ Error al buscar cliente: {e}"); return None
     def get_sheet_info(self) -> Dict[str, Any]:
@@ -171,6 +180,9 @@ class GoogleSheetsManager:
 
 class TelegramBot:
     def __init__(self):
+        bot_token = os.getenv('TELEGRAM_BOT_TOKEN')
+        if not bot_token: raise ValueError("TELEGRAM_BOT_TOKEN no encontrado.")
+        
         self.sheets_manager = GoogleSheetsManager()
         self.sheet_info = self.sheets_manager.get_sheet_info()
     def _is_authorized_user(self, user_id: int) -> bool:
@@ -214,26 +226,50 @@ class TelegramBot:
         EnhancedUserActivityLogger.log_user_action(update, "PLOGS_COMMAND")
         if not self._is_authorized_user(update.effective_user.id): await update.message.reply_text("⛔ No estás autorizado para ver los logs persistentes."); return
         logs = persistent_logger.get_recent_logs()
-        if not logs: await update.message.reply_text("No se encontraron logs persistentes."); return
+        if not logs:
+            await update.message.reply_text("No se encontraron logs persistentes.")
+            return
+
         log_message = "📝 **Últimos 20 Logs Persistentes:**\n\n```\n"
         for entry in logs:
-            if isinstance(entry, list) and len(entry) >= 5:
-                log_message += f"{entry[:16]:<16} | {entry:<15} | {entry}\n"
+            # Formato: Timestamp | Acción | Usuario
+            log_line = f"{entry[:16]} | {entry:<10} | {entry}\n"
+            log_message += log_line
         log_message += "```"
         await update.message.reply_text(log_message, parse_mode='Markdown')
     async def handle_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         chat, user, message_text_original = update.effective_chat, update.effective_user, update.message.text.strip()
         logger.info(f"📨 Mensaje de {user.first_name} en chat {chat.type}: '{message_text_original}'")
-        message_to_process, is_addressed_to_bot = "", False
-        if chat.type == Chat.PRIVATE: is_addressed_to_bot, message_to_process = True, message_text_original
+        
+        message_to_process = ""
+        is_addressed_to_bot = False
+
+        if chat.type == Chat.PRIVATE:
+            is_addressed_to_bot = True
+            message_to_process = message_text_original
+        
         elif chat.type in [Chat.GROUP, Chat.SUPERGROUP]:
             bot_info = await context.bot.get_me()
             bot_username = bot_info.username.lower()
-            if f"@{bot_username}" in message_text_original.lower(): is_addressed_to_bot, message_to_process = True, message_text_original.lower().replace(f"@{bot_username}", "").strip()
-            elif update.message.reply_to_message and update.message.reply_to_message.from_user.id == bot_info.id: is_addressed_to_bot, message_to_process = True, message_text_original
-        if not is_addressed_to_bot: logger.info("Bot no fue mencionado en grupo. Ignorando."); return
-        client_number = ''.join(filter(str.isdigit, message_to_process))
-        if not client_number: logger.warning(f"No se encontraron dígitos en '{message_to_process}'"); await update.message.reply_text("❌ Por favor, envía solo el número de cliente.", reply_to_message_id=update.message.id); return
+
+            if f"@{bot_username}" in message_text_original.lower():
+                is_addressed_to_bot = True
+                message_to_process = message_text_original.lower().replace(f"@{bot_username}", "").strip()
+            elif update.message.reply_to_message and update.message.reply_to_message.from_user.id == bot_info.id:
+                is_addressed_to_bot = True
+                message_to_process = message_text_original
+        
+        if not is_addressed_to_bot:
+            logger.info("Bot no fue mencionado en grupo. Ignorando.")
+            return
+
+        client_number = message_to_process
+        if not client_number.isdigit():
+            logger.warning(f"Formato de número de cliente inválido: '{client_number}'")
+            await update.message.reply_text("❌ Por favor, envía solo el número de cliente.", reply_to_message_id=update.message.id)
+            return
+
+        await context.bot.send_chat_action(chat_id=chat.id, action="typing")
         client_data = self.sheets_manager.get_client_data(client_number)
         if client_data:
             EnhancedUserActivityLogger.log_search_result(update, client_number, True, len(client_data))
@@ -261,24 +297,11 @@ async def initialize():
         
     # Crear la instancia de la clase que contiene la lógica
     telegram_bot = TelegramBot()
+    application = telegram_bot.application # Exponer la aplicación globalmente
+    
     if not telegram_bot.sheets_manager.service:
         raise RuntimeError("No se pudo conectar con Google Sheets.")
     
-    # Construir la aplicación PTB
-    application = Application.builder().token(bot_token).build()
-    
-    # Añadir los manejadores desde la instancia de la clase
-    application.add_handler(CommandHandler("start", telegram_bot.start_command))
-    application.add_handler(CommandHandler("help", telegram_bot.help_command))
-    application.add_handler(CommandHandler("info", telegram_bot.info_command))
-    application.add_handler(CommandHandler("status", telegram_bot.status_command))
-    application.add_handler(CommandHandler("stats", telegram_bot.stats_command))
-    application.add_handler(CommandHandler("whoami", telegram_bot.whoami_command))
-    application.add_handler(CommandHandler("logs", telegram_bot.logs_command))
-    application.add_handler(CommandHandler("plogs", telegram_bot.persistent_logs_command))
-    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, telegram_bot.handle_message))
-
-    # Paso final y crítico
     await application.initialize()
     logger.info("🎉 Bot inicializado exitosamente!")
 
