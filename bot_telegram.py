@@ -1,8 +1,18 @@
 import os
 import logging
 from typing import Dict, Any, Optional, List
-from datetime import datetime, date
-from dotenv import load_dotenv
+
+# Load environment variables from .env file (only if .env exists)
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass  # dotenv not installed, use system env vars
+
+# Importar Flask primero
+from flask import Flask, request
+
+# Importar Telegram y otras librerías
 from telegram import Update, Chat
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 from google.oauth2.service_account import Credentials
@@ -11,9 +21,17 @@ import json
 import sys
 import pytz
 MEXICO_CITY_TZ = pytz.timezone("America/Mexico_City")
+logging.basicConfig(
+    level=logging.INFO,
+    format='[%(asctime)s] %(levelname)s | %(name)s | %(message)s',
+    handlers=[logging.StreamHandler(sys.stdout)]
+)
+logger = logging.getLogger(__name__)
 
-# Load environment variables
-load_dotenv()
+# --- Variables Globales para Inicialización "Lazy" ---
+telegram_bot: Optional[Any] = None
+
+# --- Clases de Lógica del Bot ---
 
 class PersistentLogger:
     """Store all logs permanently in Google Sheets"""
@@ -113,8 +131,7 @@ class PersistentLogger:
             return data_rows[-limit:] if len(data_rows) > limit else data_rows
             
         except Exception as e:
-            print(f"❌ Error reading persistent logs: {e}")
-            return []
+            logger.error(f"❌ Error al leer logs persistentes: {e}"); return []
     
     def get_stats_from_logs(self) -> Dict[str, Any]:
         """Get usage statistics from persistent logs"""
@@ -332,45 +349,22 @@ class GoogleSheetsManager:
         self.headers = []
         self.client_column = None
         self._authenticate()
-        self._find_client_column()
+        if self.service: self._find_client_column()
     
     def _authenticate(self):
         """Authenticate with Google Sheets API"""
         try:
             # Try environment variable first (for production)
             credentials_json = os.getenv('GOOGLE_CREDENTIALS_JSON')
-            if credentials_json:
-                logger.info("Using credentials from environment variable")
-                credentials_data = json.loads(credentials_json)
-                self.creds = Credentials.from_service_account_info(
-                    credentials_data, scopes=SCOPES
-                )
-            # Fallback to credentials file (for local development)
-            elif os.path.exists(CREDENTIALS_FILE):
-                logger.info("Using credentials from file")
-                self.creds = Credentials.from_service_account_file(
-                    CREDENTIALS_FILE, scopes=SCOPES
-                )
-            else:
-                raise FileNotFoundError(
-                    "No credentials found! Please either:\n"
-                    "1. Set GOOGLE_CREDENTIALS_JSON environment variable, OR\n"
-                    "2. Place credentials.json file in the project directory"
-                )
-            
-            self.service = build('sheets', 'v4', credentials=self.creds)
-            logger.info("✅ Successfully connected to Google Sheets API")
-            
-            # Log system event
-            EnhancedUserActivityLogger.log_system_event("SHEETS_CONNECTED", "Successfully connected to Google Sheets API")
-            
-        except json.JSONDecodeError:
-            logger.error("❌ Invalid JSON in GOOGLE_CREDENTIALS_JSON")
-            raise ValueError("GOOGLE_CREDENTIALS_JSON contains invalid JSON")
+            if not credentials_json: 
+                logger.error("❌ Env var GOOGLE_CREDENTIALS_JSON no está configurada.")
+                raise ValueError("Env var GOOGLE_CREDENTIALS_JSON no está configurada.")
+            credentials_data = json.loads(credentials_json)
+            creds = Credentials.from_service_account_info(credentials_data, scopes=['https://www.googleapis.com/auth/spreadsheets.readonly'])
+            self.service = build('sheets', 'v4', credentials=creds)
+            logger.info("✅ Google Sheets conectado exitosamente.")
         except Exception as e:
-            logger.error(f"❌ Authentication failed: {e}")
-            EnhancedUserActivityLogger.log_system_event("SHEETS_ERROR", f"Authentication failed: {e}")
-            raise
+            logger.error(f"❌ Falló la autenticación con Google Sheets: {e}"); self.service = None
     
     def _find_client_column(self):
         """Find which column contains client numbers"""
@@ -394,36 +388,16 @@ class GoogleSheetsManager:
             client_keywords = ['client', 'number', 'id', 'code']
             
             for i, header in enumerate(self.headers):
-                header_lower = header.lower().strip()
-                for keyword in client_keywords:
-                    if keyword in header_lower:
-                        self.client_column = i
-                        logger.info(f"📋 Found client column: '{header}' at position {i}")
-                        EnhancedUserActivityLogger.log_system_event("COLUMN_FOUND", f"Client column: {header} at position {i}")
-                        return
-            
-            # Default to first column if no match found
-            self.client_column = 0
-            logger.info("📋 Using first column as client column (no specific match found)")
-            
-        except Exception as e:
-            logger.error(f"❌ Error finding client column: {e}")
-            self.client_column = 0
+                if any(keyword in header.lower().strip() for keyword in client_keywords):
+                    self.client_column = i; logger.info(f"📋 Columna de cliente encontrada: '{header}' en la posición {i}"); return
+            logger.info("📋 Usando la primera columna como columna de cliente por defecto.")
+        except Exception as e: logger.error(f"❌ Error al encontrar la columna de cliente: {e}")
     
-    def get_client_data(self, client_number: str) -> Optional[Dict[str, Any]]:
-        """Search for client data by client number"""
+    def get_client_data(self, client_number: str) -> Optional[Dict[str, str]]:
+        if not self.service: return None
         try:
-            if not SPREADSHEET_ID:
-                return None
-            
-            logger.info(f"🔍 Searching for client: {client_number}")
-            
-            # Get all data from the sheet
-            result = self.service.spreadsheets().values().get(
-                spreadsheetId=SPREADSHEET_ID,
-                range='Sheet1!A:Z'
-            ).execute()
-            
+            spreadsheet_id = os.getenv('SPREADSHEET_ID')
+            result = self.service.spreadsheets().values().get(spreadsheetId=spreadsheet_id, range='Sheet1!A:Z').execute()
             values = result.get('values', [])
             if len(values) < 2:  # Need at least headers + 1 data row
                 logger.warning("⚠️ Not enough data in spreadsheet")
@@ -453,8 +427,7 @@ class GoogleSheetsManager:
             return None
             
         except Exception as e:
-            logger.error(f"❌ Error searching for client: {e}")
-            return None
+            logger.error(f"❌ Error al buscar cliente: {e}"); return None
     
     def get_sheet_info(self) -> Dict[str, Any]:
         """Get basic information about the spreadsheet"""
@@ -488,371 +461,16 @@ class TelegramBot:
         
         # Get sheet info for bot status
         self.sheet_info = self.sheets_manager.get_sheet_info()
-        logger.info(f"📊 Sheet loaded: {self.sheet_info['total_clients']} clients available")
-        
-        # Log bot startup
-        EnhancedUserActivityLogger.log_system_event("BOT_STARTUP", f"Bot initialized with {self.sheet_info['total_clients']} clients")
-    
-    def _setup_handlers(self):
-        """Setup bot command and message handlers"""
-        self.application.add_handler(CommandHandler("start", self.start_command))
-        self.application.add_handler(CommandHandler("help", self.help_command))
-        self.application.add_handler(CommandHandler("info", self.info_command))
-        self.application.add_handler(CommandHandler("status", self.status_command))
-        self.application.add_handler(CommandHandler("stats", self.stats_command))
-        self.application.add_handler(CommandHandler("whoami", self.whoami_command))
-        self.application.add_handler(CommandHandler("logs", self.logs_command))
-        self.application.add_handler(CommandHandler("plogs", self.persistent_logs_command))
-        self.application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, self.handle_message))
     
     def _is_authorized_user(self, user_id: int) -> bool:
         """Check if user is authorized"""
         authorized_users = os.getenv('AUTHORIZED_USERS', '').split(',')
-        if authorized_users == ['']:
-            return True  # If no specific users set, allow all
-        return str(user_id) in authorized_users
-    
-    def _get_chat_context(self, update: Update) -> str:
-        """Get chat context for logging and responses"""
-        chat = update.effective_chat
-        if chat.type == Chat.PRIVATE:
-            return "private chat"
-        else:
-            return f"group '{chat.title}' (ID: {chat.id})"
+        return str(user_id) in authorized_users if authorized_users != [''] else True
     
     async def start_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        """Handle /start command"""
-        user = update.effective_user
-        chat = update.effective_chat
-        
-        # Log the action
-        EnhancedUserActivityLogger.log_user_action(update, "START_COMMAND")
-        
-        user_name = user.first_name or "there"
-        chat_context = self._get_chat_context(update)
-        
-        if chat.type == Chat.PRIVATE:
-            welcome_message = (
-                f"👋 Hola {user_name}! Bienvenido a **Client Data Bot**!\n\n"
-                f"🔍 Te puedo ayudar a buscar cualquier cliente :).\n"
-                f"**Comandos disponibles:**\n"
-                f"• `/help` - Instrucciones detalladas\n"
-                f"• `/info` - Información extra\n"
-                f"• `/status` - Estatus del bot\n"
-                f"• `/whoami` - obten tu user id e info de nombre\n\n"
-                f"💡 **Uso rapido:** Manda un mensaje y te contestare si lo encuentro!\n\n"
-                f"👥 **Para grupos:** Añademe al grupo y te contesto si me escribes (@)!"
-            )
-        else:
-            welcome_message = (
-                f"👋 Hola a todos! aqui **Client Data Bot**!\n\n"
-                f"🔍 Te puedo ayudar a buscar cualquier cliente :).\n"
-                f"**Uso en grupos:**\n"
-                f"• Envia los numero directamente o arroba al bot: `12345`\n"
-                f"• Otros comandos: `/help`, `/info`, `/status`\n"
-                f"💡Respondo tambien a las menciones y respuestas a mis mensajes solo asegurate que tengan el numero!"
-            )
-        
-        await update.message.reply_text(welcome_message, parse_mode='Markdown')
-        logger.info(f"Start command executed by {user_name} in {chat_context}")
-    
-    async def whoami_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        """Get user ID and information"""
-        user = update.effective_user
-        chat = update.effective_chat
-        
-        # Log the action
-        EnhancedUserActivityLogger.log_user_action(update, "WHOAMI_COMMAND")
-        
-        # Escape special characters for Markdown
-        def escape_markdown(text):
-            if text is None:
-                return ""
-            # Escape special Markdown characters
-            special_chars = ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!']
-            for char in special_chars:
-                text = str(text).replace(char, f'\\{char}')
-            return text
-        
-        safe_first_name = escape_markdown(user.first_name)
-        safe_last_name = escape_markdown(user.last_name) if user.last_name else ""
-        safe_username = escape_markdown(user.username) if user.username else "No username"
-        safe_chat_title = escape_markdown(chat.title) if hasattr(chat, 'title') and chat.title else ""
-        
-        user_info = (
-            f"👤 **Your Telegram Info:**\n\n"
-            f"🆔 **User ID:** `{user.id}`\n"
-            f"👤 **Name:** {safe_first_name} {safe_last_name}\n"
-            f"📱 **Username:** @{safe_username}\n"
-            f"💬 **Chat Type:** {chat.type}\n"
-            f"🔢 **Chat ID:** `{chat.id}`"
-        )
-        
-        if chat.type != Chat.PRIVATE:
-            user_info += f"\n🏷️ **Group:** {safe_chat_title}"
-        
-        # Check if user is authorized
-        is_authorized = self._is_authorized_user(user.id)
-        user_info += f"\n🔐 **Authorized:** {'✅ Yes' if is_authorized else '❌ No'}"
-        
-        user_info += f"\n\n💡 **To authorize this user, add:** `{user.id}` to AUTHORIZED_USERS"
-        
-        try:
-            await update.message.reply_text(user_info, parse_mode='Markdown')
-        except Exception as e:
-            logger.error(f"Markdown error in whoami: {e}")
-            # Fallback without markdown
-            simple_info = f"Your User ID: {user.id}\nName: {user.first_name or 'Unknown'}\nAuthorized: {'Yes' if is_authorized else 'No'}"
-            await update.message.reply_text(simple_info)
-        
-        # Also print to console for admin
-        logger.info(f"👤 User ID Request: {user.first_name} (@{user.username}) = {user.id}")
-    
-    async def logs_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        """Show recent local logs"""
-        user = update.effective_user
-        
-        # Log the action
-        EnhancedUserActivityLogger.log_user_action(update, "LOGS_COMMAND")
-        
-        # Check if user is authorized
-        if not self._is_authorized_user(user.id):
-            await update.message.reply_text(
-                "⛔ You're not authorized to view bot logs.\n"
-                f"💡 Your User ID is: `{user.id}`",
-                parse_mode='Markdown'
-            )
-            return
-        
-        try:
-            # Get recent local activity logs
-            recent_logs = self._get_recent_logs(lines=15)
-            
-            if not recent_logs:
-                await update.message.reply_text(
-                    "📝 No recent local activity logs found.\n"
-                    "💡 Use `/plogs` for persistent logs from Google Sheets."
-                )
-                return
-            
-            log_message = (
-                f"📝 **Recent Local Logs (Last 15 entries):**\n\n"
-                f"```\n{recent_logs}\n```\n\n"
-                f"📁 **Note:** Local logs are temporary in Railway\n"
-                f"💡 Use `/plogs` for complete persistent history\n"
-                f"🕐 **Generated:** {datetime.now(MEXICO_CITY_TZ).strftime('%H:%M:%S')}"
-            )
-            
-            await update.message.reply_text(log_message, parse_mode='Markdown')
-            
-        except Exception as e:
-            logger.error(f"Error retrieving local logs: {e}")
-            await update.message.reply_text(
-                "❌ Error retrieving local logs.\n"
-                "💡 Try `/plogs` for persistent logs."
-            )
-    
-    async def persistent_logs_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        """Show persistent logs from Google Sheets"""
-        user = update.effective_user
-        
-        # Log the action
-        EnhancedUserActivityLogger.log_user_action(update, "PLOGS_COMMAND")
-        
-        # Check if user is authorized
-        if not self._is_authorized_user(user.id):
-            await update.message.reply_text(
-                "⛔ You're not authorized to view persistent logs."
-            )
-            return
-        
-        try:
-            # Always show last 20 entries (simplified)
-            persistent_logs = persistent_logger.get_recent_logs(20)
-            
-            if not persistent_logs:
-                await update.message.reply_text(
-                    "📊 **No persistent logs found**\n\n"
-                    "**Possible reasons:**\n"
-                    "• LOGS_SPREADSHEET_ID not configured\n"
-                    "• Google Sheets connection issue\n"
-                    "• No activity logged yet\n\n"
-                    "💡 Check your configuration and try again."
-                )
-                return
-            
-            # Format logs for display - escape markdown characters
-            def escape_markdown_v2(text):
-                if text is None:
-                    return ""
-                # Escape special characters for Markdown
-                special_chars = ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!']
-                text = str(text)
-                for char in special_chars:
-                    text = text.replace(char, f'\\{char}')
-                return text
-            
-            log_message = f"📊 **Recent Persistent Logs \\({len(persistent_logs)} entries\\):**\n\n"
-            
-            for log_entry in persistent_logs[-15:]:  # Show last 15 for readability
-                if len(log_entry) >= 5:
-                    timestamp = escape_markdown_v2(log_entry[0][:16])  # Truncate timestamp
-                    action = escape_markdown_v2(log_entry[4])
-                    username = escape_markdown_v2(log_entry[3][:20])  # Truncate username
-                    details = escape_markdown_v2(log_entry[5][:40]) if len(log_entry) > 5 else ""  # Truncate details
-                    
-                    log_message += f"`{timestamp}` \\| **{action}** \\| {username}"
-                    if details:
-                        log_message += f" \\| {details}\\.\\.\\."
-                    log_message += "\n"
-            
-            log_message += (
-                f"\n📋 **Showing:** {len(persistent_logs[-15:])}/{len(persistent_logs)} entries\n"
-                f"🕐 **Generated:** {datetime.now(MEXICO_CITY_TZ).strftime('%H:%M:%S')}"
-            )
-            
-            try:
-                await update.message.reply_text(log_message, parse_mode='Markdown')
-            except Exception as e:
-                logger.error(f"Markdown error in plogs: {e}")
-                # Fallback without markdown
-                simple_message = f"Recent Logs ({len(persistent_logs)} total):\n\n"
-                for log_entry in persistent_logs[-10:]:
-                    if len(log_entry) >= 5:
-                        simple_message += f"{log_entry[0][:16]} | {log_entry[4]} | {log_entry[3][:15]}\n"
-                await update.message.reply_text(simple_message)
-            
-        except Exception as e:
-            logger.error(f"Error retrieving persistent logs: {e}")
-            await update.message.reply_text(
-                "❌ Error retrieving persistent logs.\n"
-                "Check Google Sheets connection and LOGS_SPREADSHEET_ID."
-            )
-    
-    def _get_recent_logs(self, lines: int = 20) -> str:
-        """Get recent log entries from local files"""
-        try:
-            if not os.path.exists('logs/user_activity.log'):
-                return "No local activity log file found."
-            
-            with open('logs/user_activity.log', 'r', encoding='utf-8') as f:
-                log_lines = f.readlines()
-            
-            # Get last N lines
-            recent_lines = log_lines[-lines:] if len(log_lines) > lines else log_lines
-            
-            # Format for display (truncate long lines)
-            formatted_lines = []
-            for line in recent_lines:
-                if len(line) > 100:
-                    formatted_lines.append(line[:97] + "...")
-                else:
-                    formatted_lines.append(line.rstrip())
-            
-            return '\n'.join(formatted_lines)
-            
-        except Exception as e:
-            logger.error(f"Error reading recent logs: {e}")
-            return "❌ Error reading local logs."
-    
-    async def stats_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        """Show comprehensive bot usage statistics"""
-        user = update.effective_user
-        
-        # Log the action
-        EnhancedUserActivityLogger.log_user_action(update, "STATS_COMMAND")
-        
-        # Check if user is authorized
-        if not self._is_authorized_user(user.id):
-            await update.message.reply_text(
-                "⛔ You're not authorized to view bot statistics."
-            )
-            return
-        
-        try:
-            # Get stats from persistent logs
-            persistent_stats = persistent_logger.get_stats_from_logs()
-            
-            if not persistent_stats:
-                # Fallback to local stats
-                local_stats = self._get_local_usage_stats()
-                stats_message = (
-                    f"📈 **Bot Usage Statistics (Local):**\n\n"
-                    f"🔍 **Searches today:** {local_stats.get('searches_today', 0)}\n"
-                    f"✅ **Successful:** {local_stats.get('successful_searches', 0)}\n"
-                    f"❌ **Failed:** {local_stats.get('failed_searches', 0)}\n"
-                    f"👤 **Unique users today:** {local_stats.get('unique_users_today', 0)}\n\n"
-                    f"⚠️ **Note:** Local stats only (temporary)\n"
-                    f"💡 Configure LOGS_SPREADSHEET_ID for complete history"
-                )
-            else:
-                # Use persistent stats
-                stats_message = (
-                    f"📈 **Bot Usage Statistics (Complete):**\n\n"
-                    f"📊 **Total log entries:** {persistent_stats.get('total_logs', 0)}\n"
-                    f"📅 **Today's activity:** {persistent_stats.get('today_logs', 0)}\n\n"
-                    f"🔍 **Search Statistics:**\n"
-                    f"• Total searches: {persistent_stats.get('total_searches', 0)}\n"
-                    f"• ✅ Successful: {persistent_stats.get('successful_searches', 0)}\n"
-                    f"• ❌ Failed: {persistent_stats.get('failed_searches', 0)}\n\n"
-                    f"👥 **User Activity:**\n"
-                    f"• Unique users today: {persistent_stats.get('unique_users_today', 0)}\n"
-                    f"• Active groups today: {persistent_stats.get('active_groups_today', 0)}\n\n"
-                    f"📊 **Database:** {self.sheet_info['total_clients']} clients available"
-                )
-            
-            stats_message += f"\n🕐 **Generated:** {datetime.now(MEXICO_CITY_TZ).strftime('%Y-%m-%d %H:%M:%S')}"
-            
-            await update.message.reply_text(stats_message, parse_mode='Markdown')
-            
-        except Exception as e:
-            logger.error(f"Error generating stats: {e}")
-            await update.message.reply_text(
-                "❌ Error generating statistics. Please try again later."
-            )
-    
-    def _get_local_usage_stats(self) -> Dict[str, int]:
-        """Get basic usage statistics from local logs (fallback)"""
-        try:
-            today = datetime.now(MEXICO_CITY_TZ).strftime('%Y-%m-%d')
-            
-            if not os.path.exists('logs/user_activity.log'):
-                return {}
-            
-            stats = {
-                'searches_today': 0,
-                'successful_searches': 0,
-                'failed_searches': 0,
-                'unique_users_today': set()
-            }
-            
-            with open('logs/user_activity.log', 'r', encoding='utf-8') as f:
-                for line in f:
-                    if today in line and 'SEARCH' in line:
-                        stats['searches_today'] += 1
-                        
-                        if 'SUCCESS' in line:
-                            stats['successful_searches'] += 1
-                        elif 'FAILURE' in line:
-                            stats['failed_searches'] += 1
-                        
-                        # Extract user ID (simplified parsing)
-                        try:
-                            user_id = line.split('ID: ')[1].split(' |')[0]
-                            stats['unique_users_today'].add(user_id)
-                        except:
-                            pass
-            
-            # Convert set to count
-            stats['unique_users_today'] = len(stats['unique_users_today'])
-            
-            return stats
-            
-        except Exception as e:
-            logger.error(f"Error reading local usage stats: {e}")
-            return {}
-    
-
+        user = update.effective_user; EnhancedUserActivityLogger.log_user_action(update, "START_COMMAND")
+        msg = (f"👋 ¡Hola {user.first_name}! Bienvenido a **Client Data Bot**.\n\nEnvíame un número de cliente y te daré su información.\n\nUsa `/help` para ver todos los comandos.") if update.effective_chat.type == Chat.PRIVATE else (f"👋 ¡Hola a todos! Soy **Client Data Bot**.\n\nPara buscar un cliente en este grupo, menciónname o responde a uno de mis mensajes.\nEjemplo: `@mi_bot_username 12345`")
+        await update.message.reply_text(msg, parse_mode='Markdown')
     
     async def help_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Handle /help command"""
@@ -860,50 +478,7 @@ class TelegramBot:
         
         # Log the action
         EnhancedUserActivityLogger.log_user_action(update, "HELP_COMMAND")
-        
-        if chat.type == Chat.PRIVATE:
-            help_message = (
-                "📖 **How to use this bot:**\n\n"
-                "**Finding clients:**\n"
-                "• Send any client number (e.g., `12345`, `CLIENT-001`, `ABC123`)\n"
-                "• Search is case-insensitive and ignores extra spaces\n"
-                "• I'll show all available information for that client\n\n"
-                "**Commands:**\n"
-                "• `/start` - Welcome message\n"
-                "• `/help` - This help message\n"
-                "• `/info` - Show spreadsheet details\n"
-                "• `/status` - Check if everything is working\n"
-                "• `/whoami` - Get your User ID and info\n"
-                "• `/stats` - Show usage statistics (if authorized)\n"
-                "• `/logs` - Show recent activity logs (if authorized)\n"
-                "• `/plogs` - Show persistent logs from database (if authorized)\n\n"
-                "**Group usage:**\n"
-                "• Add me to any group and I'll work there too!\n"
-                "**Tips:**\n"
-                "• Make sure the client number matches exactly\n"
-                "• Try different formats if first attempt fails\n"
-                "• Contact admin if you find issues\n\n"
-                "❓ **Need help?** Contact your system administrator."
-            )
-        else:
-            help_message = (
-                "📖 **How to use this bot in groups:**\n\n"
-                "**Finding clients:**\n"
-                "• Send any client number: `12345`, `CLIENT-001`, etc.\n"
-                "• I'll respond with client information if found\n"
-                "• Everyone in the group can use me!\n\n"
-                "**Group commands:**\n"
-                "• `/help` - This help message\n"
-                "• `/info` - Show database information\n"
-                "• `/status` - Check bot status\n"
-                "• `/whoami` - Get your User ID\n\n"
-                "**Tips for groups:**\n"
-                "• I respond to all members equally\n"
-                "• Use me for collaborative client lookup\n"
-                "• All interactions are logged for security\n\n"
-                "❓ **Questions?** Contact your administrator."
-            )
-        
+        help_message = ("📖 **Ayuda de Client Data Bot**\n\n**Buscar clientes:**\n• **En chat privado:** Simplemente envía el número de cliente.\n• **En grupos:** Menciona al bot (`@username_del_bot 12345`) o responde a un mensaje del bot con el número.\n\n**Comandos disponibles:**\n• `/start` - Mensaje de bienvenida.\n• `/help` - Muestra esta ayuda.\n• `/info` - Muestra información sobre la base de datos.\n• `/status` - Verifica el estado del bot y la conexión.\n• `/whoami` - Muestra tu información de Telegram.\n• `/stats` - Muestra estadísticas de uso (autorizado).\n• `/plogs` - Muestra los últimos logs de actividad (autorizado).")
         await update.message.reply_text(help_message, parse_mode='Markdown')
     
     async def info_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -963,307 +538,138 @@ class TelegramBot:
         )
         
         await update.message.reply_text(status_message, parse_mode='Markdown')
-
+    
+    async def whoami_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        EnhancedUserActivityLogger.log_user_action(update, "WHOAMI_COMMAND"); user = update.effective_user
+        auth_status = "✅ Sí" if self._is_authorized_user(user.id) else "❌ No"
+        user_info = (f"👤 **Tu Información:**\n\n🆔 **User ID:** `{user.id}`\n👤 **Nombre:** {user.first_name} {user.last_name or ''}\n📱 **Username:** @{user.username or 'No tienes'}\n🔑 **Autorizado:** {auth_status}")
+        await update.message.reply_text(user_info, parse_mode='Markdown')
+    
+    async def stats_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        EnhancedUserActivityLogger.log_user_action(update, "STATS_COMMAND")
+        if not self._is_authorized_user(update.effective_user.id): await update.message.reply_text("⛔ No estás autorizado para ver las estadísticas."); return
+        stats = persistent_logger.get_stats_from_logs()
+        if not stats: await update.message.reply_text("No hay estadísticas disponibles."); return
+        stats_message = (f"📈 **Estadísticas de Uso:**\n\n📊 **Logs totales:** {stats.get('total_logs', 0)}\n📅 **Actividad de hoy:** {stats.get('today_logs', 0)}\n\n🔍 **Búsquedas Totales:** {stats.get('total_searches', 0)}\n  - ✅ Exitosas: {stats.get('successful_searches', 0)}\n  - ❌ Fallidas: {stats.get('failed_searches', 0)}\n\n👥 **Actividad de Hoy:**\n  - Usuarios únicos: {stats.get('unique_users_today', 0)}\n  - Grupos activos: {stats.get('active_groups_today', 0)}")
+        await update.message.reply_text(stats_message, parse_mode='Markdown')
+    
+    async def logs_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        EnhancedUserActivityLogger.log_user_action(update, "LOGS_COMMAND")
+        if not self._is_authorized_user(update.effective_user.id): await update.message.reply_text("⛔ No estás autorizado para ver los logs."); return
+        await update.message.reply_text("📝 El comando `/logs` no está disponible. Usa `/plogs` para ver los logs de Google Sheets.")
+    
+    async def persistent_logs_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        EnhancedUserActivityLogger.log_user_action(update, "PLOGS_COMMAND")
+        if not self._is_authorized_user(update.effective_user.id): await update.message.reply_text("⛔ No estás autorizado para ver los logs persistentes."); return
+        logs = persistent_logger.get_recent_logs()
+        if not logs: await update.message.reply_text("No se encontraron logs persistentes."); return
+        log_message = "📝 **Últimos 20 Logs Persistentes:**\n\n```\n"
+        for entry in logs:
+            if isinstance(entry, list) and len(entry) >= 5:
+                log_message += f"{entry[0]:<16} | {entry[1]:<15} | {entry[4]}\n"
+        log_message += "```"
+        await update.message.reply_text(log_message, parse_mode='Markdown')
+    
     async def handle_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        """Handle client number searches - DEBUG VERSION with extensive logging"""
-        
-        chat = update.effective_chat
-        message_text = update.message.text.strip()
-        user = update.effective_user
-        
-        # ALWAYS log every message for debugging
-        logger.info(f"📨 MESSAGE RECEIVED: '{message_text}' from {user.first_name} (@{user.username}) in {chat.type} chat")
-        
-        # If it's a group/supergroup, check if bot was mentioned
-        if chat.type in [Chat.GROUP, Chat.SUPERGROUP]:
-            logger.info(f"🔍 GROUP MESSAGE - Checking for mentions...")
-            
-            # Get bot info
-            try:
-                bot_info = await context.bot.get_me()
-                bot_username = bot_info.username.lower()
-                logger.info(f"🤖 Bot username: @{bot_username}")
-            except Exception as e:
-                logger.error(f"❌ Failed to get bot info: {e}")
-                return
-            
-            # Check if bot was mentioned
-            is_mentioned = False
-            mention_method = ""
-            
-            # Method 1: Check for @botusername in text (case insensitive)
-            if f"@{bot_username}" in message_text.lower():
-                is_mentioned = True
-                mention_method = "text_mention"
-                logger.info(f"✅ Found mention in text: @{bot_username}")
-                # Remove mention from text for processing
-                message_text = message_text.replace(f"@{bot_username}", "").replace(f"@{bot_info.username}", "").strip()
-            
-            # Method 2: Check if message is a reply to bot
-            if update.message.reply_to_message:
-                replied_user = update.message.reply_to_message.from_user
-                logger.info(f"🔄 Message is a reply to: {replied_user.first_name if replied_user else 'Unknown'}")
-                if replied_user and replied_user.is_bot and replied_user.id == context.bot.id:
-                    is_mentioned = True
-                    mention_method = "reply"
-                    logger.info(f"✅ Reply to bot detected")
-            
-            # Method 3: Check mention entities
-            if update.message.entities:
-                logger.info(f"🔍 Checking {len(update.message.entities)} entities...")
-                for i, entity in enumerate(update.message.entities):
-                    logger.info(f"   Entity {i}: type={entity.type}, offset={entity.offset}, length={entity.length}")
-                    if entity.type == "mention":
-                        mentioned_text = message_text[entity.offset:entity.offset + entity.length]
-                        logger.info(f"   Mention found: '{mentioned_text}'")
-                        if mentioned_text.lower() == f"@{bot_username}":
-                            is_mentioned = True
-                            mention_method = "entity_mention"
-                            logger.info(f"✅ Entity mention matches bot")
-                            # Remove the mention from text
-                            message_text = message_text.replace(mentioned_text, "").strip()
-                            break
-            else:
-                logger.info("ℹ️ No entities in message")
-            
-            # Log final mention status
-            if is_mentioned:
-                logger.info(f"✅ BOT MENTIONED via {mention_method}. Processing message: '{message_text}'")
-            else:
-                logger.info(f"❌ BOT NOT MENTIONED. Ignoring message.")
-                return
+        chat, user, message_text_original = update.effective_chat, update.effective_user, update.message.text.strip()
+        logger.info(f"📨 Mensaje de {user.first_name} en chat {chat.type}: '{message_text_original}'")
+        message_to_process, is_addressed_to_bot = "", False
+        if chat.type == Chat.PRIVATE: is_addressed_to_bot, message_to_process = True, message_text_original
+        elif chat.type in [Chat.GROUP, Chat.SUPERGROUP]:
+            bot_info = await context.bot.get_me()
+            bot_username = bot_info.username.lower()
+            if f"@{bot_username}" in message_text_original.lower(): is_addressed_to_bot, message_to_process = True, message_text_original.lower().replace(f"@{bot_username}", "").strip()
+            elif update.message.reply_to_message and update.message.reply_to_message.from_user.id == bot_info.id: is_addressed_to_bot, message_to_process = True, message_text_original
+        if not is_addressed_to_bot: logger.info("Bot no fue mencionado en grupo. Ignorando."); return
+        client_number = ''.join(filter(str.isdigit, message_to_process))
+        if not client_number: logger.warning(f"No se encontraron dígitos en '{message_to_process}'"); await update.message.reply_text("❌ Por favor, envía solo el número de cliente.", reply_to_message_id=update.message.id); return
+        client_data = self.sheets_manager.get_client_data(client_number)
+        if client_data:
+            EnhancedUserActivityLogger.log_search_result(update, client_number, True, len(client_data))
+            response = f"✅ **Cliente encontrado: `{client_number}`**\n\n"
+            field_mappings = {'client phone number': 'Número 📞', 'cliente': 'Cliente 🙋🏻‍♀️', 'correo': 'Correo ✉️', 'other info': 'Otra Información ℹ️'}
+            for key, value in client_data.items():
+                display_key = field_mappings.get(key.lower().strip(), key.strip())
+                response += f"**{display_key}:** {value}\n"
+            user_display = f"@{user.username}" if user.username else user.first_name
+            response += f"**Buscado por 🙋🏻‍♂️** {user_display}\n"
+            await update.message.reply_text(response, parse_mode='Markdown', reply_to_message_id=update.message.id)
         else:
-            logger.info(f"💬 PRIVATE CHAT - Processing directly")
-        
-        # Process the client search
-        client_number = message_text.strip()
-        chat_context = self._get_chat_context(update)
-        
-        logger.info(f"🔢 Processing client number: '{client_number}'")
-        
-        # Validate that it's a client number (digits only)
-        if not client_number:
-            logger.info(f"⚠️ Empty client number after processing")
-            await update.message.reply_text("Por favor envía un número de cliente.")
-            return
-            
-        if not client_number.isdigit():
-            logger.info(f"⚠️ Invalid client number format: '{client_number}'")
-            if chat.type in [Chat.GROUP, Chat.SUPERGROUP]:
-                bot_info = await context.bot.get_me()
-                await update.message.reply_text(
-                    f"❌ Por favor envía solo números de cliente.\n"
-                    f"💡 Ejemplo: @{bot_info.username} 12345",
-                    reply_to_message_id=update.message.message_id
-                )
-            else:
-                await update.message.reply_text(
-                    "❌ Por favor envía solo números de cliente.\n"
-                    "💡 Ejemplo: `12345`",
-                    parse_mode='Markdown'
-                )
-            return
-        
-        # Show typing indicator while searching
-        await context.bot.send_chat_action(chat_id=update.effective_chat.id, action="typing")
-        
-        logger.info(f"🔍 Search request from {user.first_name} in {chat_context}: '{client_number}'")
-        
-        try:
-            # Search for client
-            logger.info(f"📋 Searching in spreadsheet...")
-            client_data = self.sheets_manager.get_client_data(client_number)
-            
-            if client_data:
-                # Log successful search
-                logger.info(f"✅ Client found! {len(client_data)} fields")
-                EnhancedUserActivityLogger.log_search_result(update, client_number, True, len(client_data))
-                
-                # Format successful response
-                field_mappings = {
-                    'client phone number': 'Número 📞',
-                    'cliente': 'Cliente 🙋🏻‍♀️', 
-                    'correo': 'Correo ✉️',
-                    'other info': 'Otra Información ℹ️'
-                }
-                response = f"✅ **Cliente encontrado: `{client_number}`**\n\n"
-                for key, value in client_data.items():
-                    if value and str(value).strip():
-                        key_lower = key.lower().strip()
-                        
-                        # Check if it matches one of our expected fields
-                        if key_lower in field_mappings:
-                            response += f"**{field_mappings[key_lower]}** {value}\n"
-                        else:
-                            # For any unexpected fields, just show them as-is
-                            response += f"**{key} ℹ️** {value}\n"
-                
-                # Always add the user as closer
-                user_display = f"@{user.username}" if user.username else user.first_name
-                response += f"**Closer 🙋🏻‍♂️** {user_display}\n"
-                
-                # Add context based on chat type
-                if chat.type in [Chat.GROUP, Chat.SUPERGROUP]:
-                    response += f"\n📋 *{len(client_data)} campos | Por {user.first_name}*"
-                    # Reply to original message in groups
-                    await update.message.reply_text(
-                        response, 
-                        parse_mode='Markdown', 
-                        reply_to_message_id=update.message.message_id
-                    )
-                else:
-                    response += f"\n📋 *{len(client_data)} campos con datos*"
-                    await update.message.reply_text(response, parse_mode='Markdown')
-                
-                logger.info(f"✅ Successfully sent data for client: {client_number} to {user.first_name}")
-            
-            else:
-                # Log failed search
-                logger.info(f"❌ Client not found: {client_number}")
-                EnhancedUserActivityLogger.log_search_result(update, client_number, False)
-                
-                # Client not found
-                if chat.type in [Chat.GROUP, Chat.SUPERGROUP]:
-                    error_msg = f"❌ Cliente `{client_number}` no encontrado."
-                    await update.message.reply_text(
-                        error_msg, 
-                        parse_mode='Markdown', 
-                        reply_to_message_id=update.message.message_id
-                    )
-                else:
-                    suggestion_msg = (
-                        f"❌ **No se encontró cliente:** `{client_number}`\n\n"
-                        f"**Sugerencias:**\n"
-                        f"• Verifica el número e intenta de nuevo\n"
-                        f"• Usa `/info` para ver campos disponibles\n"
-                        f"• Contacta al administrador si el cliente debería existir"
-                    )
-                    await update.message.reply_text(suggestion_msg, parse_mode='Markdown')
-                
-                logger.info(f"❌ Client not found: {client_number} (requested by {user.first_name})")
-        
-        except Exception as e:
-            # Log error
-            logger.error(f"❌ SEARCH ERROR: {e}")
-            EnhancedUserActivityLogger.log_user_action(update, "SEARCH_ERROR", f"Client: {client_number}, Error: {str(e)}")
-            
-            if chat.type in [Chat.GROUP, Chat.SUPERGROUP]:
-                error_msg = f"❌ Error al buscar cliente `{client_number}`."
-                await update.message.reply_text(
-                    error_msg, 
-                    parse_mode='Markdown', 
-                    reply_to_message_id=update.message.message_id
-                )
-            else:
-                error_msg = (
-                    f"❌ **Error al buscar cliente:** `{client_number}`\n\n"
-                    f"Intenta de nuevo en un momento."
-                )
-                await update.message.reply_text(error_msg, parse_mode='Markdown')
-            
-            logger.error(f"❌ Error processing search for '{client_number}' by {user.first_name}: {e}")
+            EnhancedUserActivityLogger.log_search_result(update, client_number, False)
+            await update.message.reply_text(f"❌ No se encontró cliente con el número `{client_number}`.", parse_mode='Markdown', reply_to_message_id=update.message.id)
 
-
-    def run(self):
-        """Start the bot"""
-        try:
-            logger.info("🚀 Starting Enhanced Telegram Bot with Persistent Logging...")
-            logger.info(f"📊 Ready to serve {self.sheet_info['total_clients']} clients")
-            logger.info("👥 Group functionality: ENABLED")
-            logger.info("📝 Local logging: ENABLED")
-            logger.info(f"💾 Persistent logging: {'ENABLED' if persistent_logger.service else 'DISABLED'}")
-            logger.info("✅ Bot is running in polling mode")
-            
-            # Log bot startup
-            EnhancedUserActivityLogger.log_system_event("BOT_STARTED", f"Bot started successfully with {self.sheet_info['total_clients']} clients loaded")
-            
-            # Start polling
-            self.application.run_polling(
-                allowed_updates=Update.ALL_TYPES,
-                drop_pending_updates=True  # Clear old messages on startup
-            )
-            
-        except KeyboardInterrupt:
-            logger.info("👋 Bot stopped by user")
-            EnhancedUserActivityLogger.log_system_event("BOT_STOPPED", "Bot stopped by user (Ctrl+C)")
-        except Exception as e:
-            logger.error(f"❌ Bot crashed: {e}")
-            EnhancedUserActivityLogger.log_system_event("BOT_CRASHED", f"Bot crashed: {str(e)}")
-            raise
-
- 
-# SERVERLESS DEPLOYMENT
-
-import asyncio
-
-# --- Global Bot Initialization ---
-# This part runs only once when the serverless function starts up.
-try:
-    print("🤖 Initializing Bot for Serverless Environment...")
-    # Initialize the bot application
-    bot_token = os.getenv('TELEGRAM_BOT_TOKEN')
+# --- Lógica de Inicialización (serverless-safe) ---
+async def _build_app_for_request(telegram_bot_instance):
+    """
+    Construye una app local por cada petición
+    Esto evita reusar objetos/clients ligados a event loops previos (problema en serverless).
+    """
+    bot_token = os.getenv("TELEGRAM_BOT_TOKEN")
     if not bot_token:
-        raise ValueError("❌ TELEGRAM_BOT_TOKEN not found in environment variables")
+        raise ValueError("TELEGRAM_BOT_TOKEN no encontrado")
+    # app_local
+    app_local = Application.builder().token(bot_token).build()
+    #handlers
+    app_local.add_handler(CommandHandler("start", telegram_bot_instance.start_command))
+    app_local.add_handler(CommandHandler("help", telegram_bot_instance.help_command))
+    app_local.add_handler(CommandHandler("info", telegram_bot_instance.info_command))
+    app_local.add_handler(CommandHandler("status", telegram_bot_instance.status_command))
+    app_local.add_handler(CommandHandler("stats", telegram_bot_instance.stats_command))
+    app_local.add_handler(CommandHandler("whoami", telegram_bot_instance.whoami_command))
+    app_local.add_handler(CommandHandler("logs", telegram_bot_instance.logs_command))
+    app_local.add_handler(CommandHandler("plogs", telegram_bot_instance.persistent_logs_command))
+    app_local.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, telegram_bot_instance.handle_message))
+    #inicializamos
+    await app_local.initialize()
+    logger.debug("app local inicializada")
+    return app_local
 
-    # We build the application but don't start polling
-    application = Application.builder().token(bot_token).build()
-
-    # Instantiate your bot logic class but don't call run()
-    telegram_bot_handler = TelegramBot()
-
-    # Add all your handlers from the _setup_handlers method
-    # This is important, we are re-creating the logic from your class here
-    application.add_handler(CommandHandler("start", telegram_bot_handler.start_command))
-    application.add_handler(CommandHandler("help", telegram_bot_handler.help_command))
-    application.add_handler(CommandHandler("info", telegram_bot_handler.info_command))
-    application.add_handler(CommandHandler("status", telegram_bot_handler.status_command))
-    application.add_handler(CommandHandler("stats", telegram_bot_handler.stats_command))
-    application.add_handler(CommandHandler("whoami", telegram_bot_handler.whoami_command))
-    application.add_handler(CommandHandler("logs", telegram_bot_handler.logs_command))
-    application.add_handler(CommandHandler("plogs", telegram_bot_handler.persistent_logs_command))
-    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, telegram_bot_handler.handle_message))
-
-    # Log startup event
-    EnhancedUserActivityLogger.log_system_event("BOT_INITIALIZED_SERVERLESS", "Handlers are set up.")
-    print("✅ Bot Handlers Initialized Successfully.")
-
-except Exception as e:
-    # If setup fails, log it. The function will fail to deploy.
-    print(f"❌ CRITICAL SETUP FAILED: {e}")
-    EnhancedUserActivityLogger.log_system_event("BOT_SETUP_FAILED", str(e))
-    application = None # none if app fails 
-
-# Flask App Definition
-
-from flask import Flask, request
+# App flask y Webhook
 
 app = Flask(__name__)
 
-@app.route('/api/telegram', methods=['POST'])
+@app.route("/api/telegram", methods=['POST'])
 async def webhook():
-    """Webhook endpoint for Telegram"""
-    if application:
+    '''
+    Webhook entrypoint. Construye una Application local por petición y la cierra al final.
+    Mantiene "telegram_bot" como instancia persistente (Google Sheets, estado).
+    '''
+    global telegram_bot
+    if not telegram_bot:
         try:
-            # get json from telegram
-            update_data = request.get_json(force=True)
-
-            #create update object
-            update = Update.de_json(update_data, application.bot)
-
-            # Process the update
-            await application.process_update(update)
-
-            # Return a 200 OK response to Telegram
-            return 'OK', 200
-
+            telegram_bot = TelegramBot()
+            if not telegram_bot.sheets_manager.service:
+                logger.error("No se pudo conectar con Google Sheets")
+                return "Fallo en inicializacion sheets", 500
         except Exception as e:
-            print(f"❌ Error processing update: {e}")
-            return 'Error', 500
-    else:
-        print("❌ Application not initialized, cannot process request.")
-        return 'Setup Failed', 500
+            logger.exception("Fallo en inicializacion (bot)")
+            return "Fallo en la inicialización (bot)", 500
+    # build local app
+    try:
+        app_local = await _build_app_for_request(telegram_bot)
+    except Exception as e:
+        logger.exception(f"Fallo crítico al crear TelegramBot: {e}")
+        return "init error", 500
+    # 
+    try:
+        update = Update.de_json(request.get_json(force=True), app_local.bot)
+        await app_local.process_update(update)
+        return "ok", 200
+    except Exception as e:
+        logger.exception(f"Error al procesar webhook: {e}")
+        return "error", 500
+    finally:
+        # Siempre cerramos recursos del Application local para seguridad
+        try:
+            await app_local.shutdown()
+        except Exception as e:
+            logger.warning(f"Error al cerrar la app local: {e}")
 
-@app.route('/')
+@app.route("/")
 def index():
-    """A simple health check page"""
-    return "<h1>Bot is running!</h1><p>Set the webhook to /api/telegram</p>", 200
+    # Como ya no usamos `application` global para servir requests serverless, mostramos el estado de telegram_bot
+    status = "✅ Bot inicializado y listo." if telegram_bot else "⏳ Bot aún no inicializado. Envía un mensaje para activarlo."
+    return f"<h1>Estado del Bot</h1><p>{status}</p>"
+
+if __name__ == "__main__":
+    app.run(debug=True)
