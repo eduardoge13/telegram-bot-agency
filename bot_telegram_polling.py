@@ -88,7 +88,8 @@ class PersistentLogger:
                 self.service = None
                 return
             
-            self.service = build('sheets', 'v4', credentials=creds)
+            # Disable discovery cache to avoid noisy logs in server environments
+            self.service = build('sheets', 'v4', credentials=creds, cache_discovery=False)
             logger.info("✅ Persistent logger connected to Google Sheets")
             
         except json.JSONDecodeError:
@@ -340,7 +341,8 @@ class GoogleSheetsManager:
             else:
                 raise ValueError("❌ GOOGLE_CREDENTIALS_JSON not found and no credentials.json file")
             
-            self.service = build('sheets', 'v4', credentials=creds)
+            # Disable discovery cache to avoid noisy logs in server environments
+            self.service = build('sheets', 'v4', credentials=creds, cache_discovery=False)
             logger.info("✅ Google Sheets connected successfully")
         except Exception as e:
             logger.error(f"❌ Failed to authenticate with Google Sheets: {e}")
@@ -705,7 +707,7 @@ class TelegramBot:
             except:
                 pass
     
-    async def setup_handlers(self):
+    def setup_handlers(self):
         self.application.add_handler(CommandHandler("start", self.start_command))
         self.application.add_handler(CommandHandler("help", self.help_command))
         self.application.add_handler(CommandHandler("info", self.info_command))
@@ -720,25 +722,18 @@ class TelegramBot:
     async def run(self):
         try:
             self.application = Application.builder().token(self.token).build()
-            await self.setup_handlers()
+            self.setup_handlers()
             
-            await self.application.initialize()
-            await self.application.start()
+            # Log system startup early
+            EnhancedUserActivityLogger.log_system_event("BOT_STARTUP", "Bot starting in polling mode")
             
-            # Log system startup
-            EnhancedUserActivityLogger.log_system_event("BOT_STARTUP", "Bot started successfully in polling mode")
-            
-            logger.info("🚀 Bot started successfully with polling!")
+            logger.info("🚀 Starting bot with run_polling()...")
             logger.info("📊 Sheets connected: %s", "✅ Yes" if self.sheets_manager.service else "❌ No")
             logger.info("📋 Total clients: %s", self.sheet_info.get('total_clients', 'Unknown'))
             logger.info("💾 Persistent logging: %s", "✅ Yes" if persistent_logger.service else "❌ No")
-            logger.info("Press Ctrl+C to stop the bot")
             
-            # Use the correct polling method for python-telegram-bot v20+
-            await self.application.updater.start_polling(drop_pending_updates=True)
-            
-            # Keep the application running
-            await self.application.updater.idle()
+            # High-level API handles initialize/start/polling/idle/stop
+            await self.application.run_polling(drop_pending_updates=True)
             
         except KeyboardInterrupt:
             logger.info("🛑 Bot stopped by user")
@@ -747,11 +742,6 @@ class TelegramBot:
             logger.error(f"❌ Critical error running bot: {e}")
             EnhancedUserActivityLogger.log_system_event("BOT_ERROR", f"Critical error: {str(e)}")
             raise
-        finally:
-            if self.application:
-                logger.info("🔧 Shutting down bot...")
-                await self.application.stop()
-                logger.info("✅ Bot shutdown complete")
 
 async def main():
     try:
