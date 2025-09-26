@@ -10,7 +10,7 @@ import asyncio
 import sys
 import json
 import pytz
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional, List, Tuple
 from datetime import datetime, date
 
 # Load environment variables
@@ -47,6 +47,59 @@ def setup_logging():
     )
 
 setup_logging()
+
+# Log Python version and environment variables
+print(f"Running Python version: {sys.version}")
+print("Environment Variables:")
+for key, value in os.environ.items():
+    print(f"{key}: {value}")
+
+
+def ensure_supported_python_version():
+    """Try to keep running on Python 3.13+ while warning loudly."""
+    if sys.version_info >= (3, 13):
+        message = (
+            "Python 3.13 introduces breaking changes for python-telegram-bot v20.x. "
+            "Applying runtime compatibility patch, but PLEASE pin Render to Python 3.12.x "
+            "(runtime.txt or PYTHON_VERSION env)."
+        )
+        logger.warning(message)
+
+
+def patch_ptb_for_python_313():
+    """Monkey-patch PTB Updater slots so run_polling works under Python 3.13."""
+    if sys.version_info < (3, 13):
+        return
+
+    try:
+        from telegram.ext import _updater  # type: ignore
+
+        updater_cls = getattr(_updater, "Updater", None)
+        if updater_cls is None:
+            logger.error("Could not find Updater class to patch; aborting.")
+            raise RuntimeError("Updater class missing")
+
+        slots: Tuple[str, ...] = getattr(updater_cls, "__slots__", tuple())
+        needed = (
+            "_Updater__polling_cleanup_cb",
+            "_Updater__start_polling_future",
+            "_Updater__bootstrap_result",
+        )
+
+        missing = tuple(name for name in needed if name not in slots)
+        if missing:
+            updater_cls.__slots__ = slots + missing  # type: ignore[attr-defined]
+            logger.warning(
+                "Applied python-telegram-bot Updater compatibility patch for Python 3.13: added %s",
+                ", ".join(missing),
+            )
+    except Exception as exc:
+        logger.error("Failed to apply python-telegram-bot compatibility patch: %s", exc)
+        raise
+
+
+ensure_supported_python_version()
+patch_ptb_for_python_313()
 
 class PersistentLogger:
     """Store all logs permanently in Google Sheets"""
@@ -468,7 +521,7 @@ class TelegramBot:
             else:
                 msg = (
                     f"👋 ¡Hola a todos! Soy **Client Data Bot**.\n\n"
-                    "Para buscar un cliente en este grupo, menciónname o responde a uno de mis mensajes.\n"
+                    "Para buscar un cliente en este grupo, mencióname o responde a uno de mis mensajes.\n"
                     "Ejemplo: @mi_bot_username 12345"
                 )
             
