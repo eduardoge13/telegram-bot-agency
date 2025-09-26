@@ -813,5 +813,32 @@ def main():
         sys.exit(1)
 
 if __name__ == "__main__":
+    # --- Minimal HTTP server for Render health checks ---
+    import threading
+    from http.server import BaseHTTPRequestHandler, HTTPServer
+
+    def start_healthcheck_server():
+        """Starts a simple HTTP server in a thread to respond to Render's health checks."""
+        port = int(os.environ.get("PORT", 10000))
+        
+        class HealthcheckHandler(BaseHTTPRequestHandler):
+            def do_GET(self):
+                self.send_response(200)
+                self.end_headers()
+                self.wfile.write(b"OK")
+            
+            def log_message(self, format, *args):
+                # Suppress noisy logging from the healthcheck server
+                return
+
+        try:
+            server = HTTPServer(("0.0.0.0", port), HealthcheckHandler)
+            thread = threading.Thread(target=server.serve_forever, daemon=True)
+            thread.start()
+            logger.info(f"✅ Healthcheck server started on port {port}")
+        except Exception as e:
+            logger.error(f"❌ Could not start healthcheck server: {e}")
+            
     logger.info("🚀 Starting Client Data Bot - Polling Version")
+    start_healthcheck_server()
     main()
