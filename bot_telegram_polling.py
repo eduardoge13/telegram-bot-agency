@@ -498,6 +498,7 @@ class TelegramBot:
         self.sheets_manager = GoogleSheetsManager()
         self.sheet_info = self.sheets_manager.get_sheet_info()
         self.application = None
+        self.bot_info = None  # To cache bot info
         
         logger.info("✅ Bot initialized successfully")
     
@@ -689,7 +690,7 @@ class TelegramBot:
             user = update.effective_user
             message_text = update.message.text.strip()
             
-            logger.info(f"📨 Message from {user.first_name} in {chat.type}: '{message_text}'")
+            logger.info(f"📨 Processing message from {user.first_name} in {chat.type}: '{message_text}'")
             
             # Determine if message should be processed
             is_addressed_to_bot = False
@@ -699,28 +700,35 @@ class TelegramBot:
                 is_addressed_to_bot = True
                 message_to_process = message_text
             elif chat.type in [Chat.GROUP, Chat.SUPERGROUP]:
-                bot_info = await context.bot.get_me()
-                bot_username = bot_info.username.lower() if bot_info.username else ""
+                if not self.bot_info:
+                    self.bot_info = await context.bot.get_me()
                 
+                bot_username = self.bot_info.username.lower() if self.bot_info.username else ""
+                
+                # Check for mention
                 if f"@{bot_username}" in message_text.lower():
                     is_addressed_to_bot = True
                     message_to_process = message_text.lower().replace(f"@{bot_username}", "").strip()
+                # Check for reply
                 elif (update.message.reply_to_message and 
-                      update.message.reply_to_message.from_user.id == bot_info.id):
+                      update.message.reply_to_message.from_user.id == self.bot_info.id):
                     is_addressed_to_bot = True
                     message_to_process = message_text
             
             if not is_addressed_to_bot:
+                # This case should ideally not be hit if filters are set up correctly
                 return
             
             # Extract client number
             client_number = ''.join(filter(str.isdigit, message_to_process))
             
             if not client_number:
-                await update.message.reply_text(
-                    "❌ Por favor, envía solo el número de cliente.",
-                    reply_to_message_id=update.message.message_id
-                )
+                # Only reply if the bot was directly addressed but no number was found
+                if chat.type == Chat.PRIVATE or (f"@{self.bot_info.username.lower()}" in message_text.lower()):
+                    await update.message.reply_text(
+                        "❌ Por favor, envía un número de cliente válido.",
+                        reply_to_message_id=update.message.message_id
+                    )
                 return
             
             # Search for client data
@@ -767,6 +775,10 @@ class TelegramBot:
             except:
                 pass
     
+    async def handle_mention(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """A dedicated handler for mentions to simplify logic."""
+        await self.handle_message(update, context)
+
     def setup_handlers(self):
         self.application.add_handler(CommandHandler("start", self.start_command))
         self.application.add_handler(CommandHandler("help", self.help_command))
@@ -774,9 +786,21 @@ class TelegramBot:
         self.application.add_handler(CommandHandler("status", self.status_command))
         self.application.add_handler(CommandHandler("stats", self.stats_command))
         self.application.add_handler(CommandHandler("plogs", self.plogs_command))
+
+        # More efficient message handling
+        # 1. Private chats (any text)
         self.application.add_handler(
-            MessageHandler(filters.TEXT & ~filters.COMMAND, self.handle_message)
+            MessageHandler(filters.TEXT & ~filters.COMMAND & filters.ChatType.PRIVATE, self.handle_message)
         )
+        # 2. Replies to the bot in groups
+        self.application.add_handler(
+            MessageHandler(filters.TEXT & ~filters.COMMAND & filters.REPLY & filters.ChatType.GROUPS, self.handle_message)
+        )
+        # 3. Mentions in groups
+        self.application.add_handler(
+            MessageHandler(filters.TEXT & ~filters.COMMAND & filters.Entity("mention") & filters.ChatType.GROUPS, self.handle_mention)
+        )
+        
         logger.info("✅ All handlers setup complete")
     
     def run(self):
@@ -804,17 +828,29 @@ class TelegramBot:
             raise
 
 def main():
-    try:
-        logger.info("🤖 Initializing Telegram Bot for Polling...")
-        bot = TelegramBot()
-        bot.run()
-    except Exception as e:
-        logger.error(f"Failed to start bot: {e}")
-        sys.exit(1)
+    """Main function to initialize and run the bot with auto-restart."""
+    while True:
+        try:
+            logger.info("🤖 Initializing Telegram Bot for Polling...")
+            bot = TelegramBot()
+            bot.run()
+            # If bot.run() exits cleanly, log it and wait before restarting
+            logger.warning("Bot polling stopped. Restarting in 10 seconds...")
+            EnhancedUserActivityLogger.log_system_event("BOT_RESTART", "Polling stopped, bot will restart.")
+            time.sleep(10)
+
+        except KeyboardInterrupt:
+            logger.info("🛑 Bot stopped by user. Exiting.")
+            break
+        except Exception as e:
+            logger.error(f"Failed to start or run bot: {e}")
+            logger.error("Restarting after a failure in 30 seconds...")
+            time.sleep(30)
 
 if __name__ == "__main__":
     # --- Minimal HTTP server for Render health checks ---
     import threading
+    import time
     from http.server import BaseHTTPRequestHandler, HTTPServer
 
     def start_healthcheck_server():
