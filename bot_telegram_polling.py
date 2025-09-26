@@ -23,6 +23,7 @@ except ImportError:
 # Telegram imports
 from telegram import Update, Chat
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
+import telegram
 
 # Google Sheets imports
 from google.oauth2.service_account import Credentials
@@ -37,6 +38,12 @@ def setup_logging():
         level=logging.INFO,
         format='[%(asctime)s] %(levelname)s | %(name)s | %(message)s',
         handlers=[logging.StreamHandler(sys.stdout)]
+    )
+    # Log key runtime versions for diagnostics
+    logging.getLogger(__name__).info(
+        "Runtime versions -> python-telegram-bot=%s, python=%s",
+        getattr(telegram, "__version__", "unknown"),
+        sys.version.split()[0]
     )
 
 setup_logging()
@@ -719,7 +726,7 @@ class TelegramBot:
         )
         logger.info("✅ All handlers setup complete")
     
-    async def run(self):
+    def run(self):
         try:
             self.application = Application.builder().token(self.token).build()
             self.setup_handlers()
@@ -733,7 +740,7 @@ class TelegramBot:
             logger.info("💾 Persistent logging: %s", "✅ Yes" if persistent_logger.service else "❌ No")
             
             # High-level API handles initialize/start/polling/idle/stop
-            await self.application.run_polling(drop_pending_updates=True)
+            self.application.run_polling(drop_pending_updates=True)
             
         except KeyboardInterrupt:
             logger.info("🛑 Bot stopped by user")
@@ -743,15 +750,15 @@ class TelegramBot:
             EnhancedUserActivityLogger.log_system_event("BOT_ERROR", f"Critical error: {str(e)}")
             raise
 
-async def main():
+def main():
     try:
         logger.info("🤖 Initializing Telegram Bot for Polling...")
         bot = TelegramBot()
-        await bot.run()
+        bot.run()
     except Exception as e:
         logger.error(f"Failed to start bot: {e}")
         sys.exit(1)
 
 if __name__ == "__main__":
     logger.info("🚀 Starting Client Data Bot - Polling Version")
-    asyncio.run(main())
+    main()
