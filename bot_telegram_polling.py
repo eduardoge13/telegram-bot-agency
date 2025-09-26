@@ -55,12 +55,27 @@ class PersistentLogger:
             # Try environment variable first (for production)
             credentials_json = os.getenv('GOOGLE_CREDENTIALS_JSON')
             if credentials_json:
-                logger.info("Using persistent logging credentials from environment variable")
-                credentials_data = json.loads(credentials_json)
-                creds = Credentials.from_service_account_info(
-                    credentials_data, 
-                    scopes=['https://www.googleapis.com/auth/spreadsheets']
-                )
+                try:
+                    logger.info("Using persistent logging credentials from environment variable")
+                    credentials_data = json.loads(credentials_json)
+                    creds = Credentials.from_service_account_info(
+                        credentials_data, 
+                        scopes=['https://www.googleapis.com/auth/spreadsheets']
+                    )
+                except json.JSONDecodeError as e:
+                    logger.warning(f"⚠️ Invalid JSON in GOOGLE_CREDENTIALS_JSON: {e}")
+                    # Try to read from Render secret file path
+                    secret_file_path = os.getenv('GOOGLE_CREDENTIALS_FILE_PATH', '/etc/secrets/credentials.json')
+                    if os.path.exists(secret_file_path):
+                        logger.info(f"Using persistent logging credentials from secret file: {secret_file_path}")
+                        creds = Credentials.from_service_account_file(
+                            secret_file_path, 
+                            scopes=['https://www.googleapis.com/auth/spreadsheets']
+                        )
+                    else:
+                        logger.warning(f"⚠️ Secret file not found at: {secret_file_path}")
+                        self.service = None
+                        return
             # Fallback to credentials file (for local development)
             elif os.path.exists('credentials.json'):
                 logger.info("Using persistent logging credentials from file")
@@ -296,14 +311,35 @@ class GoogleSheetsManager:
     def _authenticate(self):
         try:
             credentials_json = os.getenv('GOOGLE_CREDENTIALS_JSON')
-            if not credentials_json:
-                raise ValueError("❌ GOOGLE_CREDENTIALS_JSON not found")
+            if credentials_json:
+                try:
+                    logger.info("Using Google Sheets credentials from environment variable")
+                    credentials_data = json.loads(credentials_json)
+                    creds = Credentials.from_service_account_info(
+                        credentials_data, 
+                        scopes=['https://www.googleapis.com/auth/spreadsheets.readonly']
+                    )
+                except json.JSONDecodeError as e:
+                    logger.warning(f"⚠️ Invalid JSON in GOOGLE_CREDENTIALS_JSON: {e}")
+                    # Try to read from Render secret file path
+                    secret_file_path = os.getenv('GOOGLE_CREDENTIALS_FILE_PATH', '/etc/secrets/credentials.json')
+                    if os.path.exists(secret_file_path):
+                        logger.info(f"Using Google Sheets credentials from secret file: {secret_file_path}")
+                        creds = Credentials.from_service_account_file(
+                            secret_file_path, 
+                            scopes=['https://www.googleapis.com/auth/spreadsheets.readonly']
+                        )
+                    else:
+                        raise ValueError(f"❌ Secret file not found at: {secret_file_path}")
+            elif os.path.exists('credentials.json'):
+                logger.info("Using Google Sheets credentials from local file")
+                creds = Credentials.from_service_account_file(
+                    'credentials.json', 
+                    scopes=['https://www.googleapis.com/auth/spreadsheets.readonly']
+                )
+            else:
+                raise ValueError("❌ GOOGLE_CREDENTIALS_JSON not found and no credentials.json file")
             
-            credentials_data = json.loads(credentials_json)
-            creds = Credentials.from_service_account_info(
-                credentials_data, 
-                scopes=['https://www.googleapis.com/auth/spreadsheets.readonly']
-            )
             self.service = build('sheets', 'v4', credentials=creds)
             logger.info("✅ Google Sheets connected successfully")
         except Exception as e:
@@ -698,8 +734,11 @@ class TelegramBot:
             logger.info("💾 Persistent logging: %s", "✅ Yes" if persistent_logger.service else "❌ No")
             logger.info("Press Ctrl+C to stop the bot")
             
+            # Use the correct polling method for python-telegram-bot v20+
             await self.application.updater.start_polling(drop_pending_updates=True)
-            await asyncio.Future()  # Run forever
+            
+            # Keep the application running
+            await self.application.updater.idle()
             
         except KeyboardInterrupt:
             logger.info("🛑 Bot stopped by user")
