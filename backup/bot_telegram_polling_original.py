@@ -381,7 +381,7 @@ class TelegramBot:
             user = update.effective_user
             message_text = update.message.text.strip()
             
-            logger.info(f"� Processing message from {user.first_name} in {chat.type}: '{message_text}'")
+            logger.info(f"📨 Processing message from {user.first_name} in {chat.type}: '{message_text}'")
             
             # Determine if message should be processed
             is_addressed_to_bot = False

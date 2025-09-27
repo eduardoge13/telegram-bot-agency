@@ -1,8 +1,62 @@
-# ignore
+# Sensitive files
 credentials.json
 .env
-venv/pyvenv.cfg
-venv/Lib/site-packages/distutils-precedence.pth
+telegram_dev_token.txt
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Local development files
+.python-version
 venv/Lib/site-packages/google_auth_httplib2.py
 venv/Lib/site-packages/typing_extensions.py
 venv/Lib/site-packages/MarkupSafe-3.0.2.dist-info/INSTALLER
@@ -6639,3 +6693,5 @@ venv/Lib/site-packages/tzlocal-5.3.1.dist-info/RECORD
 venv/Lib/site-packages/tzlocal-5.3.1.dist-info/top_level.txt
 venv/Lib/site-packages/tzlocal-5.3.1.dist-info/WHEEL
 venv/Scripts/httpx.exe
+telegram_dev_token.txt
+__pycache__/bot_telegram_polling.cpython-313.pyc
