@@ -2,6 +2,13 @@
 credentials.json
 .env
 telegram_dev_token.txt
+dev_config.env
+
+# Production setup (keep structure, ignore credentials)
+prod_setup/telegram_prod_token.txt
+prod_setup/telegram_bot_production.json
+prod_setup/prod_config.env
+prod_setup/prod_config.txt
 
 # Virtual environments
 venv/
@@ -6695,3 +6702,4 @@ venv/Lib/site-packages/tzlocal-5.3.1.dist-info/WHEEL
 venv/Scripts/httpx.exe
 telegram_dev_token.txt
 __pycache__/bot_telegram_polling.cpython-313.pyc
+telegram_bot_production.json
