@@ -139,6 +139,90 @@ class PersistentLogger:
         except Exception as e:
             logger.error(f"❌ Error saving to persistent log: {e}")
             return False
+    
+    def get_recent_logs(self, limit: int = 50) -> List[List[str]]:
+        """Get recent logs from Google Sheets"""
+        if not self.service or not self.logs_sheet_id:
+            return []
+        
+        try:
+            result = self.service.spreadsheets().values().get(
+                spreadsheetId=self.logs_sheet_id,
+                range='Sheet1!A:I'
+            ).execute()
+            
+            values = result.get('values', [])
+            if len(values) <= 1:  # Only headers or empty
+                return []
+            
+            # Return last N entries (excluding header)
+            data_rows = values[1:]  # Skip header
+            return data_rows[-limit:] if len(data_rows) > limit else data_rows
+            
+        except Exception as e:
+            logger.error(f"❌ Error al leer logs persistentes: {e}")
+            return []
+    
+    def get_stats_from_logs(self) -> Dict[str, Any]:
+        """Get usage statistics from persistent logs"""
+        if not self.service or not self.logs_sheet_id:
+            return {}
+        
+        try:
+            # Get today's date
+            today = date.today().strftime('%Y-%m-%d')
+            
+            # Get all logs
+            result = self.service.spreadsheets().values().get(
+                spreadsheetId=self.logs_sheet_id,
+                range='Sheet1!A:I'
+            ).execute()
+            
+            values = result.get('values', [])
+            if len(values) <= 1:
+                return {'total_logs': 0, 'today_logs': 0}
+            
+            data_rows = values[1:]  # Skip header
+            today_logs = []
+            search_logs = []
+            users_today = set()
+            groups_today = set()
+            
+            for row in data_rows:
+                if len(row) >= 5:  # Minimum required columns
+                    timestamp = row[0]
+                    action = row[4] if len(row) > 4 else ""
+                    user_id = row[2] if len(row) > 2 else ""
+                    chat_type = row[6] if len(row) > 6 else ""
+                    
+                    # Count today's activity
+                    if today in timestamp:
+                        today_logs.append(row)
+                        if user_id:
+                            users_today.add(user_id)
+                        if "Group" in chat_type:
+                            groups_today.add(chat_type)
+                    
+                    # Count searches
+                    if "SEARCH" in action:
+                        search_logs.append(row)
+            
+            successful_searches = len([log for log in search_logs if len(log) > 8 and log[8] == "SUCCESS"])
+            failed_searches = len([log for log in search_logs if len(log) > 8 and log[8] == "FAILURE"])
+            
+            return {
+                'total_logs': len(data_rows),
+                'today_logs': len(today_logs),
+                'total_searches': len(search_logs),
+                'successful_searches': successful_searches,
+                'failed_searches': failed_searches,
+                'unique_users_today': len(users_today),
+                'active_groups_today': len(groups_today)
+            }
+            
+        except Exception as e:
+            logger.error(f"❌ Error getting stats from persistent logs: {e}")
+            return {}
 
 class EnhancedUserActivityLogger:
     """Enhanced logger with persistent storage"""
@@ -375,6 +459,151 @@ class TelegramBot:
             logger.error(f"Error in start_command: {e}")
             await update.message.reply_text("❌ Error interno del bot.")
     
+    async def help_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Handle /help command"""
+        chat = update.effective_chat
+        
+        # Log the action
+        EnhancedUserActivityLogger.log_user_action(update, "HELP_COMMAND")
+        
+        help_message = (
+            "📖 **Ayuda de Client Data Bot**\n\n"
+            "**Buscar clientes:**\n"
+            "• **En chat privado:** Simplemente envía el número de cliente.\n"
+            "• **En grupos:** Menciona al bot (`@username_del_bot 12345`) o responde a un mensaje del bot con el número.\n\n"
+            "**Comandos disponibles:**\n"
+            "• `/start` - Mensaje de bienvenida.\n"
+            "• `/help` - Muestra esta ayuda.\n"
+            "• `/info` - Muestra información sobre la base de datos.\n"
+            "• `/status` - Verifica el estado del bot y la conexión.\n"
+            "• `/whoami` - Muestra tu información de Telegram.\n"
+            "• `/stats` - Muestra estadísticas de uso (autorizado).\n"
+            "• `/plogs` - Muestra los últimos logs de actividad (autorizado)."
+        )
+        await update.message.reply_text(help_message, parse_mode='Markdown')
+    
+    async def info_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Show spreadsheet information"""
+        # Log the action
+        EnhancedUserActivityLogger.log_user_action(update, "INFO_COMMAND")
+        
+        info = self.sheet_info
+        
+        message = (
+            "📋 **Spreadsheet Information:**\n\n"
+            f"📊 **Total clients:** {info['total_clients']}\n"
+            f"🔍 **Search column:** {info['client_column']}\n\n"
+            f"**Available fields:**\n"
+        )
+        
+        if info['headers']:
+            for i, header in enumerate(info['headers'][:10], 1):  # Show first 10 headers
+                message += f"• {header}\n"
+            
+            if len(info['headers']) > 10:
+                message += f"• ... and {len(info['headers']) - 10} more fields\n"
+        else:
+            message += "• No headers found\n"
+        
+        message += f"\n💡 Send any client number to search!"
+        
+        await update.message.reply_text(message, parse_mode='Markdown')
+    
+    async def status_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Check bot and system status"""
+        # Log the action
+        EnhancedUserActivityLogger.log_user_action(update, "STATUS_COMMAND")
+        
+        try:
+            # Test Google Sheets connection
+            test_info = self.sheets_manager.get_sheet_info()
+            sheets_status = "✅ Connected"
+        except:
+            sheets_status = "❌ Disconnected"
+        
+        # Test persistent logging
+        try:
+            persistent_logger.get_recent_logs(limit=1)
+            logs_status = "✅ Working"
+        except:
+            logs_status = "❌ Error"
+        
+        status_message = (
+            "🔍 **Bot Status:**\n\n"
+            f"🤖 **Bot:** ✅ Running\n"
+            f"📊 **Google Sheets:** {sheets_status}\n"
+            f"📝 **Persistent Logs:** {logs_status}\n"
+            f"📋 **Total clients:** {self.sheet_info.get('total_clients', 'Unknown')}\n\n"
+            f"🚀 **Ready to search!**"
+        )
+        
+        await update.message.reply_text(status_message, parse_mode='Markdown')
+    
+    async def whoami_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Show user information"""
+        EnhancedUserActivityLogger.log_user_action(update, "WHOAMI_COMMAND")
+        
+        user = update.effective_user
+        auth_status = "✅ Sí" if self._is_authorized_user(user.id) else "❌ No"
+        
+        user_info = (
+            f"👤 **Tu Información:**\n\n"
+            f"🆔 **User ID:** `{user.id}`\n"
+            f"👤 **Nombre:** {user.first_name} {user.last_name or ''}\n"
+            f"📱 **Username:** @{user.username or 'No tienes'}\n"
+            f"🔑 **Autorizado:** {auth_status}"
+        )
+        
+        await update.message.reply_text(user_info, parse_mode='Markdown')
+    
+    async def stats_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Show usage statistics (authorized users only)"""
+        EnhancedUserActivityLogger.log_user_action(update, "STATS_COMMAND")
+        
+        if not self._is_authorized_user(update.effective_user.id):
+            await update.message.reply_text("⛔ No estás autorizado para ver las estadísticas.")
+            return
+        
+        stats = persistent_logger.get_stats_from_logs()
+        if not stats:
+            await update.message.reply_text("No hay estadísticas disponibles.")
+            return
+        
+        stats_message = (
+            f"📈 **Estadísticas de Uso:**\n\n"
+            f"📊 **Logs totales:** {stats.get('total_logs', 0)}\n"
+            f"📅 **Actividad de hoy:** {stats.get('today_logs', 0)}\n\n"
+            f"🔍 **Búsquedas Totales:** {stats.get('total_searches', 0)}\n"
+            f"  - ✅ Exitosas: {stats.get('successful_searches', 0)}\n"
+            f"  - ❌ Fallidas: {stats.get('failed_searches', 0)}\n\n"
+            f"👥 **Actividad de Hoy:**\n"
+            f"  - Usuarios únicos: {stats.get('unique_users_today', 0)}\n"
+            f"  - Grupos activos: {stats.get('active_groups_today', 0)}"
+        )
+        
+        await update.message.reply_text(stats_message, parse_mode='Markdown')
+    
+    async def persistent_logs_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Show recent persistent logs (authorized users only)"""
+        EnhancedUserActivityLogger.log_user_action(update, "PLOGS_COMMAND")
+        
+        if not self._is_authorized_user(update.effective_user.id):
+            await update.message.reply_text("⛔ No estás autorizado para ver los logs persistentes.")
+            return
+        
+        logs = persistent_logger.get_recent_logs()
+        if not logs:
+            await update.message.reply_text("No se encontraron logs persistentes.")
+            return
+        
+        log_message = "📝 **Últimos 20 Logs Persistentes:**\n\n```\n"
+        for entry in logs:
+            if isinstance(entry, list) and len(entry) >= 5:
+                log_message += f"{entry[0]:<16} | {entry[1]:<15} | {entry[4]}\n"
+        log_message += "```"
+        
+        await update.message.reply_text(log_message, parse_mode='Markdown')
+    
     async def handle_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         try:
             chat = update.effective_chat
@@ -467,7 +696,14 @@ class TelegramBot:
                 pass
     
     def setup_handlers(self):
+        # Command handlers
         self.application.add_handler(CommandHandler("start", self.start_command))
+        self.application.add_handler(CommandHandler("help", self.help_command))
+        self.application.add_handler(CommandHandler("info", self.info_command))
+        self.application.add_handler(CommandHandler("status", self.status_command))
+        self.application.add_handler(CommandHandler("whoami", self.whoami_command))
+        self.application.add_handler(CommandHandler("stats", self.stats_command))
+        self.application.add_handler(CommandHandler("plogs", self.persistent_logs_command))
         
         # More efficient message handling
         # 1. Private chats (any text)
