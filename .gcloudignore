@@ -1,0 +1,23 @@
+# Files to ignore when deploying with gcloud
+.git/
+.gitignore
+.gcloudignore
+# Local environment and credentials
+credentials.json
+.env
+telegram_dev_token.txt
+
+# Development directories and backups
+backup/
+prod_setup/
+tests/
+logs/
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+*.so
+*.egg-info/
+
+# OS
+.DS_Store

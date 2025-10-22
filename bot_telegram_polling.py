@@ -10,7 +10,9 @@ import sys
 import json
 import time
 import pytz
+import re
 from typing import Dict, Any, Optional, List, Tuple
+from collections import OrderedDict
 from datetime import datetime, date
 
 # Load environment variables
@@ -34,8 +36,14 @@ MEXICO_CITY_TZ = pytz.timezone("America/Mexico_City")
 logger = logging.getLogger(__name__)
 
 def setup_logging():
+    # Allow enabling DEBUG via environment variable DEBUG=1 or DEBUG=true
+    log_level = logging.INFO
+    debug_env = os.getenv('DEBUG', '').lower()
+    if debug_env in ('1', 'true', 'yes'):
+        log_level = logging.DEBUG
+
     logging.basicConfig(
-        level=logging.INFO,
+        level=log_level,
         format='[%(asctime)s] %(levelname)s | %(name)s | %(message)s',
         handlers=[logging.StreamHandler(sys.stdout)]
     )
@@ -230,43 +238,51 @@ class EnhancedUserActivityLogger:
     @staticmethod
     def log_user_action(update: Update, action: str, details: str = "", client_number: str = "", success: str = ""):
         """Log user actions with local AND persistent storage"""
-        user = update.effective_user
-        chat = update.effective_chat
+        user = getattr(update, 'effective_user', None)
+        chat = getattr(update, 'effective_chat', None)
         timestamp = datetime.now(MEXICO_CITY_TZ).strftime('%Y-%m-%d %H:%M:%S')
-        
-        # Determine chat type
-        chat_type = "Private" if chat.type == Chat.PRIVATE else f"Group ({chat.title})"
-        
+
+        # Determine chat type safely
+        chat_type = "Private" if getattr(chat, 'type', None) == Chat.PRIVATE else f"Group ({getattr(chat, 'title', '')})"
+
+        # Safe user fields
+        uname = getattr(user, 'username', None) or 'NoUsername'
+        first = getattr(user, 'first_name', '')
+        last = getattr(user, 'last_name', '')
+        uid = getattr(user, 'id', 'unknown')
+
         # Create log message for local logging
         log_msg = (
-            f"USER: @{user.username or 'NoUsername'} ({user.first_name} {user.last_name or ''}) "
-            f"| ID: {user.id} | CHAT: {chat_type} | ACTION: {action}"
+            f"USER: @{uname} ({first} {last or ''}) | ID: {uid} | CHAT: {chat_type} | ACTION: {action}"
         )
-        
+
         if details:
             log_msg += f" | DETAILS: {details}"
-        
+
         if client_number:
             log_msg += f" | CLIENT: {client_number}"
-        
+
         if success:
             log_msg += f" | RESULT: {success}"
-        
+
         # Log locally
         logger.info(log_msg)
-        
-        # Log persistently to Google Sheets
-        persistent_logger.log_to_sheets(
-            timestamp=timestamp,
-            level="INFO",
-            user_id=str(user.id),
-            username=f"@{user.username or 'NoUsername'} ({user.first_name})",
-            action=action,
-            details=details,
-            chat_type=chat_type,
-            client_number=client_number,
-            success=success
-        )
+
+        # Log persistently to Google Sheets (safe user fields)
+        try:
+            persistent_logger.log_to_sheets(
+                timestamp=timestamp,
+                level="INFO",
+                user_id=str(uid),
+                username=f"@{uname} ({first})",
+                action=action,
+                details=details,
+                chat_type=chat_type,
+                client_number=client_number,
+                success=success
+            )
+        except Exception:
+            logger.debug("Failed to write persistent log; continuing")
     
     @staticmethod
     def log_system_event(event: str, details: str = ""):
@@ -296,9 +312,25 @@ class GoogleSheetsManager:
         self.headers = []
         self.client_column = 0
         self.spreadsheet_id = os.getenv('SPREADSHEET_ID')
+        # In-memory index: normalized_client_number -> row dict
+        # Lightweight index: phone -> row number (int)
+        self.index_phone_to_row: Dict[str, int] = {}
+        self.index_timestamp = 0
+        self.index_ttl = int(os.getenv('INDEX_TTL_SECONDS', '600'))  # default 10 minutes
+        # Row cache (LRU) to avoid re-reading frequently used rows
+        self.row_cache: OrderedDict = OrderedDict()
+        # Default row cache reduced for small-memory Cloud Run instances (512Mi)
+        self.row_cache_size = int(os.getenv('ROW_CACHE_SIZE', '200'))
+        # Minimum digits for client number (consistency with TelegramBot)
+        self.min_client_digits = int(os.getenv('MIN_CLIENT_NUMBER_LENGTH', '3'))
         self._authenticate()
         if self.service:
             self._find_client_column()
+            # Attempt to load index at startup (best-effort)
+            try:
+                self.load_index()
+            except Exception as e:
+                logger.warning(f"⚠️ Could not load index at startup: {e}")
     
     def _authenticate(self):
         try:
@@ -347,40 +379,159 @@ class GoogleSheetsManager:
             logger.info("📋 Using first column as client column by default")
         except Exception as e:
             logger.error(f"❌ Error finding client column: {e}")
+
+    def _normalize_phone(self, raw: str) -> str:
+        if not raw:
+            return ""
+        # Keep only digits, remove leading zeros optionally
+        digits = ''.join(ch for ch in str(raw) if ch.isdigit())
+        return digits.lstrip('0') if digits else ''
+
+    def load_index(self):
+        """Load an in-memory index mapping normalized phone -> row dict.
+
+        This reads the sheet once and builds a dictionary for O(1) lookups.
+        """
+        if not self.service or not self.spreadsheet_id:
+            logger.warning("⚠️ Cannot load index: Sheets service or spreadsheet ID missing")
+            return
+
+        # Read header row to get column names (assume simple 4-column sheet A:D)
+        result = self.service.spreadsheets().values().get(
+            spreadsheetId=self.spreadsheet_id,
+            range='Sheet1!A1:D1'
+        ).execute()
+        headers = result.get('values', [[]])[0]
+        if not headers:
+            logger.warning("⚠️ No headers found when loading index")
+            return
+
+            # For large sheets, avoid loading full rows into memory.
+            # We'll build a lightweight index: normalized_phone -> row_number
+            cache_path = f"/tmp/sheets_index_rows_{self.spreadsheet_id}.json"
+            try:
+                if os.path.exists(cache_path):
+                    with open(cache_path, 'r', encoding='utf-8') as f:
+                        cached = json.load(f)
+                    ts = cached.get('_ts', 0)
+                    if time.time() - ts < self.index_ttl:
+                        # load phone->row mapping
+                        self.index_phone_to_row = cached.get('index', {})
+                        self.index_timestamp = ts
+                        logger.info(f"✅ Loaded lightweight index from cache with {len(self.index_phone_to_row)} entries")
+                        return
+            except Exception:
+                logger.debug("No valid lightweight cache available, will rebuild index")
+
+            # Read only column A (phones) using values().get to minimize payload
+            result = self.service.spreadsheets().values().get(
+                spreadsheetId=self.spreadsheet_id,
+                range='Sheet1!A2:A'
+            ).execute()
+            phones = result.get('values', [])
+            index_map: Dict[str, int] = {}
+            # Phones correspond to rows starting at 2
+            for i, row in enumerate(phones, start=2):
+                raw_phone = row[0] if row and len(row) > 0 else ''
+                normalized = self._normalize_phone(raw_phone)
+                if normalized:
+                    index_map[normalized] = i
+
+            self.index_phone_to_row = index_map
+            self.index_timestamp = time.time()
+
+            # persist cache
+            try:
+                with open(cache_path, 'w', encoding='utf-8') as f:
+                    json.dump({'_ts': self.index_timestamp, 'index': self.index_phone_to_row}, f)
+                logger.info(f"✅ Lightweight index built with {len(self.index_phone_to_row)} entries (cached)")
+            except Exception:
+                logger.info(f"✅ Lightweight index built with {len(self.index_phone_to_row)} entries")
+
+    def _ensure_index(self):
+        now = time.time()
+        if not self.index_phone_to_row or (now - self.index_timestamp) > self.index_ttl:
+            try:
+                self.load_index()
+            except Exception as e:
+                logger.warning(f"⚠️ Failed to refresh index: {e}")
     
     def get_client_data(self, client_number: str) -> Optional[Dict[str, str]]:
-        if not self.service:
-            return None
-        
+        # Lightweight index lookup -> then fetch single row and cache it (LRU)
         try:
-            result = self.service.spreadsheets().values().get(
-                spreadsheetId=self.spreadsheet_id, 
-                range='Sheet1!A:Z'
-            ).execute()
-            
-            values = result.get('values', [])
-            if len(values) < 2:
+            self._ensure_index()
+            normalized = self._normalize_phone(client_number)
+            if not normalized:
                 return None
-            
-            for row_index, row in enumerate(values[1:], start=2):
-                if not row or len(row) <= self.client_column:
-                    continue
-                
-                cell_value = str(row[self.client_column]).strip().lower()
-                search_value = str(client_number).strip().lower()
-                
-                if cell_value == search_value:
-                    logger.info(f"✅ Found client at row {row_index}")
-                    
-                    client_data = {}
-                    for i, header in enumerate(self.headers):
-                        if i < len(row) and row[i].strip():
-                            client_data[header] = row[i].strip()
-                    
-                    return client_data
-            
-            logger.info(f"❌ Client '{client_number}' not found")
-            return None
+
+            row_num = self.index_phone_to_row.get(normalized)
+            if row_num:
+                # check row cache
+                if row_num in self.row_cache:
+                    # move to end (recent)
+                    entry = self.row_cache.pop(row_num)
+                    self.row_cache[row_num] = entry
+                    return entry
+
+                # fetch only the single row A:D
+                rng = f"Sheet1!A{row_num}:D{row_num}"
+                result = self.service.spreadsheets().values().get(
+                    spreadsheetId=self.spreadsheet_id,
+                    range=rng
+                ).execute()
+                values = result.get('values', [])
+                if not values:
+                    return None
+                row = values[0]
+                client_data = {}
+                # ensure headers exist
+                for i, hdr in enumerate(self.headers[:4]):
+                    client_data[hdr] = row[i].strip() if i < len(row) and row[i] is not None else ''
+
+                # update LRU cache
+                self.row_cache[row_num] = client_data
+                # evict if oversized
+                while len(self.row_cache) > self.row_cache_size:
+                    self.row_cache.popitem(last=False)
+
+                return client_data
+
+            # Fallback: rebuild the lightweight index and re-attempt lookup once.
+            # This is safer than scanning and avoids recursive calls / repeated scans.
+            try:
+                if not self.service:
+                    return None
+
+                logger.info("ℹ️ Client not found in index — rebuilding index and retrying")
+                self.load_index()
+                row_num = self.index_phone_to_row.get(normalized)
+                if not row_num:
+                    logger.info(f"❌ Client '{client_number}' not found after rebuilding index")
+                    return None
+
+                # If index now contains the row number, fetch the single row A:D
+                rng = f"Sheet1!A{row_num}:D{row_num}"
+                result = self.service.spreadsheets().values().get(
+                    spreadsheetId=self.spreadsheet_id,
+                    range=rng
+                ).execute()
+                values = result.get('values', [])
+                if not values:
+                    return None
+                row = values[0]
+                client_data = {}
+                for i, hdr in enumerate(self.headers[:4]):
+                    client_data[hdr] = row[i].strip() if i < len(row) and row[i] is not None else ''
+
+                # update LRU cache
+                self.row_cache[row_num] = client_data
+                while len(self.row_cache) > self.row_cache_size:
+                    self.row_cache.popitem(last=False)
+
+                return client_data
+            except Exception as e:
+                logger.error(f"❌ Error during fallback index rebuild: {e}")
+                return None
         except Exception as e:
             logger.error(f"❌ Error searching for client: {e}")
             return None
@@ -417,18 +568,113 @@ class TelegramBot:
             raise ValueError("❌ GCP_PROJECT_ID not found in environment variables")
         
         logger.info("🔧 Fetching Telegram bot token from Secret Manager...")
-        self.token = get_secret(project_id, 'telegram-bot-token')
+        # Prefer an explicit env var (convenient for dev deploys). Fall back to Secret Manager.
+        self.token = os.getenv('TELEGRAM_BOT_TOKEN')
         if not self.token:
-            logger.error("❌ Could not fetch 'telegram-bot-token' from Secret Manager")
-            raise ValueError("❌ Could not fetch 'telegram-bot-token' from Secret Manager")
+            logger.info("🔧 TELEGRAM_BOT_TOKEN env var not set, fetching from Secret Manager 'telegram-bot-token'...")
+            self.token = get_secret(project_id, 'telegram-bot-token')
+        if not self.token:
+            logger.error("❌ Telegram bot token not provided (env or secret)")
+            raise ValueError("❌ Telegram bot token not provided (env or secret)")
         
         logger.info("🔧 Token retrieved successfully, initializing Google Sheets manager...")
         self.sheets_manager = GoogleSheetsManager()
         self.sheet_info = self.sheets_manager.get_sheet_info()
         self.application = None
         self.bot_info = None  # To cache bot info
-        
+        # In-memory deduplication store to avoid processing duplicate messages
+        self.recent_messages: Dict[str, float] = {}
+        self.dedupe_window = int(os.getenv('DEDUP_WINDOW_SECONDS', '30'))
+        # Minimum length for a recognized client number (in digits)
+        self.min_client_digits = int(os.getenv('MIN_CLIENT_NUMBER_LENGTH', '3'))
+
         logger.info("✅ Bot initialized successfully")
+
+    async def _ensure_bot_info(self, context: ContextTypes.DEFAULT_TYPE):
+        """Ensure self.bot_info is populated (best-effort)."""
+        if self.bot_info:
+            return
+        try:
+            self.bot_info = await context.bot.get_me()
+        except Exception:
+            logger.debug("Could not fetch bot info via get_me()")
+
+    def _is_mentioned_in_message(self, message) -> bool:
+        """Check entities and caption_entities for a mention of the bot username.
+
+        Note: this requires `self.bot_info` to be set (username available).
+        """
+        if not message or not self.bot_info or not getattr(self.bot_info, 'username', None):
+            return False
+
+        bot_username = self.bot_info.username.lower()
+
+        entities_sources = []
+        if getattr(message, 'entities', None):
+            entities_sources.append((message.entities, message.text or ""))
+        if getattr(message, 'caption_entities', None):
+            entities_sources.append((message.caption_entities, message.caption or ""))
+
+        for ents, text in entities_sources:
+            try:
+                for ent in ents:
+                    if ent.type == 'mention':
+                        start, end = ent.offset, ent.offset + ent.length
+                        mention_text = text[start:end]
+                        if mention_text.lower() == f"@{bot_username}":
+                            return True
+            except Exception:
+                continue
+
+        # Fallback: raw text contains @username
+        raw = (message.text or message.caption or "").lower()
+        return f"@{bot_username}" in raw
+
+    def _extract_client_number(self, text: str) -> str:
+        if not text:
+            return ""
+        matches = re.findall(r"(\d+)", text)
+        for m in matches:
+            if len(m) >= self.min_client_digits:
+                return m
+        return ""
+
+    async def _addressed_and_processed_text(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> Tuple[bool, str]:
+        """Return (is_addressed, processed_text).
+
+        Handles private chats, mentions (via entities), and replies to bot messages.
+        """
+        chat = update.effective_chat
+        message = update.message
+
+        # Private chat: always addressed
+        if chat and chat.type == Chat.PRIVATE:
+            raw_text = (message.text or message.caption) if message is not None else ""
+            return True, (raw_text or "").strip()
+
+        # Group chat: detect mention or replies
+        if chat and chat.type in [Chat.GROUP, Chat.SUPERGROUP]:
+            await self._ensure_bot_info(context)
+
+            # Mention via entities/caption_entities
+            try:
+                if self._is_mentioned_in_message(message):
+                    processed = (message.text or message.caption or "")
+                    if self.bot_info and getattr(self.bot_info, 'username', None):
+                        processed = re.sub(fr"@{re.escape(self.bot_info.username)}", "", processed, flags=re.IGNORECASE)
+                    return True, processed.strip()
+            except Exception:
+                logger.debug("Mention detection failed")
+
+            # Reply to a bot message
+            try:
+                if message and getattr(message, 'reply_to_message', None) and getattr(message.reply_to_message, 'from_user', None) and self.bot_info and getattr(message.reply_to_message.from_user, 'id', None) == self.bot_info.id:
+                    raw_text = (message.text or message.caption or "")
+                    return True, (raw_text or "").strip()
+            except Exception:
+                logger.debug("Reply detection failed")
+
+        return False, ""
     
     def _is_authorized_user(self, user_id: int) -> bool:
         authorized_users = os.getenv('AUTHORIZED_USERS', '').split(',')
@@ -436,12 +682,12 @@ class TelegramBot:
     
     async def start_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         try:
-            user = update.effective_user
+            user = getattr(update, 'effective_user', None)
             
             # Log the action
             EnhancedUserActivityLogger.log_user_action(update, "START_COMMAND")
             
-            if update.effective_chat.type == Chat.PRIVATE:
+            if getattr(update, 'effective_chat', None) and getattr(update.effective_chat, 'type', None) == Chat.PRIVATE:
                 msg = (
                     f"👋 ¡Hola {user.first_name}! Bienvenido a **Client Data Bot**.\n\n"
                     "Envíame un número de cliente y te daré su información.\n\n"
@@ -454,10 +700,23 @@ class TelegramBot:
                     "Ejemplo: @mi_bot_username 12345"
                 )
             
-            await update.message.reply_text(msg, parse_mode='Markdown')
+            try:
+                await getattr(update, 'message', None).reply_text(msg, parse_mode='Markdown')
+            except Exception:
+                # Best-effort: send via context.bot
+                try:
+                    await context.bot.send_message(chat_id=update.effective_chat.id, text=msg, parse_mode='Markdown')
+                except Exception:
+                    logger.debug('Failed to send start message')
         except Exception as e:
             logger.error(f"Error in start_command: {e}")
-            await update.message.reply_text("❌ Error interno del bot.")
+            try:
+                await getattr(update, 'message', None).reply_text("❌ Error interno del bot.")
+            except Exception:
+                try:
+                    await context.bot.send_message(chat_id=getattr(update.effective_chat, 'id', None), text="❌ Error interno del bot.")
+                except Exception:
+                    logger.debug('Failed to notify user of internal error')
     
     async def help_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Handle /help command"""
@@ -608,39 +867,42 @@ class TelegramBot:
         try:
             chat = update.effective_chat
             user = update.effective_user
-            message_text = update.message.text.strip()
-            
-            logger.info(f"� Processing message from {user.first_name} in {chat.type}: '{message_text}'")
-            
-            # Determine if message should be processed
-            is_addressed_to_bot = False
-            message_to_process = ""
-            
-            if chat.type == Chat.PRIVATE:
-                is_addressed_to_bot = True
-                message_to_process = message_text
-            elif chat.type in [Chat.GROUP, Chat.SUPERGROUP]:
-                if not self.bot_info:
-                    self.bot_info = await context.bot.get_me()
-                
-                bot_username = self.bot_info.username.lower() if self.bot_info.username else ""
-                
-                # Check for mention
-                if f"@{bot_username}" in message_text.lower():
-                    is_addressed_to_bot = True
-                    message_to_process = message_text.lower().replace(f"@{bot_username}", "").strip()
-                # Check for reply
-                elif (update.message.reply_to_message and 
-                      update.message.reply_to_message.from_user.id == self.bot_info.id):
-                    is_addressed_to_bot = True
-                    message_to_process = message_text
-            
+            # Use helper to determine if message is addressed and get processed text
+            is_addressed_to_bot, message_to_process = await self._addressed_and_processed_text(update, context)
+
+            # Raw message text for logging/dedupe fallback
+            raw_text = ""
+            if update.message is not None:
+                raw_text = update.message.text or update.message.caption or ""
+
+            logger.info("Processing message from %s in %s: '%s'", user.first_name if user else 'Unknown', chat.type if chat else 'Unknown', (message_to_process or raw_text))
+
             if not is_addressed_to_bot:
-                # This case should ideally not be hit if filters are set up correctly
                 return
-            
+
+            # Deduplication: avoid processing the same user+chat+text repeatedly within a short window
+            try:
+                dedupe_text = message_to_process or raw_text
+                key = f"{chat.id}:{user.id}:{dedupe_text}"
+                now_ts = time.time()
+                # Clean old entries opportunistically
+                self.recent_messages = {k: v for k, v in self.recent_messages.items() if now_ts - v < self.dedupe_window}
+                if key in self.recent_messages and now_ts - self.recent_messages[key] < self.dedupe_window:
+                    logger.info("Ignoring duplicate message from %s in chat %s", user.id, chat.id)
+                    return
+                self.recent_messages[key] = now_ts
+            except Exception:
+                logger.debug("Dedupe check failed, continuing")
+
             # Extract client number
-            client_number = ''.join(filter(str.isdigit, message_to_process))
+            # Log original and attempt extraction for debugging
+            original_text_for_log = message_to_process or raw_text
+            logger.debug("Message original: %s", original_text_for_log)
+            extracted_raw = self._extract_client_number(message_to_process)
+            normalized_for_search = self._normalize_phone(extracted_raw)
+            logger.debug("Extracted number: %s | Normalized for search: %s", extracted_raw, normalized_for_search)
+
+            client_number = extracted_raw
             
             if not client_number:
                 # Only reply if the bot was directly addressed but no number was found
@@ -655,7 +917,7 @@ class TelegramBot:
             client_data = self.sheets_manager.get_client_data(client_number)
             
             if client_data:
-                # Log successful search
+                # Log successful search (user-facing persistent log)
                 EnhancedUserActivityLogger.log_user_action(update, "SEARCH", f"Client: {client_number}, Fields: {len(client_data)}", client_number, "SUCCESS")
                 
                 response = f"✅ **Cliente encontrado: `{client_number}`**\n\n"
@@ -680,8 +942,8 @@ class TelegramBot:
                     reply_to_message_id=update.message.message_id
                 )
             else:
-                # Log failed search
-                EnhancedUserActivityLogger.log_user_action(update, "SEARCH", f"Client: {client_number}, Not found", client_number, "FAILURE")
+                # Log failed search (include normalized value for debugging)
+                EnhancedUserActivityLogger.log_user_action(update, "SEARCH", f"Client: {client_number}, Not found (normalized: {self._normalize_phone(client_number)})", client_number, "FAILURE")
                 
                 await update.message.reply_text(
                     f"❌ No se encontró información para el cliente: `{client_number}`",
