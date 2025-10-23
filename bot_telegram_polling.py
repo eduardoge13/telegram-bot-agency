@@ -9,6 +9,8 @@ import asyncio
 import sys
 import json
 import time
+import threading
+import asyncio
 import pytz
 import re
 from typing import Dict, Any, Optional, List, Tuple
@@ -147,6 +149,14 @@ class PersistentLogger:
         except Exception as e:
             logger.error(f"❌ Error saving to persistent log: {e}")
             return False
+
+    def log_to_sheets_async(self, *args, **kwargs):
+        # Fire-and-forget wrapper to avoid blocking handlers
+        try:
+            t = threading.Thread(target=self.log_to_sheets, args=args, kwargs=kwargs, daemon=True)
+            t.start()
+        except Exception:
+            logger.debug('Failed to start persistent logging thread')
     
     def get_recent_logs(self, limit: int = 50) -> List[List[str]]:
         """Get recent logs from Google Sheets"""
@@ -324,6 +334,12 @@ class GoogleSheetsManager:
         # Minimum digits for client number (consistency with TelegramBot)
         self.min_client_digits = int(os.getenv('MIN_CLIENT_NUMBER_LENGTH', '3'))
         self._authenticate()
+        # Lock protecting index map and timestamp
+        self._index_lock = threading.Lock()
+        # Lock protecting row cache accesses
+        self._row_cache_lock = threading.Lock()
+        # Start background refresher thread to keep index warm
+        self._start_index_refresher()
         if self.service:
             self._find_client_column()
             # Attempt to load index at startup (best-effort)
@@ -331,6 +347,24 @@ class GoogleSheetsManager:
                 self.load_index()
             except Exception as e:
                 logger.warning(f"⚠️ Could not load index at startup: {e}")
+
+    def _start_index_refresher(self):
+        def refresher():
+            while True:
+                try:
+                    time.sleep(max(10, self.index_ttl))
+                    if self.service and self.spreadsheet_id:
+                        logger.debug('Index refresher: refreshing lightweight index')
+                        try:
+                            self.load_index()
+                        except Exception as e:
+                            logger.debug(f'Index refresher error: {e}')
+                except Exception:
+                    # keep loop alive
+                    time.sleep(5)
+
+        t = threading.Thread(target=refresher, daemon=True)
+        t.start()
     
     def _authenticate(self):
         try:
@@ -360,6 +394,12 @@ class GoogleSheetsManager:
     
     def _find_client_column(self):
         try:
+            if not self.spreadsheet_id:
+                logger.warning("⚠️ SPREADSHEET_ID not set. Skipping client column discovery.")
+                return
+            if not self.service:
+                logger.warning("⚠️ Sheets service not available. Skipping client column discovery.")
+                return
             result = self.service.spreadsheets().values().get(
                 spreadsheetId=self.spreadsheet_id,
                 range='Sheet1!1:1'
@@ -406,55 +446,85 @@ class GoogleSheetsManager:
             logger.warning("⚠️ No headers found when loading index")
             return
 
-            # For large sheets, avoid loading full rows into memory.
-            # We'll build a lightweight index: normalized_phone -> row_number
-            cache_path = f"/tmp/sheets_index_rows_{self.spreadsheet_id}.json"
-            try:
-                if os.path.exists(cache_path):
-                    with open(cache_path, 'r', encoding='utf-8') as f:
-                        cached = json.load(f)
-                    ts = cached.get('_ts', 0)
-                    if time.time() - ts < self.index_ttl:
-                        # load phone->row mapping
+        # For large sheets, avoid loading full rows into memory.
+        # We'll build a lightweight index: normalized_phone -> row_number
+        cache_path = f"/tmp/sheets_index_rows_{self.spreadsheet_id}.json"
+        try:
+            if os.path.exists(cache_path):
+                with open(cache_path, 'r', encoding='utf-8') as f:
+                    cached = json.load(f)
+                ts = cached.get('_ts', 0)
+                if time.time() - ts < self.index_ttl:
+                    # load phone->row mapping
+                    with self._index_lock:
                         self.index_phone_to_row = cached.get('index', {})
                         self.index_timestamp = ts
-                        logger.info(f"✅ Loaded lightweight index from cache with {len(self.index_phone_to_row)} entries")
-                        return
-            except Exception:
-                logger.debug("No valid lightweight cache available, will rebuild index")
+                    logger.info(f"✅ Loaded lightweight index from cache with {len(self.index_phone_to_row)} entries")
+                    return
+        except Exception:
+            logger.debug("No valid lightweight cache available, will rebuild index")
 
-            # Read only column A (phones) using values().get to minimize payload
+        # Determine which column to use for phones (default to A)
+        try:
+            col_idx = self.client_column if hasattr(self, 'client_column') and self.client_column is not None else 0
+            # clamp
+            if col_idx < 0:
+                col_idx = 0
+            column_letter = chr(ord('A') + int(col_idx))
+        except Exception:
+            column_letter = 'A'
+
+        # Read only the detected column (phones) to minimize payload
+        try:
             result = self.service.spreadsheets().values().get(
                 spreadsheetId=self.spreadsheet_id,
-                range='Sheet1!A2:A'
+                range=f'Sheet1!{column_letter}2:{column_letter}'
             ).execute()
-            phones = result.get('values', [])
-            index_map: Dict[str, int] = {}
-            # Phones correspond to rows starting at 2
-            for i, row in enumerate(phones, start=2):
-                raw_phone = row[0] if row and len(row) > 0 else ''
-                normalized = self._normalize_phone(raw_phone)
-                if normalized:
-                    index_map[normalized] = i
+        except Exception as e:
+            logger.error(f"❌ Error reading phone column '{column_letter}': {e}")
+            return
 
+        phones = result.get('values', [])
+        index_map: Dict[str, int] = {}
+        # Phones correspond to rows starting at 2
+        for i, row in enumerate(phones, start=2):
+            raw_phone = row[0] if row and len(row) > 0 else ''
+            normalized = self._normalize_phone(raw_phone)
+            if normalized:
+                index_map[normalized] = i
+
+        with self._index_lock:
             self.index_phone_to_row = index_map
             self.index_timestamp = time.time()
 
-            # persist cache
+        # persist cache
+        try:
             try:
                 with open(cache_path, 'w', encoding='utf-8') as f:
                     json.dump({'_ts': self.index_timestamp, 'index': self.index_phone_to_row}, f)
-                logger.info(f"✅ Lightweight index built with {len(self.index_phone_to_row)} entries (cached)")
             except Exception:
-                logger.info(f"✅ Lightweight index built with {len(self.index_phone_to_row)} entries")
+                pass
+            logger.info(f"✅ Lightweight index built with {len(self.index_phone_to_row)} entries (cached)")
+        except Exception:
+            logger.info(f"✅ Lightweight index built with {len(self.index_phone_to_row)} entries")
 
     def _ensure_index(self):
         now = time.time()
-        if not self.index_phone_to_row or (now - self.index_timestamp) > self.index_ttl:
-            try:
+        # Only trigger a synchronous reload if index is empty; otherwise rely on
+        # background refresher to keep it warm to avoid blocking request handlers.
+        try:
+            with self._index_lock:
+                empty = not bool(self.index_phone_to_row)
+                stale = (now - self.index_timestamp) > self.index_ttl
+
+            if empty:
+                # synchronous build required
                 self.load_index()
-            except Exception as e:
-                logger.warning(f"⚠️ Failed to refresh index: {e}")
+            elif stale:
+                # let background refresher update soon; don't block
+                logger.debug('Index is stale; background refresher will update it')
+        except Exception as e:
+            logger.warning(f"⚠️ Failed to check/refresh index: {e}")
     
     def get_client_data(self, client_number: str) -> Optional[Dict[str, str]]:
         # Lightweight index lookup -> then fetch single row and cache it (LRU)
@@ -463,14 +533,15 @@ class GoogleSheetsManager:
             normalized = self._normalize_phone(client_number)
             if not normalized:
                 return None
-
-            row_num = self.index_phone_to_row.get(normalized)
+            with self._index_lock:
+                row_num = self.index_phone_to_row.get(normalized)
             if row_num:
                 # check row cache
                 if row_num in self.row_cache:
                     # move to end (recent)
-                    entry = self.row_cache.pop(row_num)
-                    self.row_cache[row_num] = entry
+                    with self._row_cache_lock:
+                        entry = self.row_cache.pop(row_num)
+                        self.row_cache[row_num] = entry
                     return entry
 
                 # fetch only the single row A:D
@@ -489,12 +560,34 @@ class GoogleSheetsManager:
                     client_data[hdr] = row[i].strip() if i < len(row) and row[i] is not None else ''
 
                 # update LRU cache
-                self.row_cache[row_num] = client_data
-                # evict if oversized
-                while len(self.row_cache) > self.row_cache_size:
-                    self.row_cache.popitem(last=False)
+                with self._row_cache_lock:
+                    self.row_cache[row_num] = client_data
+                    # evict if oversized
+                    while len(self.row_cache) > self.row_cache_size:
+                        self.row_cache.popitem(last=False)
 
                 return client_data
+
+            # Fallback: attempt suffix matching before rebuilding the index.
+            # This helps when sheet stores numbers with country code or extra prefixes.
+            try:
+                with self._index_lock:
+                    idx_copy = dict(self.index_phone_to_row)
+                if idx_copy:
+                    # find best suffix match (longest match)
+                    best_match_row = None
+                    best_match_len = 0
+                    for k, rn in idx_copy.items():
+                        if k.endswith(normalized) and len(normalized) <= len(k):
+                            match_len = len(normalized)
+                            if match_len > best_match_len:
+                                best_match_len = match_len
+                                best_match_row = rn
+
+                    if best_match_row:
+                        row_num = best_match_row
+            except Exception:
+                logger.debug("Suffix matching fallback failed; will rebuild index if needed")
 
             # Fallback: rebuild the lightweight index and re-attempt lookup once.
             # This is safer than scanning and avoids recursive calls / repeated scans.
@@ -502,9 +595,11 @@ class GoogleSheetsManager:
                 if not self.service:
                     return None
 
-                logger.info("ℹ️ Client not found in index — rebuilding index and retrying")
+                logger.info("ℹ️ Client not found in index — rebuilding index and retrying (sync)")
+                # Rebuild index synchronously here (this call may be slow for very large sheets)
                 self.load_index()
-                row_num = self.index_phone_to_row.get(normalized)
+                with self._index_lock:
+                    row_num = self.index_phone_to_row.get(normalized)
                 if not row_num:
                     logger.info(f"❌ Client '{client_number}' not found after rebuilding index")
                     return None
@@ -524,9 +619,10 @@ class GoogleSheetsManager:
                     client_data[hdr] = row[i].strip() if i < len(row) and row[i] is not None else ''
 
                 # update LRU cache
-                self.row_cache[row_num] = client_data
-                while len(self.row_cache) > self.row_cache_size:
-                    self.row_cache.popitem(last=False)
+                with self._row_cache_lock:
+                    self.row_cache[row_num] = client_data
+                    while len(self.row_cache) > self.row_cache_size:
+                        self.row_cache.popitem(last=False)
 
                 return client_data
             except Exception as e:
@@ -535,9 +631,21 @@ class GoogleSheetsManager:
         except Exception as e:
             logger.error(f"❌ Error searching for client: {e}")
             return None
+
+    async def get_client_data_async(self, client_number: str) -> Optional[Dict[str, str]]:
+        """Async wrapper that runs the blocking get_client_data in an executor."""
+        try:
+            loop = asyncio.get_running_loop()
+            return await loop.run_in_executor(None, self.get_client_data, client_number)
+        except Exception as e:
+            logger.error(f"❌ Async get_client_data error: {e}")
+            return None
     
     def get_sheet_info(self) -> Dict[str, Any]:
         try:
+            if not self.spreadsheet_id:
+                logger.warning("⚠️ SPREADSHEET_ID not set. Returning empty sheet info.")
+                return {'total_clients': 0, 'headers': [], 'client_column': 'Unknown'}
             if not self.service:
                 return {'total_clients': 0, 'headers': [], 'client_column': 'Unknown'}
             
@@ -580,6 +688,21 @@ class TelegramBot:
         logger.info("🔧 Token retrieved successfully, initializing Google Sheets manager...")
         self.sheets_manager = GoogleSheetsManager()
         self.sheet_info = self.sheets_manager.get_sheet_info()
+        # Defensive: always bind an instance-level _normalize_phone callable so
+        # message handlers (which may be running concurrently) cannot see a
+        # missing attribute if the class-level method is replaced or shadowed.
+        if hasattr(self.sheets_manager, '_normalize_phone'):
+            # Delegate to sheets manager implementation
+            self._normalize_phone = self.sheets_manager._normalize_phone
+        else:
+            # Fallback simple normalizer
+            def _fallback_normalize(raw: str) -> str:
+                if not raw:
+                    return ''
+                digits = ''.join(ch for ch in str(raw) if ch.isdigit())
+                return digits.lstrip('0') if digits else ''
+
+            self._normalize_phone = _fallback_normalize
         self.application = None
         self.bot_info = None  # To cache bot info
         # In-memory deduplication store to avoid processing duplicate messages
@@ -589,6 +712,36 @@ class TelegramBot:
         self.min_client_digits = int(os.getenv('MIN_CLIENT_NUMBER_LENGTH', '3'))
 
         logger.info("✅ Bot initialized successfully")
+
+    def _normalize_phone(self, raw: str) -> str:
+        """Delegate normalization to sheets manager if available, otherwise fallback."""
+        try:
+            if hasattr(self, 'sheets_manager') and self.sheets_manager and hasattr(self.sheets_manager, '_normalize_phone'):
+                return self.sheets_manager._normalize_phone(raw)
+        except Exception:
+            pass
+
+        # Fallback normalization
+        if not raw:
+            return ''
+        digits = ''.join(ch for ch in str(raw) if ch.isdigit())
+        return digits.lstrip('0') if digits else ''
+
+    def _get_normalize_fn(self):
+        """Return a callable normalization function bound to the instance with fallbacks."""
+        fn = getattr(self, '_normalize_phone', None)
+        if callable(fn):
+            return fn
+        if hasattr(self, 'sheets_manager') and hasattr(self.sheets_manager, '_normalize_phone'):
+            return self.sheets_manager._normalize_phone
+
+        def _local_fallback(raw: str) -> str:
+            if not raw:
+                return ''
+            digits = ''.join(ch for ch in str(raw) if ch.isdigit())
+            return digits.lstrip('0') if digits else ''
+
+        return _local_fallback
 
     async def _ensure_bot_info(self, context: ContextTypes.DEFAULT_TYPE):
         """Ensure self.bot_info is populated (best-effort)."""
@@ -865,6 +1018,19 @@ class TelegramBot:
     
     async def handle_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         try:
+            # Runtime defensive guard: ensure instance has a callable _normalize_phone.
+            # Some runtimes/handler dispatching paths may execute handlers on objects
+            # where instance attributes weren't bound as expected; ensure a safe
+            # fallback is available to avoid AttributeError and allow graceful replies.
+            if not hasattr(self, '_normalize_phone') or not callable(getattr(self, '_normalize_phone', None)):
+                logger.warning("⚠️ _normalize_phone missing on TelegramBot instance; binding fallback normalizer")
+                def _runtime_fallback(raw: str) -> str:
+                    if not raw:
+                        return ''
+                    digits = ''.join(ch for ch in str(raw) if ch.isdigit())
+                    return digits.lstrip('0') if digits else ''
+                self._normalize_phone = _runtime_fallback
+
             chat = update.effective_chat
             user = update.effective_user
             # Use helper to determine if message is addressed and get processed text
@@ -899,26 +1065,51 @@ class TelegramBot:
             original_text_for_log = message_to_process or raw_text
             logger.debug("Message original: %s", original_text_for_log)
             extracted_raw = self._extract_client_number(message_to_process)
-            normalized_for_search = self._normalize_phone(extracted_raw)
+            # Resolve normalization function safely via helper
+            normalize_fn = self._get_normalize_fn()
+            normalized_for_search = normalize_fn(extracted_raw)
             logger.debug("Extracted number: %s | Normalized for search: %s", extracted_raw, normalized_for_search)
 
-            client_number = extracted_raw
-            
+            # Use normalized number for searching; keep extracted_raw for display if needed
+            client_number = normalized_for_search
+
             if not client_number:
                 # Only reply if the bot was directly addressed but no number was found
-                if chat.type == Chat.PRIVATE or (f"@{self.bot_info.username.lower()}" in message_text.lower()):
-                    await update.message.reply_text(
-                        "❌ Por favor, envía un número de cliente válido.",
-                        reply_to_message_id=update.message.message_id
-                    )
+                bot_username = getattr(self.bot_info, 'username', '') if self.bot_info else ''
+                message_text = (message_to_process or raw_text or "")
+                if (chat and getattr(chat, 'type', None) == Chat.PRIVATE) or (bot_username and f"@{bot_username.lower()}" in message_text.lower()):
+                    try:
+                        await update.message.reply_text(
+                            "❌ Por favor, envía un número de cliente válido.",
+                            reply_to_message_id=getattr(update.message, 'message_id', None)
+                        )
+                    except Exception:
+                        try:
+                            await context.bot.send_message(chat_id=getattr(update.effective_chat, 'id', None), text="❌ Por favor, envía un número de cliente válido.")
+                        except Exception:
+                            logger.debug('Failed to notify user about missing client number')
                 return
             
-            # Search for client data
-            client_data = self.sheets_manager.get_client_data(client_number)
+            # Search for client data (async to avoid blocking event loop)
+            client_data = await self.sheets_manager.get_client_data_async(client_number)
             
             if client_data:
                 # Log successful search (user-facing persistent log)
-                EnhancedUserActivityLogger.log_user_action(update, "SEARCH", f"Client: {client_number}, Fields: {len(client_data)}", client_number, "SUCCESS")
+                # Non-blocking persistent log
+                try:
+                    persistent_logger.log_to_sheets_async(
+                        timestamp=datetime.now(MEXICO_CITY_TZ).strftime('%Y-%m-%d %H:%M:%S'),
+                        level="INFO",
+                        user_id=str(getattr(user, 'id', 'unknown')),
+                        username=f"@{getattr(user, 'username', '')}",
+                        action="SEARCH",
+                        details=f"Client: {client_number}, Fields: {len(client_data)}",
+                        chat_type=getattr(chat, 'type', ''),
+                        client_number=client_number,
+                        success="SUCCESS"
+                    )
+                except Exception:
+                    logger.debug('Failed to enqueue persistent log')
                 
                 response = f"✅ **Cliente encontrado: `{client_number}`**\n\n"
                 
@@ -936,20 +1127,41 @@ class TelegramBot:
                 user_display = f"@{user.username}" if user.username else user.first_name
                 response += f"\n**Buscado por:** {user_display}"
                 
-                await update.message.reply_text(
-                    response, 
-                    parse_mode='Markdown',
-                    reply_to_message_id=update.message.message_id
-                )
+                # Send as plain text to avoid Markdown parsing errors when fields contain
+                # characters that could break entity parsing.
+                try:
+                    # Send as plain text (no Markdown) to avoid entity parsing errors
+                    await update.message.reply_text(response, reply_to_message_id=getattr(update.message, 'message_id', None), parse_mode=None)
+                except Exception:
+                    try:
+                        await context.bot.send_message(chat_id=getattr(update.effective_chat, 'id', None), text=response, parse_mode=None)
+                    except Exception:
+                        logger.debug('Failed to send search response')
             else:
-                # Log failed search (include normalized value for debugging)
-                EnhancedUserActivityLogger.log_user_action(update, "SEARCH", f"Client: {client_number}, Not found (normalized: {self._normalize_phone(client_number)})", client_number, "FAILURE")
-                
-                await update.message.reply_text(
-                    f"❌ No se encontró información para el cliente: `{client_number}`",
-                    parse_mode='Markdown',
-                    reply_to_message_id=update.message.message_id
-                )
+                # Log failed search async
+                try:
+                    persistent_logger.log_to_sheets_async(
+                        timestamp=datetime.now(MEXICO_CITY_TZ).strftime('%Y-%m-%d %H:%M:%S'),
+                        level="INFO",
+                        user_id=str(getattr(user, 'id', 'unknown')),
+                        username=f"@{getattr(user, 'username', '')}",
+                        action="SEARCH",
+                        details=f"Client: {client_number}, Not found (normalized: {normalized_for_search})",
+                        chat_type=getattr(chat, 'type', ''),
+                        client_number=client_number,
+                        success="FAILURE"
+                    )
+                except Exception:
+                    logger.debug('Failed to enqueue persistent failure log')
+
+                # Plain-text reply for failure
+                try:
+                    await update.message.reply_text(f"❌ No se encontró información para el cliente: {client_number}", reply_to_message_id=getattr(update.message, 'message_id', None), parse_mode=None)
+                except Exception:
+                    try:
+                        await context.bot.send_message(chat_id=getattr(update.effective_chat, 'id', None), text=f"❌ No se encontró información para el cliente: {client_number}", parse_mode=None)
+                    except Exception:
+                        logger.debug('Failed to send not-found message')
         except Exception as e:
             logger.error(f"Error handling message: {e}")
             try:
