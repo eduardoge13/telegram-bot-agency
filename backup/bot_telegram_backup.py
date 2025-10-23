@@ -470,7 +470,7 @@ class TelegramBot:
     async def start_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         user = update.effective_user; EnhancedUserActivityLogger.log_user_action(update, "START_COMMAND")
         msg = (f"👋 ¡Hola {user.first_name}! Bienvenido a **Client Data Bot**.\n\nEnvíame un número de cliente y te daré su información.\n\nUsa `/help` para ver todos los comandos.") if update.effective_chat.type == Chat.PRIVATE else (f"👋 ¡Hola a todos! Soy **Client Data Bot**.\n\nPara buscar un cliente en este grupo, menciónname o responde a uno de mis mensajes.\nEjemplo: `@mi_bot_username 12345`")
-        await update.message.reply_text(msg, parse_mode='Markdown')
+    await update.message.reply_text(msg, parse_mode=None)
     
     async def help_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Handle /help command"""
@@ -479,7 +479,7 @@ class TelegramBot:
         # Log the action
         EnhancedUserActivityLogger.log_user_action(update, "HELP_COMMAND")
         help_message = ("📖 **Ayuda de Client Data Bot**\n\n**Buscar clientes:**\n• **En chat privado:** Simplemente envía el número de cliente.\n• **En grupos:** Menciona al bot (`@username_del_bot 12345`) o responde a un mensaje del bot con el número.\n\n**Comandos disponibles:**\n• `/start` - Mensaje de bienvenida.\n• `/help` - Muestra esta ayuda.\n• `/info` - Muestra información sobre la base de datos.\n• `/status` - Verifica el estado del bot y la conexión.\n• `/whoami` - Muestra tu información de Telegram.\n• `/stats` - Muestra estadísticas de uso (autorizado).\n• `/plogs` - Muestra los últimos logs de actividad (autorizado).")
-        await update.message.reply_text(help_message, parse_mode='Markdown')
+    await update.message.reply_text(help_message, parse_mode=None)
     
     async def info_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Show spreadsheet information"""
@@ -506,7 +506,7 @@ class TelegramBot:
         
         message += f"\n💡 Send any client number to search!"
         
-        await update.message.reply_text(message, parse_mode='Markdown')
+    await update.message.reply_text(message, parse_mode=None)
     
     async def status_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Check bot and system status"""
@@ -537,13 +537,13 @@ class TelegramBot:
             f"**Mexico City Time:** {datetime.now(MEXICO_CITY_TZ).strftime('%H:%M:%S')}"
         )
         
-        await update.message.reply_text(status_message, parse_mode='Markdown')
+    await update.message.reply_text(status_message, parse_mode=None)
     
     async def whoami_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         EnhancedUserActivityLogger.log_user_action(update, "WHOAMI_COMMAND"); user = update.effective_user
         auth_status = "✅ Sí" if self._is_authorized_user(user.id) else "❌ No"
         user_info = (f"👤 **Tu Información:**\n\n🆔 **User ID:** `{user.id}`\n👤 **Nombre:** {user.first_name} {user.last_name or ''}\n📱 **Username:** @{user.username or 'No tienes'}\n🔑 **Autorizado:** {auth_status}")
-        await update.message.reply_text(user_info, parse_mode='Markdown')
+    await update.message.reply_text(user_info, parse_mode=None)
     
     async def stats_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         EnhancedUserActivityLogger.log_user_action(update, "STATS_COMMAND")
@@ -551,7 +551,7 @@ class TelegramBot:
         stats = persistent_logger.get_stats_from_logs()
         if not stats: await update.message.reply_text("No hay estadísticas disponibles."); return
         stats_message = (f"📈 **Estadísticas de Uso:**\n\n📊 **Logs totales:** {stats.get('total_logs', 0)}\n📅 **Actividad de hoy:** {stats.get('today_logs', 0)}\n\n🔍 **Búsquedas Totales:** {stats.get('total_searches', 0)}\n  - ✅ Exitosas: {stats.get('successful_searches', 0)}\n  - ❌ Fallidas: {stats.get('failed_searches', 0)}\n\n👥 **Actividad de Hoy:**\n  - Usuarios únicos: {stats.get('unique_users_today', 0)}\n  - Grupos activos: {stats.get('active_groups_today', 0)}")
-        await update.message.reply_text(stats_message, parse_mode='Markdown')
+    await update.message.reply_text(stats_message, parse_mode=None)
     
     async def logs_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         EnhancedUserActivityLogger.log_user_action(update, "LOGS_COMMAND")
@@ -568,7 +568,7 @@ class TelegramBot:
             if isinstance(entry, list) and len(entry) >= 5:
                 log_message += f"{entry[0]:<16} | {entry[1]:<15} | {entry[4]}\n"
         log_message += "```"
-        await update.message.reply_text(log_message, parse_mode='Markdown')
+    await update.message.reply_text(log_message, parse_mode=None)
     
     async def handle_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         chat, user, message_text_original = update.effective_chat, update.effective_user, update.message.text.strip()
@@ -593,10 +593,10 @@ class TelegramBot:
                 response += f"**{display_key}:** {value}\n"
             user_display = f"@{user.username}" if user.username else user.first_name
             response += f"**Buscado por 🙋🏻‍♂️** {user_display}\n"
-            await update.message.reply_text(response, parse_mode='Markdown', reply_to_message_id=update.message.id)
+            await update.message.reply_text(response, parse_mode='HTML', reply_to_message_id=update.message.id)
         else:
             EnhancedUserActivityLogger.log_search_result(update, client_number, False)
-            await update.message.reply_text(f"❌ No se encontró cliente con el número `{client_number}`.", parse_mode='Markdown', reply_to_message_id=update.message.id)
+            await update.message.reply_text(f"❌ No se encontró cliente con el número <code>{html_escape(client_number)}</code>.", parse_mode='HTML', reply_to_message_id=update.message.id)
 
 # --- Lógica de Inicialización (serverless-safe) ---
 async def _build_app_for_request(telegram_bot_instance):

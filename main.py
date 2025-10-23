@@ -39,8 +39,8 @@ def signal_handler(signum, frame):
             bot_instance.application.stop()
         except Exception as e:
             logger.error(f"Error stopping bot: {e}")
-    
-    sys.exit(0)
+    # Do not call sys.exit here; allow main thread to exit naturally after cleanup.
+    # Cloud Run will receive the process exit and handle restarts if needed.
 
 def run_flask_server():
     """Run Flask server in background thread"""
@@ -79,37 +79,31 @@ def detailed_health():
     
     return jsonify(status), 200
 
-def run_bot_with_restart():
-    """Run bot with auto-restart in main thread"""
+def run_bot_once():
+    """Initialize and run the bot one time in the main thread.
+
+    Let the container process exit on unexpected failures and let Cloud Run
+    manage restarts. This avoids an in-process restart loop which hides the
+    true exit reason and complicates debugging.
+    """
     global bot_instance, shutdown_requested
-    
+
+    from bot_telegram_polling import TelegramBot, setup_logging
+    setup_logging()
+
     try:
-        from bot_telegram_polling import TelegramBot, setup_logging
-        setup_logging()
-        
-        while not shutdown_requested:
-            try:
-                logger.info("🤖 Initializing bot...")
-                bot_instance = TelegramBot()
-                logger.info("✅ Bot instance ready")
-                
-                logger.info("🚀 Starting bot polling...")
-                # This MUST run in main thread for asyncio
-                bot_instance.run()
-                
-                if not shutdown_requested:
-                    logger.warning("⚠️ Bot stopped unexpectedly, restarting in 10s...")
-                    time.sleep(10)
-                    
-            except Exception as e:
-                logger.error(f"❌ Bot error: {e}")
-                bot_instance = None
-                if not shutdown_requested:
-                    logger.info("🔄 Restarting bot in 30s...")
-                    time.sleep(30)
-                    
+        logger.info("🤖 Initializing bot...")
+        bot_instance = TelegramBot()
+        logger.info("✅ Bot instance ready")
+
+        logger.info("🚀 Starting bot polling...")
+        # This MUST run in main thread for asyncio
+        bot_instance.run()
+
     except Exception as e:
-        logger.error(f"❌ Critical error: {e}")
+        # Log full stack trace to help root-cause analysis in Cloud Run logs
+        logger.exception("❌ Bot error - exiting process")
+        # Re-raise so the process exits and Cloud Run can restart the container.
         raise
 
 def main():
@@ -130,7 +124,7 @@ def main():
     
     # Run bot in main thread (CRITICAL for asyncio)
     try:
-        run_bot_with_restart()
+        run_bot_once()
     except KeyboardInterrupt:
         logger.info("🛑 Application interrupted")
     except Exception as e:

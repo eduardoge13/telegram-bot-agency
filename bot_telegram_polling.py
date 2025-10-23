@@ -10,12 +10,14 @@ import sys
 import json
 import time
 import threading
+from concurrent.futures import ThreadPoolExecutor
 import asyncio
 import pytz
 import re
 from typing import Dict, Any, Optional, List, Tuple
 from collections import OrderedDict
 from datetime import datetime, date
+from html import escape as html_escape
 
 # Load environment variables
 try:
@@ -57,6 +59,16 @@ def setup_logging():
     )
 
 setup_logging()
+
+
+def safe_html(text: Optional[str]) -> str:
+    """Escape text for use in Telegram HTML parse mode.
+
+    Keeps emojis and basic punctuation intact while escaping HTML special chars.
+    """
+    if text is None:
+        return ''
+    return html_escape(str(text))
 
 def get_secret(project_id: str, secret_id: str, version_id: str = "latest") -> Optional[str]:
     """
@@ -338,6 +350,8 @@ class GoogleSheetsManager:
         self._index_lock = threading.Lock()
         # Lock protecting row cache accesses
         self._row_cache_lock = threading.Lock()
+        # Executor for background blocking IO tasks
+        self._executor = ThreadPoolExecutor(max_workers=int(os.getenv('SHEETS_THREAD_WORKERS', '4')))
         # Start background refresher thread to keep index warm
         self._start_index_refresher()
         if self.service:
@@ -356,7 +370,9 @@ class GoogleSheetsManager:
                     if self.service and self.spreadsheet_id:
                         logger.debug('Index refresher: refreshing lightweight index')
                         try:
-                            self.load_index()
+                            # Offload heavy index build to executor to avoid blocking
+                            t = threading.Thread(target=self.load_index, daemon=True)
+                            t.start()
                         except Exception as e:
                             logger.debug(f'Index refresher error: {e}')
                 except Exception:
@@ -518,8 +534,33 @@ class GoogleSheetsManager:
                 stale = (now - self.index_timestamp) > self.index_ttl
 
             if empty:
-                # synchronous build required
-                self.load_index()
+                # Do NOT block request handlers by rebuilding the entire index
+                # synchronously. Instead, schedule a background index build the
+                # first time we notice the index is empty. Handlers can check
+                # `self._index_warming` to provide a friendly message to users
+                # while the index is being built.
+                if not getattr(self, '_index_warming', False):
+                    logger.info('ℹ️ Index empty: scheduling background rebuild')
+                    self._index_warming = True
+
+                    def _bg_build():
+                        try:
+                            # Run the heavy load_index inside the executor so we don't
+                            # spawn too many threads and we get managed pooling.
+                            fut = self._executor.submit(self.load_index)
+                            fut.result()
+                        except Exception as e:
+                            logger.debug(f'Background index build failed: {e}')
+                        finally:
+                            try:
+                                self._index_warming = False
+                            except Exception:
+                                pass
+
+                    t = threading.Thread(target=_bg_build, daemon=True)
+                    t.start()
+                # Return without blocking; callers should handle the None response
+                return
             elif stale:
                 # let background refresher update soon; don't block
                 logger.debug('Index is stale; background refresher will update it')
@@ -589,44 +630,39 @@ class GoogleSheetsManager:
             except Exception:
                 logger.debug("Suffix matching fallback failed; will rebuild index if needed")
 
-            # Fallback: rebuild the lightweight index and re-attempt lookup once.
-            # This is safer than scanning and avoids recursive calls / repeated scans.
+            # Fallback: avoid blocking synchronous rebuilds during request handling.
+            # Schedule a background index rebuild and return None immediately so
+            # the handler can respond quickly. The background build will refresh
+            # the lightweight index for subsequent requests.
             try:
                 if not self.service:
                     return None
 
-                logger.info("ℹ️ Client not found in index — rebuilding index and retrying (sync)")
-                # Rebuild index synchronously here (this call may be slow for very large sheets)
-                self.load_index()
-                with self._index_lock:
-                    row_num = self.index_phone_to_row.get(normalized)
-                if not row_num:
-                    logger.info(f"❌ Client '{client_number}' not found after rebuilding index")
-                    return None
+                if not getattr(self, '_index_warming', False):
+                    logger.info("ℹ️ Client not found in index — scheduling background rebuild")
+                    self._index_warming = True
 
-                # If index now contains the row number, fetch the single row A:D
-                rng = f"Sheet1!A{row_num}:D{row_num}"
-                result = self.service.spreadsheets().values().get(
-                    spreadsheetId=self.spreadsheet_id,
-                    range=rng
-                ).execute()
-                values = result.get('values', [])
-                if not values:
-                    return None
-                row = values[0]
-                client_data = {}
-                for i, hdr in enumerate(self.headers[:4]):
-                    client_data[hdr] = row[i].strip() if i < len(row) and row[i] is not None else ''
+                    def _bg_build():
+                        try:
+                            fut = None
+                            try:
+                                fut = self._executor.submit(self.load_index)
+                                fut.result()
+                            except Exception as e:
+                                logger.debug(f'Background rebuild failed: {e}')
+                        finally:
+                            try:
+                                self._index_warming = False
+                            except Exception:
+                                pass
 
-                # update LRU cache
-                with self._row_cache_lock:
-                    self.row_cache[row_num] = client_data
-                    while len(self.row_cache) > self.row_cache_size:
-                        self.row_cache.popitem(last=False)
+                    t = threading.Thread(target=_bg_build, daemon=True)
+                    t.start()
 
-                return client_data
+                logger.info(f"❌ Client '{client_number}' not found; background rebuild scheduled")
+                return None
             except Exception as e:
-                logger.error(f"❌ Error during fallback index rebuild: {e}")
+                logger.error(f"❌ Error scheduling fallback index rebuild: {e}")
                 return None
         except Exception as e:
             logger.error(f"❌ Error searching for client: {e}")
@@ -636,7 +672,8 @@ class GoogleSheetsManager:
         """Async wrapper that runs the blocking get_client_data in an executor."""
         try:
             loop = asyncio.get_running_loop()
-            return await loop.run_in_executor(None, self.get_client_data, client_number)
+            # Use the manager's dedicated executor to avoid overloading the default
+            return await loop.run_in_executor(self._executor, self.get_client_data, client_number)
         except Exception as e:
             logger.error(f"❌ Async get_client_data error: {e}")
             return None
@@ -710,6 +747,9 @@ class TelegramBot:
         self.dedupe_window = int(os.getenv('DEDUP_WINDOW_SECONDS', '30'))
         # Minimum length for a recognized client number (in digits)
         self.min_client_digits = int(os.getenv('MIN_CLIENT_NUMBER_LENGTH', '3'))
+
+    # Pending notifications to avoid duplicate follow-ups: (chat_id, client_number)
+    self._pending_notifications = set()
 
         logger.info("✅ Bot initialized successfully")
 
@@ -842,23 +882,23 @@ class TelegramBot:
             
             if getattr(update, 'effective_chat', None) and getattr(update.effective_chat, 'type', None) == Chat.PRIVATE:
                 msg = (
-                    f"👋 ¡Hola {user.first_name}! Bienvenido a **Client Data Bot**.\n\n"
+                    f"👋 ¡Hola {safe_html(getattr(user, 'first_name', ''))}! Bienvenido a <b>Client Data Bot</b>.\n\n"
                     "Envíame un número de cliente y te daré su información.\n\n"
                     "Usa /help para ver todos los comandos."
                 )
             else:
                 msg = (
-                    f"👋 ¡Hola a todos! Soy **Client Data Bot**.\n\n"
+                    f"👋 ¡Hola a todos! Soy <b>Client Data Bot</b>.\n\n"
                     "Para buscar un cliente en este grupo, mencióname o responde a uno de mis mensajes.\n"
                     "Ejemplo: @mi_bot_username 12345"
                 )
             
             try:
-                await getattr(update, 'message', None).reply_text(msg, parse_mode='Markdown')
+                await getattr(update, 'message', None).reply_text(msg, parse_mode='HTML')
             except Exception:
                 # Best-effort: send via context.bot
                 try:
-                    await context.bot.send_message(chat_id=update.effective_chat.id, text=msg, parse_mode='Markdown')
+                    await context.bot.send_message(chat_id=update.effective_chat.id, text=msg, parse_mode='HTML')
                 except Exception:
                     logger.debug('Failed to send start message')
         except Exception as e:
@@ -879,20 +919,27 @@ class TelegramBot:
         EnhancedUserActivityLogger.log_user_action(update, "HELP_COMMAND")
         
         help_message = (
-            "📖 **Ayuda de Client Data Bot**\n\n"
-            "**Buscar clientes:**\n"
-            "• **En chat privado:** Simplemente envía el número de cliente.\n"
-            "• **En grupos:** Menciona al bot (`@username_del_bot 12345`) o responde a un mensaje del bot con el número.\n\n"
-            "**Comandos disponibles:**\n"
-            "• `/start` - Mensaje de bienvenida.\n"
-            "• `/help` - Muestra esta ayuda.\n"
-            "• `/info` - Muestra información sobre la base de datos.\n"
-            "• `/status` - Verifica el estado del bot y la conexión.\n"
-            "• `/whoami` - Muestra tu información de Telegram.\n"
-            "• `/stats` - Muestra estadísticas de uso (autorizado).\n"
-            "• `/plogs` - Muestra los últimos logs de actividad (autorizado)."
+            "📖 <b>Ayuda de Client Data Bot</b>\n\n"
+            "<b>Buscar clientes:</b>\n"
+            "• <b>En chat privado:</b> Simplemente envía el número de cliente.\n"
+            "• <b>En grupos:</b> Menciona al bot (ej. <code>@username_del_bot 12345</code>) o responde a un mensaje del bot con el número.\n\n"
+            "<b>Comandos disponibles:</b>\n"
+            "• <code>/start</code> - Mensaje de bienvenida.\n"
+            "• <code>/help</code> - Muestra esta ayuda.\n"
+            "• <code>/info</code> - Muestra información sobre la base de datos.\n"
+            "• <code>/status</code> - Verifica el estado del bot y la conexión.\n"
+            "• <code>/whoami</code> - Muestra tu información de Telegram.\n"
+            "• <code>/stats</code> - Muestra estadísticas de uso (autorizado).\n"
+            "• <code>/plogs</code> - Muestra los últimos logs de actividad (autorizado)."
         )
-        await update.message.reply_text(help_message, parse_mode='Markdown')
+        # Send help as HTML (static content already safe)
+        try:
+            await update.message.reply_text(help_message, parse_mode='HTML')
+        except Exception:
+            try:
+                await context.bot.send_message(chat_id=getattr(update.effective_chat, 'id', None), text=help_message, parse_mode='HTML')
+            except Exception:
+                logger.debug('Failed to send help message')
     
     async def info_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Show spreadsheet information"""
@@ -902,24 +949,29 @@ class TelegramBot:
         info = self.sheet_info
         
         message = (
-            "📋 **Spreadsheet Information:**\n\n"
-            f"📊 **Total clients:** {info['total_clients']}\n"
-            f"🔍 **Search column:** {info['client_column']}\n\n"
-            f"**Available fields:**\n"
+            "📋 <b>Spreadsheet Information:</b>\n\n"
+            f"📊 <b>Total clients:</b> {safe_html(info.get('total_clients', '0'))}\n"
+            f"🔍 <b>Search column:</b> {safe_html(info.get('client_column', 'Unknown'))}\n\n"
+            f"<b>Available fields:</b>\n"
         )
         
         if info['headers']:
             for i, header in enumerate(info['headers'][:10], 1):  # Show first 10 headers
-                message += f"• {header}\n"
+                message += f"• {safe_html(header)}\n"
             
             if len(info['headers']) > 10:
-                message += f"• ... and {len(info['headers']) - 10} more fields\n"
+                message += f"• ... and {safe_html(str(len(info['headers']) - 10))} more fields\n"
         else:
             message += "• No headers found\n"
         
         message += f"\n💡 Send any client number to search!"
-        
-        await update.message.reply_text(message, parse_mode='Markdown')
+        try:
+            await update.message.reply_text(message, parse_mode='HTML')
+        except Exception:
+            try:
+                await context.bot.send_message(chat_id=getattr(update.effective_chat, 'id', None), text=message, parse_mode='HTML')
+            except Exception:
+                logger.debug('Failed to send info message')
     
     async def status_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Check bot and system status"""
@@ -941,32 +993,43 @@ class TelegramBot:
             logs_status = "❌ Error"
         
         status_message = (
-            "🔍 **Bot Status:**\n\n"
-            f"🤖 **Bot:** ✅ Running\n"
-            f"📊 **Google Sheets:** {sheets_status}\n"
-            f"📝 **Persistent Logs:** {logs_status}\n"
-            f"📋 **Total clients:** {self.sheet_info.get('total_clients', 'Unknown')}\n\n"
-            f"🚀 **Ready to search!**"
+            "🔍 <b>Bot Status:</b>\n\n"
+            f"🤖 <b>Bot:</b> ✅ Running\n"
+            f"📊 <b>Google Sheets:</b> {safe_html(sheets_status)}\n"
+            f"📝 <b>Persistent Logs:</b> {safe_html(logs_status)}\n"
+            f"📋 <b>Total clients:</b> {safe_html(str(self.sheet_info.get('total_clients', 'Unknown')))}\n\n"
+            f"🚀 <b>Ready to search!</b>"
         )
-        
-        await update.message.reply_text(status_message, parse_mode='Markdown')
+        try:
+            await update.message.reply_text(status_message, parse_mode='HTML')
+        except Exception:
+            try:
+                await context.bot.send_message(chat_id=getattr(update.effective_chat, 'id', None), text=status_message, parse_mode='HTML')
+            except Exception:
+                logger.debug('Failed to send status message')
     
     async def whoami_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Show user information"""
         EnhancedUserActivityLogger.log_user_action(update, "WHOAMI_COMMAND")
         
         user = update.effective_user
-        auth_status = "✅ Sí" if self._is_authorized_user(user.id) else "❌ No"
-        
-        user_info = (
-            f"👤 **Tu Información:**\n\n"
-            f"🆔 **User ID:** `{user.id}`\n"
-            f"👤 **Nombre:** {user.first_name} {user.last_name or ''}\n"
-            f"📱 **Username:** @{user.username or 'No tienes'}\n"
-            f"🔑 **Autorizado:** {auth_status}"
+        auth_status = "✅ Sí" if self._is_authorized_user(getattr(user, 'id', None)) else "❌ No"
+
+        safe_user_info = (
+            f"👤 <b>Tu Información:</b>\n\n"
+            f"🆔 <b>User ID:</b> <code>{safe_html(getattr(user, 'id', ''))}</code>\n"
+            f"👤 <b>Nombre:</b> {safe_html(getattr(user, 'first_name', ''))} {safe_html(getattr(user, 'last_name', '') or '')}\n"
+            f"📱 <b>Username:</b> @{safe_html(getattr(user, 'username', 'No tienes'))}\n"
+            f"🔑 <b>Autorizado:</b> {safe_html(auth_status)}"
         )
-        
-        await update.message.reply_text(user_info, parse_mode='Markdown')
+
+        try:
+            await update.message.reply_text(safe_user_info, parse_mode='HTML')
+        except Exception:
+            try:
+                await context.bot.send_message(chat_id=getattr(update.effective_chat, 'id', None), text=safe_user_info, parse_mode='HTML')
+            except Exception:
+                logger.debug('Failed to send whoami message')
     
     async def stats_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Show usage statistics (authorized users only)"""
@@ -982,18 +1045,24 @@ class TelegramBot:
             return
         
         stats_message = (
-            f"📈 **Estadísticas de Uso:**\n\n"
-            f"📊 **Logs totales:** {stats.get('total_logs', 0)}\n"
-            f"📅 **Actividad de hoy:** {stats.get('today_logs', 0)}\n\n"
-            f"🔍 **Búsquedas Totales:** {stats.get('total_searches', 0)}\n"
-            f"  - ✅ Exitosas: {stats.get('successful_searches', 0)}\n"
-            f"  - ❌ Fallidas: {stats.get('failed_searches', 0)}\n\n"
-            f"👥 **Actividad de Hoy:**\n"
-            f"  - Usuarios únicos: {stats.get('unique_users_today', 0)}\n"
-            f"  - Grupos activos: {stats.get('active_groups_today', 0)}"
+            "📈 <b>Estadísticas de Uso:</b>\n\n"
+            f"📊 <b>Logs totales:</b> {safe_html(str(stats.get('total_logs', 0)))}\n"
+            f"📅 <b>Actividad de hoy:</b> {safe_html(str(stats.get('today_logs', 0)))}\n\n"
+            f"🔍 <b>Búsquedas Totales:</b> {safe_html(str(stats.get('total_searches', 0)))}\n"
+            f"  - ✅ <b>Exitosas:</b> {safe_html(str(stats.get('successful_searches', 0)))}\n"
+            f"  - ❌ <b>Fallidas:</b> {safe_html(str(stats.get('failed_searches', 0)))}\n\n"
+            f"👥 <b>Actividad de Hoy:</b>\n"
+            f"  - <b>Usuarios únicos:</b> {safe_html(str(stats.get('unique_users_today', 0)))}\n"
+            f"  - <b>Grupos activos:</b> {safe_html(str(stats.get('active_groups_today', 0)))}"
         )
-        
-        await update.message.reply_text(stats_message, parse_mode='Markdown')
+
+        try:
+            await update.message.reply_text(stats_message, parse_mode='HTML')
+        except Exception:
+            try:
+                await context.bot.send_message(chat_id=getattr(update.effective_chat, 'id', None), text=stats_message, parse_mode='HTML')
+            except Exception:
+                logger.debug('Failed to send stats message')
     
     async def persistent_logs_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Show recent persistent logs (authorized users only)"""
@@ -1008,13 +1077,20 @@ class TelegramBot:
             await update.message.reply_text("No se encontraron logs persistentes.")
             return
         
-        log_message = "📝 **Últimos 20 Logs Persistentes:**\n\n```\n"
+        log_message = "📝 Últimos 20 Logs Persistentes:\n\n"
         for entry in logs:
             if isinstance(entry, list) and len(entry) >= 5:
-                log_message += f"{entry[0]:<16} | {entry[1]:<15} | {entry[4]}\n"
-        log_message += "```"
-        
-        await update.message.reply_text(log_message, parse_mode='Markdown')
+                log_message += f"{safe_html(entry[0])} | {safe_html(entry[1])} | {safe_html(entry[4])}\n"
+
+        # logs displayed as preformatted text — escape and wrap in <pre>
+        safe_logs = '<pre>' + html_escape(log_message) + '</pre>'
+        try:
+            await update.message.reply_text(safe_logs, parse_mode='HTML')
+        except Exception:
+            try:
+                await context.bot.send_message(chat_id=getattr(update.effective_chat, 'id', None), text=log_message)
+            except Exception:
+                logger.debug('Failed to send persistent logs')
     
     async def handle_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         try:
@@ -1111,33 +1187,68 @@ class TelegramBot:
                 except Exception:
                     logger.debug('Failed to enqueue persistent log')
                 
-                response = f"✅ **Cliente encontrado: `{client_number}`**\n\n"
-                
+                # Build an HTML-safe response (escape any user/sheet content)
                 field_mappings = {
                     'client phone number': 'Número 📞',
                     'cliente': 'Cliente 🙋🏻‍♀️',
                     'correo': 'Correo ✉️',
                     'other info': 'Otra Información ℹ️'
                 }
-                
+
+                parts = []
+                parts.append(f"✅ <b>Cliente encontrado:</b> <code>{safe_html(client_number)}</code>")
+                parts.append("")
+
                 for key, value in client_data.items():
                     display_key = field_mappings.get(key.lower().strip(), key.strip())
-                    response += f"**{display_key}:** {value}\n"
-                
-                user_display = f"@{user.username}" if user.username else user.first_name
-                response += f"\n**Buscado por:** {user_display}"
-                
-                # Send as plain text to avoid Markdown parsing errors when fields contain
-                # characters that could break entity parsing.
+                    parts.append(f"<b>{safe_html(display_key)}:</b> {safe_html(value)}")
+
+                user_display = f"@{getattr(user, 'username', '')}" if getattr(user, 'username', None) else safe_html(getattr(user, 'first_name', ''))
+                parts.append("")
+                parts.append(f"<b>Buscado por:</b> {safe_html(user_display)}")
+
+                response_html = "\n".join(parts)
+
                 try:
-                    # Send as plain text (no Markdown) to avoid entity parsing errors
-                    await update.message.reply_text(response, reply_to_message_id=getattr(update.message, 'message_id', None), parse_mode=None)
+                    await update.message.reply_text(response_html, reply_to_message_id=getattr(update.message, 'message_id', None), parse_mode='HTML')
                 except Exception:
                     try:
-                        await context.bot.send_message(chat_id=getattr(update.effective_chat, 'id', None), text=response, parse_mode=None)
+                        await context.bot.send_message(chat_id=getattr(update.effective_chat, 'id', None), text=response_html, parse_mode='HTML')
                     except Exception:
                         logger.debug('Failed to send search response')
             else:
+                # If a background rebuild was scheduled by the sheets manager,
+                # tell the user we scheduled an index refresh and set up a
+                # follow-up notification that will re-query once the index
+                # finishes warming (or times out).
+                try:
+                    if getattr(self.sheets_manager, '_index_warming', False):
+                        chat_id = getattr(update.effective_chat, 'id', None)
+                        reply_to_id = getattr(update.message, 'message_id', None)
+                        try:
+                            await update.message.reply_text(
+                                f"🔄 No se encontró información para <code>{safe_html(client_number)}</code>. He programado una actualización del índice en segundo plano y te avisaré cuando termine.",
+                                reply_to_message_id=reply_to_id,
+                                parse_mode='HTML'
+                            )
+                        except Exception:
+                            try:
+                                await context.bot.send_message(chat_id=chat_id, text=f"🔄 No se encontró información para {safe_html(client_number)}. He programado una actualización del índice en segundo plano y te avisaré cuando termine.")
+                            except Exception:
+                                logger.debug('Failed to notify user that index is warming')
+
+                        # Schedule a follow-up task that will re-run the lookup after
+                        # the index build completes (with debounce via _pending_notifications)
+                        try:
+                            if chat_id is not None:
+                                # Fire-and-forget; the coroutine handles its own exceptions
+                                asyncio.create_task(self._followup_after_rebuild(chat_id, reply_to_id, client_number, context.bot))
+                        except Exception:
+                            logger.debug('Failed to schedule followup after rebuild')
+
+                        return
+                except Exception:
+                    pass
                 # Log failed search async
                 try:
                     persistent_logger.log_to_sheets_async(
@@ -1156,10 +1267,10 @@ class TelegramBot:
 
                 # Plain-text reply for failure
                 try:
-                    await update.message.reply_text(f"❌ No se encontró información para el cliente: {client_number}", reply_to_message_id=getattr(update.message, 'message_id', None), parse_mode=None)
+                    await update.message.reply_text(f"❌ No se encontró información para el cliente: <code>{safe_html(client_number)}</code>", reply_to_message_id=getattr(update.message, 'message_id', None), parse_mode='HTML')
                 except Exception:
                     try:
-                        await context.bot.send_message(chat_id=getattr(update.effective_chat, 'id', None), text=f"❌ No se encontró información para el cliente: {client_number}", parse_mode=None)
+                        await context.bot.send_message(chat_id=getattr(update.effective_chat, 'id', None), text=f"❌ No se encontró información para el cliente: {safe_html(client_number)}", parse_mode='HTML')
                     except Exception:
                         logger.debug('Failed to send not-found message')
         except Exception as e:
@@ -1218,3 +1329,60 @@ class TelegramBot:
             logger.error(f"❌ Critical error running bot: {e}")
             EnhancedUserActivityLogger.log_system_event("BOT_ERROR", f"Critical error: {str(e)}")
             raise
+
+    async def _followup_after_rebuild(self, chat_id: int, reply_to_message_id: Optional[int], client_number: str, bot, timeout: int = 30):
+        """Wait for the background index rebuild to complete (or timeout), re-run the lookup and notify the user.
+
+        This prevents spamming multiple follow-ups for the same chat+client by
+        using `self._pending_notifications` as a debounce set.
+        """
+        key = (chat_id, client_number)
+        if key in self._pending_notifications:
+            return
+        self._pending_notifications.add(key)
+
+        try:
+            waited = 0
+            interval = 1
+            # Wait until index warming finishes or timeout
+            while getattr(self.sheets_manager, '_index_warming', False) and waited < timeout:
+                await asyncio.sleep(interval)
+                waited += interval
+
+            # After waiting (either finished or timed out), re-run lookup
+            try:
+                client_data = await self.sheets_manager.get_client_data_async(client_number)
+            except Exception as e:
+                logger.debug(f'Followup lookup failed for {client_number}: {e}')
+                client_data = None
+
+            if client_data:
+                # Build response same as in main handler
+                parts = []
+                parts.append(f"✅ <b>Cliente encontrado:</b> <code>{safe_html(client_number)}</code>")
+                parts.append("")
+                for key_name, value in client_data.items():
+                    parts.append(f"<b>{safe_html(key_name)}:</b> {safe_html(value)}")
+                response_html = "\n".join(parts)
+                try:
+                    await bot.send_message(chat_id=chat_id, text=response_html, parse_mode='HTML', reply_to_message_id=reply_to_message_id)
+                except Exception:
+                    try:
+                        await bot.send_message(chat_id=chat_id, text=f"✅ Cliente encontrado: {safe_html(client_number)}")
+                    except Exception:
+                        logger.debug('Failed to send followup found message')
+            else:
+                # Notify that index updated (or timed out) and nothing found
+                try:
+                    await bot.send_message(chat_id=chat_id, text=f"🔎 Índice actualizado: no se encontró información para el cliente: <code>{safe_html(client_number)}</code>", parse_mode='HTML', reply_to_message_id=reply_to_message_id)
+                except Exception:
+                    try:
+                        await bot.send_message(chat_id=chat_id, text=f"🔎 Índice actualizado: no se encontró información para el cliente: {safe_html(client_number)}")
+                    except Exception:
+                        logger.debug('Failed to send followup not-found message')
+
+        finally:
+            try:
+                self._pending_notifications.discard(key)
+            except Exception:
+                pass

@@ -21,7 +21,10 @@ print_error() { echo -e "${RED}❌ $1${NC}"; }
 # Fixed configuration (non-sensitive)
 PROJECT_ID="promising-node-469902-m2"
 REGION="us-central1"
+# Default production service name
 SERVICE_NAME="telegram-bot-agency"
+# Default dev service name (used when deploying dev)
+DEV_SERVICE_NAME="telegram-bot-dev"
 
 # Check argument
 if [ $# -ne 1 ] || ([ "$1" != "dev" ] && [ "$1" != "prod" ]); then
@@ -54,11 +57,16 @@ if [ "$ENVIRONMENT" == "dev" ]; then
     fi
     
     source "dev_config.env"
-    
+
+    # Allow dev_config.env to override project/region and optionally service name
+    PROJECT_ID="${DEV_PROJECT_ID:-$PROJECT_ID}"
+    REGION="${DEV_REGION:-$REGION}"
+    SERVICE_NAME="${DEV_SERVICE_NAME}"
+
     SPREADSHEET_ID="$DEV_SPREADSHEET_ID"
     LOGS_SPREADSHEET_ID="$DEV_LOGS_SPREADSHEET_ID"
     AUTHORIZED_USERS="$DEV_AUTHORIZED_USERS"
-    
+
     # Dev token file
     BOT_TOKEN_FILE="telegram_dev_token.txt"
     SECRET_NAME="telegram-bot-token-dev"
@@ -139,7 +147,7 @@ gcloud run deploy "$SERVICE_NAME" \
     --source . \
     --project="$PROJECT_ID" \
     --region="$REGION" \
-    --allow-unauthenticated \
+    # Deploy as a private service (omit --allow-unauthenticated so the service requires authentication).
     --min-instances=1 \
     --no-cpu-throttling \
     --memory=512Mi \
@@ -153,6 +161,8 @@ SERVICE_URL=$(gcloud run services describe "$SERVICE_NAME" --project="$PROJECT_I
 
 print_success "🎉 Deployment completed!"
 print_info "🌐 Service URL: $SERVICE_URL"
+
+print_info "📌 Deployed service name: $SERVICE_NAME"
 
 # Test the deployment
 print_info "🏥 Testing health check..."
