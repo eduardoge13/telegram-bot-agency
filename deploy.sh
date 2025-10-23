@@ -142,19 +142,9 @@ print_success "Bot token updated in Secret Manager"
 
 # Deploy to Cloud Run
 print_info "🚀 Deploying to Cloud Run..."
-
-gcloud run deploy "$SERVICE_NAME" \
-    --source . \
-    --project="$PROJECT_ID" \
-    --region="$REGION" \
-    # Deploy as a private service (omit --allow-unauthenticated so the service requires authentication).
-    --min-instances=1 \
-    --no-cpu-throttling \
-    --memory=512Mi \
-    --cpu=1000m \
-    --timeout=300 \
-    --set-env-vars="GCP_PROJECT_ID=$PROJECT_ID,SPREADSHEET_ID=$SPREADSHEET_ID,LOGS_SPREADSHEET_ID=$LOGS_SPREADSHEET_ID,AUTHORIZED_USERS=$AUTHORIZED_USERS" \
-    --quiet
+# Deploy to Cloud Run. We intentionally omit --allow-unauthenticated so the
+# service is private and requires authentication to invoke.
+gcloud run deploy "$SERVICE_NAME" --source . --project="$PROJECT_ID" --region="$REGION" --min-instances=1 --no-cpu-throttling --memory=512Mi --cpu=1000m --timeout=300 --set-env-vars="GCP_PROJECT_ID=$PROJECT_ID,SPREADSHEET_ID=$SPREADSHEET_ID,LOGS_SPREADSHEET_ID=$LOGS_SPREADSHEET_ID,AUTHORIZED_USERS=$AUTHORIZED_USERS" --quiet
 
 # Get service URL and test
 SERVICE_URL=$(gcloud run services describe "$SERVICE_NAME" --project="$PROJECT_ID" --region="$REGION" --format="value(status.url)")
