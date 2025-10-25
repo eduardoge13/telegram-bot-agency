@@ -748,8 +748,8 @@ class TelegramBot:
         # Minimum length for a recognized client number (in digits)
         self.min_client_digits = int(os.getenv('MIN_CLIENT_NUMBER_LENGTH', '3'))
 
-    # Pending notifications to avoid duplicate follow-ups: (chat_id, client_number)
-    self._pending_notifications = set()
+        # Pending notifications to avoid duplicate follow-ups: (chat_id, client_number)
+        self._pending_notifications = set()
 
         logger.info("✅ Bot initialized successfully")
 
