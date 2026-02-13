@@ -1,4 +1,5 @@
 import pytest
+import os
 from types import SimpleNamespace
 from telegram import Message, User, Chat
 from telegram.ext import ContextTypes
@@ -16,10 +17,11 @@ class DummyMessage:
 
 
 class DummyEntity:
-    def __init__(self, type, offset, length):
+    def __init__(self, type, offset=0, length=0, user=None):
         self.type = type
         self.offset = offset
         self.length = length
+        self.user = user
 
 
 class DummyUpdate:
@@ -34,9 +36,18 @@ class DummyContext:
         self.bot = SimpleNamespace()
 
 
+def build_test_bot():
+    tb = TelegramBot.__new__(TelegramBot)
+    tb.bot_info = None
+    tb.min_client_digits = 3
+    tb._normalize_phone = lambda raw: ''.join(ch for ch in str(raw) if ch.isdigit()).lstrip('0')
+    tb._get_normalize_fn = lambda: tb._normalize_phone
+    return tb
+
+
 @pytest.mark.asyncio
 async def test_extract_client_number():
-    tb = TelegramBot()
+    tb = build_test_bot()
     assert tb._extract_client_number('cliente 12345') == '12345'
     assert tb._extract_client_number('no digits') == ''
     assert tb._extract_client_number('id: 12') == ''  # default min length 3
@@ -44,7 +55,7 @@ async def test_extract_client_number():
 
 @pytest.mark.asyncio
 async def test_mention_detection():
-    tb = TelegramBot()
+    tb = build_test_bot()
     # set fake bot_info
     tb.bot_info = SimpleNamespace(username='mybot', id=999)
 
@@ -56,7 +67,7 @@ async def test_mention_detection():
 
 @pytest.mark.asyncio
 async def test_addressed_and_processed_text_private():
-    tb = TelegramBot()
+    tb = build_test_bot()
     msg = DummyMessage(text='12345')
     update = DummyUpdate(message=msg, chat_type='private')
     ctx = DummyContext()
@@ -68,7 +79,7 @@ async def test_addressed_and_processed_text_private():
 
 @pytest.mark.asyncio
 async def test_addressed_and_processed_text_mention():
-    tb = TelegramBot()
+    tb = build_test_bot()
     tb.bot_info = SimpleNamespace(username='mybot', id=999)
     msg = DummyMessage(text='@mybot 12345')
     update = DummyUpdate(message=msg, chat_type='group')
@@ -77,3 +88,28 @@ async def test_addressed_and_processed_text_mention():
     addressed, processed = await tb._addressed_and_processed_text(update, ctx)
     assert addressed is True
     assert '12345' in processed
+
+
+@pytest.mark.asyncio
+async def test_addressed_and_processed_text_group_direct_number_enabled(monkeypatch):
+    monkeypatch.setenv('ALLOW_DIRECT_GROUP_NUMBER', 'true')
+    tb = build_test_bot()
+    tb.bot_info = SimpleNamespace(username='mybot', id=999)
+    msg = DummyMessage(text='5536604547')
+    update = DummyUpdate(message=msg, chat_type='group')
+    ctx = DummyContext()
+
+    addressed, processed = await tb._addressed_and_processed_text(update, ctx)
+    assert addressed is True
+    assert processed == '5536604547'
+
+
+@pytest.mark.asyncio
+async def test_text_mention_detection():
+    tb = build_test_bot()
+    tb.bot_info = SimpleNamespace(username='mybot', id=999)
+
+    entity = DummyEntity(type='text_mention', user=SimpleNamespace(id=999))
+    msg = DummyMessage(text='hola bot 12345', entities=[entity])
+
+    assert tb._is_mentioned_in_message(msg) is True

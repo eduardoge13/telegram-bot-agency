@@ -781,6 +781,7 @@ class TelegramBot:
         self.bot_info = None  # To cache bot info
         # In-memory deduplication store to avoid processing duplicate messages
         self.recent_messages: Dict[str, float] = {}
+        self._recent_messages_lock = threading.Lock()
         self.dedupe_window = int(os.getenv('DEDUP_WINDOW_SECONDS', '30'))
         # Minimum length for a recognized client number (in digits)
         self.min_client_digits = int(os.getenv('MIN_CLIENT_NUMBER_LENGTH', '3'))
@@ -853,6 +854,10 @@ class TelegramBot:
                         mention_text = text[start:end]
                         if mention_text.lower() == f"@{bot_username}":
                             return True
+                    if ent.type == 'text_mention':
+                        mentioned_user = getattr(ent, 'user', None)
+                        if mentioned_user and self.bot_info and getattr(mentioned_user, 'id', None) == getattr(self.bot_info, 'id', None):
+                            return True
             except Exception:
                 continue
 
@@ -903,6 +908,18 @@ class TelegramBot:
                     return True, (raw_text or "").strip()
             except Exception:
                 logger.debug("Reply detection failed")
+
+            # Optional direct-number mode for groups: if the whole message looks
+            # like a client number, process it even without mention/reply.
+            try:
+                allow_direct_group = os.getenv('ALLOW_DIRECT_GROUP_NUMBER', 'true').lower() in ('1', 'true', 'yes')
+                raw_text = (message.text or message.caption or "").strip() if message is not None else ""
+                if allow_direct_group and raw_text:
+                    compact = re.sub(r"[\s\-\(\)\+]", "", raw_text)
+                    if compact.isdigit() and len(compact) >= self.min_client_digits:
+                        return True, raw_text
+            except Exception:
+                logger.debug("Direct-number detection in group failed")
 
         return False, ""
     
@@ -1154,22 +1171,23 @@ class TelegramBot:
             if update.message is not None:
                 raw_text = update.message.text or update.message.caption or ""
 
-            logger.info("Processing message from %s in %s: '%s'", user.first_name if user else 'Unknown', chat.type if chat else 'Unknown', (message_to_process or raw_text))
-
             if not is_addressed_to_bot:
                 return
+
+            logger.info("Processing message from %s in %s: '%s'", user.first_name if user else 'Unknown', chat.type if chat else 'Unknown', (message_to_process or raw_text))
 
             # Deduplication: avoid processing the same user+chat+text repeatedly within a short window
             try:
                 dedupe_text = message_to_process or raw_text
                 key = f"{chat.id}:{user.id}:{dedupe_text}"
                 now_ts = time.time()
-                # Clean old entries opportunistically
-                self.recent_messages = {k: v for k, v in self.recent_messages.items() if now_ts - v < self.dedupe_window}
-                if key in self.recent_messages and now_ts - self.recent_messages[key] < self.dedupe_window:
-                    logger.info("Ignoring duplicate message from %s in chat %s", user.id, chat.id)
-                    return
-                self.recent_messages[key] = now_ts
+                with self._recent_messages_lock:
+                    # Clean old entries opportunistically
+                    self.recent_messages = {k: v for k, v in self.recent_messages.items() if now_ts - v < self.dedupe_window}
+                    if key in self.recent_messages and now_ts - self.recent_messages[key] < self.dedupe_window:
+                        logger.info("Ignoring duplicate message from %s in chat %s", user.id, chat.id)
+                        return
+                    self.recent_messages[key] = now_ts
             except Exception:
                 logger.debug("Dedupe check failed, continuing")
 
@@ -1332,13 +1350,10 @@ class TelegramBot:
         self.application.add_handler(
             MessageHandler(filters.TEXT & ~filters.COMMAND & filters.ChatType.PRIVATE, self.handle_message)
         )
-        # 2. Replies to the bot in groups
+        # 2. Group messages are routed through a single handler and then gated by
+        # _addressed_and_processed_text (mention/reply/direct-number mode).
         self.application.add_handler(
-            MessageHandler(filters.TEXT & ~filters.COMMAND & filters.REPLY & filters.ChatType.GROUPS, self.handle_message)
-        )
-        # 3. Mentions in groups
-        self.application.add_handler(
-            MessageHandler(filters.TEXT & ~filters.COMMAND & filters.Entity("mention") & filters.ChatType.GROUPS, self.handle_message)
+            MessageHandler(filters.TEXT & ~filters.COMMAND & filters.ChatType.GROUPS, self.handle_message)
         )
         
         logger.info("✅ All handlers setup complete")
