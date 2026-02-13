@@ -144,7 +144,39 @@ print_success "Bot token updated in Secret Manager"
 print_info "🚀 Deploying to Cloud Run..."
 # Deploy to Cloud Run. We intentionally omit --allow-unauthenticated so the
 # service is private and requires authentication to invoke.
-gcloud run deploy "$SERVICE_NAME" --source . --project="$PROJECT_ID" --region="$REGION" --min-instances=1 --no-cpu-throttling --memory=512Mi --cpu=1000m --timeout=300 --set-env-vars="GCP_PROJECT_ID=$PROJECT_ID,SPREADSHEET_ID=$SPREADSHEET_ID,LOGS_SPREADSHEET_ID=$LOGS_SPREADSHEET_ID,AUTHORIZED_USERS=$AUTHORIZED_USERS" --quiet
+# Create a temporary env file and use --env-vars-file to avoid issues with
+# commas and quoting inside environment variable values.
+TMP_ENV_FILE=$(mktemp /tmp/telegram-env.XXXX.yaml)
+cat > "$TMP_ENV_FILE" <<EOF
+GCP_PROJECT_ID: "$PROJECT_ID"
+SPREADSHEET_ID: "$SPREADSHEET_ID"
+LOGS_SPREADSHEET_ID: "$LOGS_SPREADSHEET_ID"
+AUTHORIZED_USERS: "$AUTHORIZED_USERS"
+INDEX_TTL_SECONDS: "1800"
+ROW_CACHE_SIZE: "100"
+SHEETS_THREAD_WORKERS: "2"
+SHEETS_RETRY_ATTEMPTS: "3"
+SHEETS_RETRY_BASE_DELAY: "0.5"
+EOF
+
+print_info "Using env file: $TMP_ENV_FILE"
+# Deploy with min-instances=1 for polling mode (required for continuous polling)
+# Polling mode cannot scale to zero as it actively fetches updates
+gcloud run deploy "$SERVICE_NAME" \
+    --source . \
+    --project="$PROJECT_ID" \
+    --region="$REGION" \
+    --min-instances=1 \
+    --max-instances=1 \
+    --no-cpu-throttling \
+    --memory=512Mi \
+    --cpu=1000m \
+    --timeout=300 \
+    --env-vars-file="$TMP_ENV_FILE" \
+    --quiet
+
+# Clean up temp file
+rm -f "$TMP_ENV_FILE"
 
 # Get service URL and test
 SERVICE_URL=$(gcloud run services describe "$SERVICE_NAME" --project="$PROJECT_ID" --region="$REGION" --format="value(status.url)")

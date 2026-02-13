@@ -11,7 +11,6 @@ import json
 import time
 import threading
 from concurrent.futures import ThreadPoolExecutor
-import asyncio
 import pytz
 import re
 from typing import Dict, Any, Optional, List, Tuple
@@ -34,6 +33,7 @@ import telegram
 # Google Sheets imports
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
 
 # Configuration
 MEXICO_CITY_TZ = pytz.timezone("America/Mexico_City")
@@ -51,6 +51,13 @@ def setup_logging():
         format='[%(asctime)s] %(levelname)s | %(name)s | %(message)s',
         handlers=[logging.StreamHandler(sys.stdout)]
     )
+    
+    # Reduce noisy HTTP client logs (99% log reduction)
+    logging.getLogger('httpx').setLevel(logging.WARNING)
+    logging.getLogger('httpcore').setLevel(logging.WARNING)
+    logging.getLogger('urllib3').setLevel(logging.WARNING)
+    logging.getLogger('telegram.ext._updater').setLevel(logging.WARNING)
+    
     # Log key runtime versions for diagnostics
     logging.getLogger(__name__).info(
         "Runtime versions -> python-telegram-bot=%s, python=%s",
@@ -343,6 +350,8 @@ class GoogleSheetsManager:
         self.row_cache: OrderedDict = OrderedDict()
         # Default row cache reduced for small-memory Cloud Run instances (512Mi)
         self.row_cache_size = int(os.getenv('ROW_CACHE_SIZE', '200'))
+        self.sheets_retry_attempts = int(os.getenv('SHEETS_RETRY_ATTEMPTS', '3'))
+        self.sheets_retry_base_delay = float(os.getenv('SHEETS_RETRY_BASE_DELAY', '0.5'))
         # Minimum digits for client number (consistency with TelegramBot)
         self.min_client_digits = int(os.getenv('MIN_CLIENT_NUMBER_LENGTH', '3'))
         self._authenticate()
@@ -350,6 +359,10 @@ class GoogleSheetsManager:
         self._index_lock = threading.Lock()
         # Lock protecting row cache accesses
         self._row_cache_lock = threading.Lock()
+        # Lock to ensure only one index build runs at a time
+        self._index_build_lock = threading.Lock()
+        # Flag used by handlers to know if index is warming
+        self._index_warming = False
         # Executor for background blocking IO tasks
         self._executor = ThreadPoolExecutor(max_workers=int(os.getenv('SHEETS_THREAD_WORKERS', '4')))
         # Start background refresher thread to keep index warm
@@ -362,6 +375,108 @@ class GoogleSheetsManager:
             except Exception as e:
                 logger.warning(f"⚠️ Could not load index at startup: {e}")
 
+    def _is_retryable_error(self, error: Exception) -> bool:
+        if isinstance(error, BrokenPipeError):
+            return True
+        if isinstance(error, HttpError):
+            try:
+                status = int(getattr(error.resp, 'status', 0))
+                return status in (408, 429, 500, 502, 503, 504)
+            except Exception:
+                return False
+        message = str(error).lower()
+        retryable_tokens = (
+            'broken pipe',
+            'connection reset',
+            'connection aborted',
+            'temporarily unavailable',
+            'timed out',
+            'timeout',
+            'eof occurred in violation of protocol'
+        )
+        return any(token in message for token in retryable_tokens)
+
+    def _execute_with_retry(self, request, operation_name: str):
+        attempts = max(1, self.sheets_retry_attempts)
+        last_error = None
+        for attempt in range(1, attempts + 1):
+            try:
+                return request.execute()
+            except Exception as e:
+                last_error = e
+                if not self._is_retryable_error(e) or attempt == attempts:
+                    raise
+                delay = self.sheets_retry_base_delay * (2 ** (attempt - 1))
+                logger.warning(
+                    f"⚠️ {operation_name} failed (attempt {attempt}/{attempts}): {e}. Retrying in {delay:.1f}s"
+                )
+                time.sleep(delay)
+        if last_error:
+            raise last_error
+
+    def _schedule_index_rebuild(self, reason: str):
+        if self._index_warming:
+            return
+
+        self._index_warming = True
+        logger.info(f"ℹ️ Scheduling background index rebuild ({reason})")
+
+        def _bg_build():
+            try:
+                with self._index_build_lock:
+                    self.load_index()
+            except Exception as e:
+                logger.warning(f"⚠️ Background index rebuild failed: {e}")
+            finally:
+                self._index_warming = False
+
+        self._executor.submit(_bg_build)
+
+    def _col_to_letter(self, col_idx: int) -> str:
+        n = int(col_idx) + 1
+        letters = []
+        while n > 0:
+            n, remainder = divmod(n - 1, 26)
+            letters.append(chr(65 + remainder))
+        return ''.join(reversed(letters))
+
+    def _fetch_row_client_data(self, row_num: int) -> Optional[Dict[str, str]]:
+        if row_num <= 0:
+            return None
+
+        if row_num in self.row_cache:
+            with self._row_cache_lock:
+                entry = self.row_cache.pop(row_num)
+                self.row_cache[row_num] = entry
+            return entry
+
+        max_col_idx = max(3, len(self.headers) - 1) if self.headers else 3
+        end_col = self._col_to_letter(max_col_idx)
+        rng = f"Sheet1!A{row_num}:{end_col}{row_num}"
+        result = self._execute_with_retry(
+            self.service.spreadsheets().values().get(
+                spreadsheetId=self.spreadsheet_id,
+                range=rng
+            ),
+            f"fetch row {row_num}"
+        )
+        values = result.get('values', [])
+        if not values:
+            return None
+
+        row = values[0]
+        headers = self.headers if self.headers else ['client phone number', 'cliente', 'correo', 'other info']
+        client_data = {}
+        for i, hdr in enumerate(headers):
+            client_data[hdr] = row[i].strip() if i < len(row) and row[i] is not None else ''
+
+        with self._row_cache_lock:
+            self.row_cache[row_num] = client_data
+            while len(self.row_cache) > self.row_cache_size:
+                self.row_cache.popitem(last=False)
+
+        return client_data
+
     def _start_index_refresher(self):
         def refresher():
             while True:
@@ -369,12 +484,7 @@ class GoogleSheetsManager:
                     time.sleep(max(10, self.index_ttl))
                     if self.service and self.spreadsheet_id:
                         logger.debug('Index refresher: refreshing lightweight index')
-                        try:
-                            # Offload heavy index build to executor to avoid blocking
-                            t = threading.Thread(target=self.load_index, daemon=True)
-                            t.start()
-                        except Exception as e:
-                            logger.debug(f'Index refresher error: {e}')
+                        self._schedule_index_rebuild('periodic refresher')
                 except Exception:
                     # keep loop alive
                     time.sleep(5)
@@ -448,81 +558,76 @@ class GoogleSheetsManager:
 
         This reads the sheet once and builds a dictionary for O(1) lookups.
         """
-        if not self.service or not self.spreadsheet_id:
-            logger.warning("⚠️ Cannot load index: Sheets service or spreadsheet ID missing")
-            return
-
-        # Read header row to get column names (assume simple 4-column sheet A:D)
-        result = self.service.spreadsheets().values().get(
-            spreadsheetId=self.spreadsheet_id,
-            range='Sheet1!A1:D1'
-        ).execute()
-        headers = result.get('values', [[]])[0]
-        if not headers:
-            logger.warning("⚠️ No headers found when loading index")
-            return
-
-        # For large sheets, avoid loading full rows into memory.
-        # We'll build a lightweight index: normalized_phone -> row_number
-        cache_path = f"/tmp/sheets_index_rows_{self.spreadsheet_id}.json"
         try:
-            if os.path.exists(cache_path):
-                with open(cache_path, 'r', encoding='utf-8') as f:
-                    cached = json.load(f)
-                ts = cached.get('_ts', 0)
-                if time.time() - ts < self.index_ttl:
-                    # load phone->row mapping
-                    with self._index_lock:
-                        self.index_phone_to_row = cached.get('index', {})
-                        self.index_timestamp = ts
-                    logger.info(f"✅ Loaded lightweight index from cache with {len(self.index_phone_to_row)} entries")
-                    return
-        except Exception:
-            logger.debug("No valid lightweight cache available, will rebuild index")
+            if not self.service or not self.spreadsheet_id:
+                logger.warning("⚠️ Cannot load index: Sheets service or spreadsheet ID missing")
+                return
 
-        # Determine which column to use for phones (default to A)
-        try:
-            col_idx = self.client_column if hasattr(self, 'client_column') and self.client_column is not None else 0
-            # clamp
-            if col_idx < 0:
-                col_idx = 0
-            column_letter = chr(ord('A') + int(col_idx))
-        except Exception:
-            column_letter = 'A'
+            # Read full header row to keep response mapping aligned with sheet structure
+            header_result = self._execute_with_retry(
+                self.service.spreadsheets().values().get(
+                    spreadsheetId=self.spreadsheet_id,
+                    range='Sheet1!1:1'
+                ),
+                'read sheet headers for index'
+            )
+            headers = header_result.get('values', [[]])[0]
+            if not headers:
+                logger.warning("⚠️ No headers found when loading index")
+                return
+            self.headers = headers
 
-        # Read only the detected column (phones) to minimize payload
-        try:
-            result = self.service.spreadsheets().values().get(
-                spreadsheetId=self.spreadsheet_id,
-                range=f'Sheet1!{column_letter}2:{column_letter}'
-            ).execute()
-        except Exception as e:
-            logger.error(f"❌ Error reading phone column '{column_letter}': {e}")
-            return
+            cache_path = f"/tmp/sheets_index_rows_{self.spreadsheet_id}.json"
+            try:
+                if os.path.exists(cache_path):
+                    with open(cache_path, 'r', encoding='utf-8') as f:
+                        cached = json.load(f)
+                    ts = cached.get('_ts', 0)
+                    if time.time() - ts < self.index_ttl:
+                        with self._index_lock:
+                            self.index_phone_to_row = cached.get('index', {})
+                            self.index_timestamp = ts
+                        logger.info(f"✅ Loaded lightweight index from cache with {len(self.index_phone_to_row)} entries")
+                        return
+            except Exception:
+                logger.debug("No valid lightweight cache available, will rebuild index")
 
-        phones = result.get('values', [])
-        index_map: Dict[str, int] = {}
-        # Phones correspond to rows starting at 2
-        for i, row in enumerate(phones, start=2):
-            raw_phone = row[0] if row and len(row) > 0 else ''
-            normalized = self._normalize_phone(raw_phone)
-            if normalized:
-                index_map[normalized] = i
+            try:
+                col_idx = self.client_column if hasattr(self, 'client_column') and self.client_column is not None else 0
+                if col_idx < 0:
+                    col_idx = 0
+                column_letter = self._col_to_letter(int(col_idx))
+            except Exception:
+                column_letter = 'A'
 
-        with self._index_lock:
-            self.index_phone_to_row = index_map
-            self.index_timestamp = time.time()
+            result = self._execute_with_retry(
+                self.service.spreadsheets().values().get(
+                    spreadsheetId=self.spreadsheet_id,
+                    range=f'Sheet1!{column_letter}2:{column_letter}'
+                ),
+                f"read phone column {column_letter}"
+            )
 
-        # persist cache
-        try:
+            phones = result.get('values', [])
+            index_map: Dict[str, int] = {}
+            for i, row in enumerate(phones, start=2):
+                raw_phone = row[0] if row and len(row) > 0 else ''
+                normalized = self._normalize_phone(raw_phone)
+                if normalized:
+                    index_map[normalized] = i
+
+            with self._index_lock:
+                self.index_phone_to_row = index_map
+                self.index_timestamp = time.time()
+
             try:
                 with open(cache_path, 'w', encoding='utf-8') as f:
                     json.dump({'_ts': self.index_timestamp, 'index': self.index_phone_to_row}, f)
+                logger.info(f"✅ Lightweight index built with {len(self.index_phone_to_row)} entries (cached)")
             except Exception:
-                pass
-            logger.info(f"✅ Lightweight index built with {len(self.index_phone_to_row)} entries (cached)")
-        except Exception:
-            logger.info(f"✅ Lightweight index built with {len(self.index_phone_to_row)} entries")
+                logger.info(f"✅ Lightweight index built with {len(self.index_phone_to_row)} entries")
+        except Exception as e:
+            logger.warning(f"⚠️ load_index failed: {e}")
 
     def _ensure_index(self):
         now = time.time()
@@ -539,31 +644,11 @@ class GoogleSheetsManager:
                 # first time we notice the index is empty. Handlers can check
                 # `self._index_warming` to provide a friendly message to users
                 # while the index is being built.
-                if not getattr(self, '_index_warming', False):
-                    logger.info('ℹ️ Index empty: scheduling background rebuild')
-                    self._index_warming = True
-
-                    def _bg_build():
-                        try:
-                            # Run the heavy load_index inside the executor so we don't
-                            # spawn too many threads and we get managed pooling.
-                            fut = self._executor.submit(self.load_index)
-                            fut.result()
-                        except Exception as e:
-                            logger.debug(f'Background index build failed: {e}')
-                        finally:
-                            try:
-                                self._index_warming = False
-                            except Exception:
-                                pass
-
-                    t = threading.Thread(target=_bg_build, daemon=True)
-                    t.start()
+                self._schedule_index_rebuild('index empty')
                 # Return without blocking; callers should handle the None response
                 return
             elif stale:
-                # let background refresher update soon; don't block
-                logger.debug('Index is stale; background refresher will update it')
+                self._schedule_index_rebuild('index stale')
         except Exception as e:
             logger.warning(f"⚠️ Failed to check/refresh index: {e}")
     
@@ -577,37 +662,7 @@ class GoogleSheetsManager:
             with self._index_lock:
                 row_num = self.index_phone_to_row.get(normalized)
             if row_num:
-                # check row cache
-                if row_num in self.row_cache:
-                    # move to end (recent)
-                    with self._row_cache_lock:
-                        entry = self.row_cache.pop(row_num)
-                        self.row_cache[row_num] = entry
-                    return entry
-
-                # fetch only the single row A:D
-                rng = f"Sheet1!A{row_num}:D{row_num}"
-                result = self.service.spreadsheets().values().get(
-                    spreadsheetId=self.spreadsheet_id,
-                    range=rng
-                ).execute()
-                values = result.get('values', [])
-                if not values:
-                    return None
-                row = values[0]
-                client_data = {}
-                # ensure headers exist
-                for i, hdr in enumerate(self.headers[:4]):
-                    client_data[hdr] = row[i].strip() if i < len(row) and row[i] is not None else ''
-
-                # update LRU cache
-                with self._row_cache_lock:
-                    self.row_cache[row_num] = client_data
-                    # evict if oversized
-                    while len(self.row_cache) > self.row_cache_size:
-                        self.row_cache.popitem(last=False)
-
-                return client_data
+                return self._fetch_row_client_data(row_num)
 
             # Fallback: attempt suffix matching before rebuilding the index.
             # This helps when sheet stores numbers with country code or extra prefixes.
@@ -627,6 +682,7 @@ class GoogleSheetsManager:
 
                     if best_match_row:
                         row_num = best_match_row
+                        return self._fetch_row_client_data(row_num)
             except Exception:
                 logger.debug("Suffix matching fallback failed; will rebuild index if needed")
 
@@ -638,26 +694,7 @@ class GoogleSheetsManager:
                 if not self.service:
                     return None
 
-                if not getattr(self, '_index_warming', False):
-                    logger.info("ℹ️ Client not found in index — scheduling background rebuild")
-                    self._index_warming = True
-
-                    def _bg_build():
-                        try:
-                            fut = None
-                            try:
-                                fut = self._executor.submit(self.load_index)
-                                fut.result()
-                            except Exception as e:
-                                logger.debug(f'Background rebuild failed: {e}')
-                        finally:
-                            try:
-                                self._index_warming = False
-                            except Exception:
-                                pass
-
-                    t = threading.Thread(target=_bg_build, daemon=True)
-                    t.start()
+                self._schedule_index_rebuild('client not found')
 
                 logger.info(f"❌ Client '{client_number}' not found; background rebuild scheduled")
                 return None
@@ -1187,7 +1224,7 @@ class TelegramBot:
                 except Exception:
                     logger.debug('Failed to enqueue persistent log')
                 
-                # Build an HTML-safe response (escape any user/sheet content)
+                # Build an HTML-safe response with new format
                 field_mappings = {
                     'client phone number': 'Número 📞',
                     'cliente': 'Cliente 🙋🏻‍♀️',
@@ -1196,16 +1233,16 @@ class TelegramBot:
                 }
 
                 parts = []
-                parts.append(f"✅ <b>Cliente encontrado:</b> <code>{safe_html(client_number)}</code>")
+                parts.append("✅ <b>Cliente encontrado</b>")
                 parts.append("")
 
                 for key, value in client_data.items():
                     display_key = field_mappings.get(key.lower().strip(), key.strip())
-                    parts.append(f"<b>{safe_html(display_key)}:</b> {safe_html(value)}")
+                    parts.append(f"{safe_html(display_key)}: {safe_html(value)}")
 
                 user_display = f"@{getattr(user, 'username', '')}" if getattr(user, 'username', None) else safe_html(getattr(user, 'first_name', ''))
                 parts.append("")
-                parts.append(f"<b>Buscado por:</b> {safe_html(user_display)}")
+                parts.append(f"Buscado por: {safe_html(user_display)}")
 
                 response_html = "\n".join(parts)
 
@@ -1358,17 +1395,25 @@ class TelegramBot:
 
             if client_data:
                 # Build response same as in main handler
+                field_mappings = {
+                    'client phone number': 'Número 📞',
+                    'cliente': 'Cliente 🙋🏻‍♀️',
+                    'correo': 'Correo ✉️',
+                    'other info': 'Otra Información ℹ️'
+                }
+                
                 parts = []
-                parts.append(f"✅ <b>Cliente encontrado:</b> <code>{safe_html(client_number)}</code>")
+                parts.append("✅ <b>Cliente encontrado</b>")
                 parts.append("")
                 for key_name, value in client_data.items():
-                    parts.append(f"<b>{safe_html(key_name)}:</b> {safe_html(value)}")
+                    display_key = field_mappings.get(key_name.lower().strip(), key_name.strip())
+                    parts.append(f"{safe_html(display_key)}: {safe_html(value)}")
                 response_html = "\n".join(parts)
                 try:
                     await bot.send_message(chat_id=chat_id, text=response_html, parse_mode='HTML', reply_to_message_id=reply_to_message_id)
                 except Exception:
                     try:
-                        await bot.send_message(chat_id=chat_id, text=f"✅ Cliente encontrado: {safe_html(client_number)}")
+                        await bot.send_message(chat_id=chat_id, text="✅ Cliente encontrado")
                     except Exception:
                         logger.debug('Failed to send followup found message')
             else:

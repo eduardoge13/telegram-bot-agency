@@ -7,8 +7,9 @@ A simple and reliable Telegram bot that helps your team find client information 
 - 🔍 **Smart Search**: Find clients by their number or ID
 - 📊 **Live Data**: Always shows the latest information from your Google Sheet
 - 👥 **Team Ready**: Works for multiple people at the same time
-- 🚀 **24/7 Available**: Runs in the cloud so your team can access it anytime
+- 🚀 **24/7 Available**: Runs in the cloud, scales automatically
 - 📱 **Easy to Use**: Just message the bot - no complicated commands needed
+- 💰 **Cost Efficient**: Scales to zero when idle - only pay when used
 
 ## 🎯 Perfect For
 
