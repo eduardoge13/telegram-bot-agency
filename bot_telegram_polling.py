@@ -26,8 +26,8 @@ except ImportError:
     pass
 
 # Telegram imports
-from telegram import Update, Chat
-from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
+from telegram import Update, Chat, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQueryHandler, filters, ContextTypes, ConversationHandler
 import telegram
 
 # Google Sheets imports
@@ -38,6 +38,10 @@ from googleapiclient.errors import HttpError
 # Configuration
 MEXICO_CITY_TZ = pytz.timezone("America/Mexico_City")
 logger = logging.getLogger(__name__)
+
+# Conversation states for bank update flow
+WAITING_FOR_BANK_NAME = 1
+WAITING_FOR_BANK_CONFIRMATION = 2
 
 def setup_logging():
     # Allow enabling DEBUG via environment variable DEBUG=1 or DEBUG=true
@@ -465,7 +469,7 @@ class GoogleSheetsManager:
             return None
 
         row = values[0]
-        headers = self.headers if self.headers else ['client phone number', 'cliente', 'correo', 'other info']
+        headers = self.headers if self.headers else ['client phone number', 'cliente', 'correo', 'banco']
         client_data = {}
         for i, hdr in enumerate(headers):
             client_data[hdr] = row[i].strip() if i < len(row) and row[i] is not None else ''
@@ -505,8 +509,8 @@ class GoogleSheetsManager:
                 logger.info("Using Google Sheets credentials from Secret Manager")
                 credentials_data = json.loads(credentials_json)
                 creds = Credentials.from_service_account_info(
-                    credentials_data, 
-                    scopes=['https://www.googleapis.com/auth/spreadsheets.readonly']
+                    credentials_data,
+                    scopes=['https://www.googleapis.com/auth/spreadsheets']
                 )
             else:
                 raise ValueError("❌ Failed to fetch 'google-credentials-json' from Secret Manager.")
@@ -722,15 +726,15 @@ class GoogleSheetsManager:
                 return {'total_clients': 0, 'headers': [], 'client_column': 'Unknown'}
             if not self.service:
                 return {'total_clients': 0, 'headers': [], 'client_column': 'Unknown'}
-            
+
             result = self.service.spreadsheets().values().get(
                 spreadsheetId=self.spreadsheet_id,
                 range='Sheet1!A:A'
             ).execute()
-            
+
             values = result.get('values', [])
             total_rows = len(values) - 1
-            
+
             return {
                 'total_clients': max(0, total_rows),
                 'headers': self.headers,
@@ -739,6 +743,90 @@ class GoogleSheetsManager:
         except Exception as e:
             logger.error(f"Error getting sheet info: {e}")
             return {'total_clients': 0, 'headers': [], 'client_column': 'Unknown'}
+
+    def update_bank(self, client_number: str, bank_name: str) -> tuple[bool, str]:
+        """Update the bank field for a specific client
+
+        Returns:
+            tuple[bool, str]: (success, error_message)
+        """
+        try:
+            if not self.service or not self.spreadsheet_id:
+                error_msg = "Servicio de Sheets no disponible"
+                logger.error(f"❌ Cannot update bank: Sheets service or spreadsheet ID missing")
+                return False, error_msg
+
+            # Find the row number for the client
+            self._ensure_index()
+            normalized = self._normalize_phone(client_number)
+            if not normalized:
+                error_msg = "No se pudo normalizar el número de teléfono"
+                return False, error_msg
+
+            with self._index_lock:
+                row_num = self.index_phone_to_row.get(normalized)
+
+            if not row_num:
+                error_msg = f"Cliente {client_number} no encontrado en el índice"
+                logger.error(f"❌ Client {client_number} not found in index")
+                return False, error_msg
+
+            # Find the bank column index (supports 'bank' or 'banco')
+            bank_column_idx = None
+            logger.info(f"🔍 Searching for bank column in headers: {self.headers}")
+            for i, header in enumerate(self.headers):
+                header_lower = header.lower()
+                logger.debug(f"  - Checking header[{i}]: '{header}' (lower: '{header_lower}')")
+                if 'banco' in header_lower or 'bank' in header_lower:
+                    bank_column_idx = i
+                    logger.info(f"✅ Found bank column at index {i}: '{header}'")
+                    break
+
+            if bank_column_idx is None:
+                error_msg = f"Columna 'banco' no encontrada. Columnas disponibles: {', '.join(self.headers)}"
+                logger.error(f"❌ Bank column not found in headers: {self.headers}")
+                return False, error_msg
+
+            # Update the cell
+            column_letter = self._col_to_letter(bank_column_idx)
+            cell_range = f"Sheet1!{column_letter}{row_num}"
+
+            self._execute_with_retry(
+                self.service.spreadsheets().values().update(
+                    spreadsheetId=self.spreadsheet_id,
+                    range=cell_range,
+                    valueInputOption='RAW',
+                    body={'values': [[bank_name]]}
+                ),
+                f"update bank for client {client_number}"
+            )
+
+            # Update row cache if present
+            with self._row_cache_lock:
+                if row_num in self.row_cache:
+                    self.row_cache[row_num]['banco'] = bank_name
+
+            logger.info(f"✅ Successfully updated bank for client {client_number} to {bank_name}")
+            return True, ""
+
+        except Exception as e:
+            error_msg = f"Error al actualizar: {str(e)}"
+            logger.error(f"❌ Error updating bank for client {client_number}: {e}")
+            return False, error_msg
+
+    async def update_bank_async(self, client_number: str, bank_name: str) -> tuple[bool, str]:
+        """Async wrapper for update_bank
+
+        Returns:
+            tuple[bool, str]: (success, error_message)
+        """
+        try:
+            loop = asyncio.get_running_loop()
+            return await loop.run_in_executor(self._executor, self.update_bank, client_number, bank_name)
+        except Exception as e:
+            error_msg = f"Error en operación asíncrona: {str(e)}"
+            logger.error(f"❌ Async update_bank error: {e}")
+            return False, error_msg
 
 class TelegramBot:
     def __init__(self):
@@ -788,6 +876,11 @@ class TelegramBot:
 
         # Pending notifications to avoid duplicate follow-ups: (chat_id, client_number)
         self._pending_notifications = set()
+
+        # Bank update conversation tracking: chat_id -> {'client_number': str, 'attempts': int, 'bank_name': str}
+        self._bank_conversations: Dict[int, Dict[str, Any]] = {}
+        self._bank_conversations_lock = threading.Lock()
+        self.max_bank_input_attempts = int(os.getenv('MAX_BANK_INPUT_ATTEMPTS', '3'))
 
         logger.info("✅ Bot initialized successfully")
 
@@ -874,6 +967,25 @@ class TelegramBot:
                 return m
         return ""
 
+    def _is_direct_group_phone_candidate(self, raw_text: str) -> bool:
+        """Validate whether a group message looks like a standalone phone number.
+
+        Accept only digits with common separators and enforce realistic length
+        to avoid accidental triggers on casual group messages.
+        """
+        if not raw_text:
+            return False
+
+        text = raw_text.strip()
+        # Only allow digits and common phone separators when using direct mode
+        if not re.fullmatch(r"[\d\s\-\(\)\+]+", text):
+            return False
+
+        digits = ''.join(ch for ch in text if ch.isdigit())
+        min_digits = int(os.getenv('MIN_GROUP_DIRECT_DIGITS', '10'))
+        max_digits = int(os.getenv('MAX_GROUP_DIRECT_DIGITS', '15'))
+        return min_digits <= len(digits) <= max_digits
+
     async def _addressed_and_processed_text(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> Tuple[bool, str]:
         """Return (is_addressed, processed_text).
 
@@ -914,10 +1026,8 @@ class TelegramBot:
             try:
                 allow_direct_group = os.getenv('ALLOW_DIRECT_GROUP_NUMBER', 'true').lower() in ('1', 'true', 'yes')
                 raw_text = (message.text or message.caption or "").strip() if message is not None else ""
-                if allow_direct_group and raw_text:
-                    compact = re.sub(r"[\s\-\(\)\+]", "", raw_text)
-                    if compact.isdigit() and len(compact) >= self.min_client_digits:
-                        return True, raw_text
+                if allow_direct_group and self._is_direct_group_phone_candidate(raw_text):
+                    return True, raw_text
             except Exception:
                 logger.debug("Direct-number detection in group failed")
 
@@ -1174,6 +1284,17 @@ class TelegramBot:
             if not is_addressed_to_bot:
                 return
 
+            # Check if we're in a bank conversation first
+            chat_id = getattr(chat, 'id', None)
+            if chat_id:
+                with self._bank_conversations_lock:
+                    in_bank_conversation = chat_id in self._bank_conversations
+
+                if in_bank_conversation:
+                    # Route to bank input handler
+                    await self.handle_bank_input(update, context)
+                    return
+
             logger.info("Processing message from %s in %s: '%s'", user.first_name if user else 'Unknown', chat.type if chat else 'Unknown', (message_to_process or raw_text))
 
             # Deduplication: avoid processing the same user+chat+text repeatedly within a short window
@@ -1247,7 +1368,7 @@ class TelegramBot:
                     'client phone number': 'Número 📞',
                     'cliente': 'Cliente 🙋🏻‍♀️',
                     'correo': 'Correo ✉️',
-                    'other info': 'Otra Información ℹ️'
+                    'banco': 'Banco 🏦'
                 }
 
                 parts = []
@@ -1271,6 +1392,47 @@ class TelegramBot:
                         await context.bot.send_message(chat_id=getattr(update.effective_chat, 'id', None), text=response_html, parse_mode='HTML')
                     except Exception:
                         logger.debug('Failed to send search response')
+
+                # Check if bank is missing and offer to add it
+                try:
+                    bank_value = client_data.get('banco', '').strip()
+                    if not bank_value:
+                        # Bank is missing, offer to add it
+                        chat_id = getattr(update.effective_chat, 'id', None)
+                        if chat_id:
+                            # Initialize conversation state
+                            with self._bank_conversations_lock:
+                                self._bank_conversations[chat_id] = {
+                                    'client_number': client_number,
+                                    'attempts': 0,
+                                    'bank_name': ''
+                                }
+
+                            keyboard = [
+                                [
+                                    InlineKeyboardButton("✅ Sí", callback_data="add_bank_yes"),
+                                    InlineKeyboardButton("❌ No", callback_data="add_bank_no")
+                                ]
+                            ]
+                            reply_markup = InlineKeyboardMarkup(keyboard)
+
+                            try:
+                                await update.message.reply_text(
+                                    f"ℹ️ Este cliente no tiene banco registrado. ¿Deseas agregar el banco?",
+                                    reply_markup=reply_markup,
+                                    reply_to_message_id=getattr(update.message, 'message_id', None)
+                                )
+                            except Exception:
+                                try:
+                                    await context.bot.send_message(
+                                        chat_id=chat_id,
+                                        text=f"ℹ️ Este cliente no tiene banco registrado. ¿Deseas agregar el banco?",
+                                        reply_markup=reply_markup
+                                    )
+                                except Exception:
+                                    logger.debug('Failed to send bank prompt')
+                except Exception as e:
+                    logger.debug(f'Failed to check/prompt for missing bank: {e}')
             else:
                 # If a background rebuild was scheduled by the sheets manager,
                 # tell the user we scheduled an index refresh and set up a
@@ -1334,7 +1496,168 @@ class TelegramBot:
                 await update.message.reply_text("❌ Error interno procesando el mensaje.")
             except:
                 pass
-    
+
+    async def handle_bank_callback(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Handle inline keyboard callback for bank update"""
+        query = update.callback_query
+        await query.answer()
+
+        try:
+            chat_id = update.effective_chat.id
+            user = update.effective_user
+
+            if query.data == "add_bank_yes":
+                # User wants to add bank, get client number from conversation state
+                with self._bank_conversations_lock:
+                    if chat_id not in self._bank_conversations:
+                        await query.edit_message_text("❌ Sesión expirada. Por favor, busca el cliente nuevamente.")
+                        return
+
+                    conv_data = self._bank_conversations[chat_id]
+                    client_number = conv_data.get('client_number')
+
+                EnhancedUserActivityLogger.log_user_action(update, "BANK_UPDATE_START", f"Client: {client_number}")
+
+                await query.edit_message_text(
+                    f"✏️ Por favor, envía el nombre del banco para el cliente <code>{safe_html(client_number)}</code>:",
+                    parse_mode='HTML'
+                )
+
+            elif query.data == "add_bank_no":
+                # User doesn't want to add bank
+                with self._bank_conversations_lock:
+                    if chat_id in self._bank_conversations:
+                        client_number = self._bank_conversations[chat_id].get('client_number', '')
+                        del self._bank_conversations[chat_id]
+
+                EnhancedUserActivityLogger.log_user_action(update, "BANK_UPDATE_DECLINED", f"Client: {client_number}")
+                await query.edit_message_text("✅ Entendido. No se actualizará el banco.")
+
+            elif query.data.startswith("confirm_bank_"):
+                # User confirmed the bank name
+                action = query.data.split("_", 2)[2]  # yes or no
+
+                with self._bank_conversations_lock:
+                    if chat_id not in self._bank_conversations:
+                        await query.edit_message_text("❌ Sesión expirada. Por favor, busca el cliente nuevamente.")
+                        return
+
+                    conv_data = self._bank_conversations[chat_id]
+                    client_number = conv_data.get('client_number')
+                    bank_name = conv_data.get('bank_name', '')
+
+                if action == "yes":
+                    # Update the bank in Google Sheets
+                    await query.edit_message_text("🔄 Actualizando banco en Google Sheets...")
+
+                    success, error_message = await self.sheets_manager.update_bank_async(client_number, bank_name)
+
+                    if success:
+                        EnhancedUserActivityLogger.log_user_action(
+                            update,
+                            "BANK_UPDATED",
+                            f"Client: {client_number}, Bank: {bank_name}",
+                            client_number=client_number,
+                            success="SUCCESS"
+                        )
+                        await query.edit_message_text(
+                            f"✅ <b>Banco actualizado exitosamente</b>\n\n"
+                            f"Cliente: <code>{safe_html(client_number)}</code>\n"
+                            f"Banco: {safe_html(bank_name)}",
+                            parse_mode='HTML'
+                        )
+                    else:
+                        EnhancedUserActivityLogger.log_user_action(
+                            update,
+                            "BANK_UPDATE_FAILED",
+                            f"Client: {client_number}, Bank: {bank_name}, Error: {error_message}",
+                            client_number=client_number,
+                            success="FAILURE"
+                        )
+                        await query.edit_message_text(
+                            f"❌ <b>No pude actualizar el banco</b>\n\n"
+                            f"<b>Error:</b> {safe_html(error_message)}\n\n"
+                            f"Por favor, verifica la configuración del Sheet.",
+                            parse_mode='HTML'
+                        )
+
+                    # Clean up conversation state
+                    with self._bank_conversations_lock:
+                        if chat_id in self._bank_conversations:
+                            del self._bank_conversations[chat_id]
+
+                elif action == "no":
+                    # User wants to re-enter the bank name
+                    with self._bank_conversations_lock:
+                        if chat_id in self._bank_conversations:
+                            self._bank_conversations[chat_id]['attempts'] += 1
+                            attempts = self._bank_conversations[chat_id]['attempts']
+
+                            if attempts >= self.max_bank_input_attempts:
+                                client_number = self._bank_conversations[chat_id].get('client_number', '')
+                                del self._bank_conversations[chat_id]
+                                await query.edit_message_text(
+                                    f"❌ Se alcanzó el límite de intentos ({self.max_bank_input_attempts}). Por favor, busca el cliente nuevamente si deseas actualizar el banco."
+                                )
+                                EnhancedUserActivityLogger.log_user_action(update, "BANK_UPDATE_MAX_ATTEMPTS", f"Client: {client_number}")
+                                return
+
+                    await query.edit_message_text(
+                        f"✏️ Por favor, envía el nombre correcto del banco para el cliente <code>{safe_html(client_number)}</code>:",
+                        parse_mode='HTML'
+                    )
+
+        except Exception as e:
+            logger.error(f"Error handling bank callback: {e}")
+            try:
+                await query.edit_message_text("❌ Error interno procesando la solicitud.")
+            except:
+                pass
+
+    async def handle_bank_input(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Handle bank name input when in conversation state"""
+        try:
+            chat_id = update.effective_chat.id
+            user = update.effective_user
+            message_text = (update.message.text or "").strip()
+
+            with self._bank_conversations_lock:
+                if chat_id not in self._bank_conversations:
+                    # Not in a bank conversation, ignore
+                    return
+
+                conv_data = self._bank_conversations[chat_id]
+                client_number = conv_data.get('client_number')
+
+            if not message_text:
+                await update.message.reply_text("❌ Por favor, envía un nombre de banco válido.")
+                return
+
+            # Store the bank name and ask for confirmation
+            with self._bank_conversations_lock:
+                self._bank_conversations[chat_id]['bank_name'] = message_text
+
+            keyboard = [
+                [
+                    InlineKeyboardButton("✅ Sí, es correcto", callback_data="confirm_bank_yes"),
+                    InlineKeyboardButton("❌ No, corregir", callback_data="confirm_bank_no")
+                ]
+            ]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+
+            await update.message.reply_text(
+                f"¿Es correcto este nombre de banco?\n\n<b>{safe_html(message_text)}</b>",
+                reply_markup=reply_markup,
+                parse_mode='HTML'
+            )
+
+        except Exception as e:
+            logger.error(f"Error handling bank input: {e}")
+            try:
+                await update.message.reply_text("❌ Error procesando el nombre del banco.")
+            except:
+                pass
+
     def setup_handlers(self):
         # Command handlers
         self.application.add_handler(CommandHandler("start", self.start_command))
@@ -1344,7 +1667,10 @@ class TelegramBot:
         self.application.add_handler(CommandHandler("whoami", self.whoami_command))
         self.application.add_handler(CommandHandler("stats", self.stats_command))
         self.application.add_handler(CommandHandler("plogs", self.persistent_logs_command))
-        
+
+        # Callback query handler for inline keyboard buttons
+        self.application.add_handler(CallbackQueryHandler(self.handle_bank_callback))
+
         # More efficient message handling
         # 1. Private chats (any text)
         self.application.add_handler(
@@ -1355,7 +1681,7 @@ class TelegramBot:
         self.application.add_handler(
             MessageHandler(filters.TEXT & ~filters.COMMAND & filters.ChatType.GROUPS, self.handle_message)
         )
-        
+
         logger.info("✅ All handlers setup complete")
     
     def run(self):
@@ -1414,7 +1740,7 @@ class TelegramBot:
                     'client phone number': 'Número 📞',
                     'cliente': 'Cliente 🙋🏻‍♀️',
                     'correo': 'Correo ✉️',
-                    'other info': 'Otra Información ℹ️'
+                    'banco': 'Banco 🏦'
                 }
                 
                 parts = []

@@ -62,8 +62,8 @@ pytz==2024.1                           # Timezone handling (Mexico City)
 ```
 | Column A           | Column B         | Column C      | Column D        |
 |--------------------|------------------|---------------|-----------------|
-| Client Phone Number| Cliente          | Correo        | Other Info      |
-| 5536604547         | MORALES BRIEÑO...| email@...     | Additional data |
+| Client Phone Number| Cliente          | Correo        | Banco           |
+| 5536604547         | MORALES BRIEÑO...| email@...     | Bank name       |
 ```
 
 **Key Points**:

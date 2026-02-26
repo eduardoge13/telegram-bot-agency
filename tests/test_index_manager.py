@@ -65,7 +65,7 @@ class DummyExecutor:
 def build_manager_for_tests(values_api):
     manager = GoogleSheetsManager.__new__(GoogleSheetsManager)
     manager.service = DummyService(values_api)
-    manager.headers = ["client phone number", "cliente", "correo", "other info"]
+    manager.headers = ["client phone number", "cliente", "correo", "banco"]
     manager.client_column = 0
     manager.spreadsheet_id = "sheet"
     manager.index_phone_to_row = {}
