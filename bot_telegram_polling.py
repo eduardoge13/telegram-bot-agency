@@ -26,8 +26,8 @@ except ImportError:
     pass
 
 # Telegram imports
-from telegram import Update, Chat
-from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
+from telegram import Update, Chat, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQueryHandler, filters, ContextTypes
 import telegram
 
 # Google Sheets imports
@@ -424,6 +424,10 @@ class GoogleSheetsManager:
         def _bg_build():
             try:
                 with self._index_build_lock:
+                    # Clear row cache before rebuilding index to ensure fresh data
+                    with self._row_cache_lock:
+                        self.row_cache.clear()
+                        logger.debug("🗑️ Row cache cleared before index rebuild")
                     self.load_index()
             except Exception as e:
                 logger.warning(f"⚠️ Background index rebuild failed: {e}")
@@ -505,8 +509,8 @@ class GoogleSheetsManager:
                 logger.info("Using Google Sheets credentials from Secret Manager")
                 credentials_data = json.loads(credentials_json)
                 creds = Credentials.from_service_account_info(
-                    credentials_data, 
-                    scopes=['https://www.googleapis.com/auth/spreadsheets.readonly']
+                    credentials_data,
+                    scopes=['https://www.googleapis.com/auth/spreadsheets']
                 )
             else:
                 raise ValueError("❌ Failed to fetch 'google-credentials-json' from Secret Manager.")
@@ -740,6 +744,101 @@ class GoogleSheetsManager:
             logger.error(f"Error getting sheet info: {e}")
             return {'total_clients': 0, 'headers': [], 'client_column': 'Unknown'}
 
+    def update_field(self, client_number: str, field_name: str, new_value: str) -> tuple[bool, str]:
+        """Update any field for a specific client
+
+        Returns:
+            tuple[bool, str]: (success, error_message)
+        """
+        try:
+            if not self.service or not self.spreadsheet_id:
+                error_msg = "Servicio de Sheets no disponible"
+                logger.error(f"❌ Cannot update field: Sheets service or spreadsheet ID missing")
+                return False, error_msg
+
+            # Find the row number for the client
+            self._ensure_index()
+            normalized = self._normalize_phone(client_number)
+            if not normalized:
+                error_msg = "No se pudo normalizar el número de teléfono"
+                return False, error_msg
+
+            with self._index_lock:
+                row_num = self.index_phone_to_row.get(normalized)
+
+            if not row_num:
+                error_msg = f"Cliente {client_number} no encontrado"
+                logger.error(f"❌ Client {client_number} not found in index")
+                return False, error_msg
+
+            # Find the field column index
+            field_column_idx = None
+            field_name_lower = field_name.lower().strip()
+            logger.info(f"🔍 Searching for field '{field_name}' in headers: {self.headers}")
+
+            # First try exact match (case-insensitive)
+            for i, header in enumerate(self.headers):
+                if header.lower().strip() == field_name_lower:
+                    field_column_idx = i
+                    logger.info(f"✅ Found exact match at index {i}: '{header}'")
+                    break
+
+            # If no exact match, try partial match
+            if field_column_idx is None:
+                for i, header in enumerate(self.headers):
+                    header_lower = header.lower().strip()
+                    if field_name_lower in header_lower or header_lower in field_name_lower:
+                        field_column_idx = i
+                        logger.info(f"✅ Found partial match at index {i}: '{header}'")
+                        break
+
+            if field_column_idx is None:
+                error_msg = f"Campo '{field_name}' no encontrado. Columnas disponibles: {', '.join(self.headers)}"
+                logger.error(f"❌ Field '{field_name}' not found in headers: {self.headers}")
+                return False, error_msg
+
+            # Update the cell
+            column_letter = self._col_to_letter(field_column_idx)
+            cell_range = f"Sheet1!{column_letter}{row_num}"
+
+            self._execute_with_retry(
+                self.service.spreadsheets().values().update(
+                    spreadsheetId=self.spreadsheet_id,
+                    range=cell_range,
+                    valueInputOption='RAW',
+                    body={'values': [[new_value]]}
+                ),
+                f"update {field_name} for client {client_number}"
+            )
+
+            # Clear row cache for this client to force refresh
+            with self._row_cache_lock:
+                if row_num in self.row_cache:
+                    del self.row_cache[row_num]
+                    logger.debug(f"🗑️ Cleared cache for row {row_num}")
+
+            logger.info(f"✅ Successfully updated {field_name} for client {client_number} to {new_value}")
+            return True, ""
+
+        except Exception as e:
+            error_msg = f"Error al actualizar: {str(e)}"
+            logger.error(f"❌ Error updating {field_name} for client {client_number}: {e}")
+            return False, error_msg
+
+    async def update_field_async(self, client_number: str, field_name: str, new_value: str) -> tuple[bool, str]:
+        """Async wrapper for update_field
+
+        Returns:
+            tuple[bool, str]: (success, error_message)
+        """
+        try:
+            loop = asyncio.get_running_loop()
+            return await loop.run_in_executor(self._executor, self.update_field, client_number, field_name, new_value)
+        except Exception as e:
+            error_msg = f"Error en operación asíncrona: {str(e)}"
+            logger.error(f"❌ Async update_field error: {e}")
+            return False, error_msg
+
 class TelegramBot:
     def __init__(self):
         logger.info("🔧 Starting TelegramBot initialization...")
@@ -788,6 +887,10 @@ class TelegramBot:
 
         # Pending notifications to avoid duplicate follow-ups: (chat_id, client_number)
         self._pending_notifications = set()
+
+        # Edit conversation tracking: chat_id -> {'client_number': str, 'field_name': str}
+        self._edit_conversations: Dict[int, Dict[str, str]] = {}
+        self._edit_conversations_lock = threading.Lock()
 
         logger.info("✅ Bot initialized successfully")
 
@@ -1191,6 +1294,17 @@ class TelegramBot:
             if not is_addressed_to_bot:
                 return
 
+            # Check if we're in an edit conversation first
+            chat_id = getattr(chat, 'id', None)
+            if chat_id:
+                with self._edit_conversations_lock:
+                    in_edit_conversation = chat_id in self._edit_conversations
+
+                if in_edit_conversation:
+                    # Route to edit input handler
+                    await self.handle_edit_input(update, context)
+                    return
+
             logger.info("Processing message from %s in %s: '%s'", user.first_name if user else 'Unknown', chat.type if chat else 'Unknown', (message_to_process or raw_text))
 
             # Deduplication: avoid processing the same user+chat+text repeatedly within a short window
@@ -1281,11 +1395,25 @@ class TelegramBot:
 
                 response_html = "\n".join(parts)
 
+                # Add edit button
+                keyboard = [[InlineKeyboardButton("✏️ Editar campo", callback_data=f"edit_{client_number}")]]
+                reply_markup = InlineKeyboardMarkup(keyboard)
+
                 try:
-                    await update.message.reply_text(response_html, reply_to_message_id=getattr(update.message, 'message_id', None), parse_mode='HTML')
+                    await update.message.reply_text(
+                        response_html,
+                        reply_to_message_id=getattr(update.message, 'message_id', None),
+                        parse_mode='HTML',
+                        reply_markup=reply_markup
+                    )
                 except Exception:
                     try:
-                        await context.bot.send_message(chat_id=getattr(update.effective_chat, 'id', None), text=response_html, parse_mode='HTML')
+                        await context.bot.send_message(
+                            chat_id=getattr(update.effective_chat, 'id', None),
+                            text=response_html,
+                            parse_mode='HTML',
+                            reply_markup=reply_markup
+                        )
                     except Exception:
                         logger.debug('Failed to send search response')
             else:
@@ -1351,7 +1479,166 @@ class TelegramBot:
                 await update.message.reply_text("❌ Error interno procesando el mensaje.")
             except:
                 pass
-    
+
+    async def handle_edit_callback(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Handle inline keyboard callback for edit field"""
+        query = update.callback_query
+        await query.answer()
+
+        try:
+            chat_id = update.effective_chat.id
+            user = update.effective_user
+
+            logger.info(f"📝 Callback received: {query.data}")
+
+            if query.data.startswith("edit_"):
+                # User clicked "Edit field" button - show field selection
+                client_number = query.data.split("_", 1)[1]
+
+                EnhancedUserActivityLogger.log_user_action(update, "EDIT_START", f"Client: {client_number}")
+
+                # Get available editable fields from sheet headers (skip phone number column)
+                headers = self.sheets_manager.headers if self.sheets_manager.headers else []
+                keyboard = []
+
+                field_icons = {
+                    'banco': '🏦',
+                    'bank': '🏦',
+                    'correo': '✉️',
+                    'email': '✉️',
+                    'other info': 'ℹ️',
+                    'cliente': '👤',
+                    'client': '👤'
+                }
+
+                for idx, header in enumerate(headers):
+                    # Skip phone number column (usually first column)
+                    if idx == 0:
+                        continue
+
+                    header_lower = header.lower().strip()
+                    icon = field_icons.get(header_lower, '📝')
+                    button_text = f"{icon} {header}"
+
+                    keyboard.append([InlineKeyboardButton(button_text, callback_data=f"field_{idx}_{client_number}")])
+
+                keyboard.append([InlineKeyboardButton("❌ Cancelar", callback_data="edit_cancel")])
+                reply_markup = InlineKeyboardMarkup(keyboard)
+
+                await query.edit_message_text(
+                    f"¿Qué campo deseas editar para el cliente <code>{safe_html(client_number)}</code>?",
+                    reply_markup=reply_markup,
+                    parse_mode='HTML'
+                )
+
+            elif query.data.startswith("field_"):
+                # User selected a field to edit
+                parts = query.data.split("_", 2)
+                field_idx = int(parts[1])
+                client_number = parts[2]
+
+                # Get the actual field name from headers
+                headers = self.sheets_manager.headers if self.sheets_manager.headers else []
+                if field_idx < len(headers):
+                    field_name = headers[field_idx]
+                else:
+                    await query.edit_message_text("❌ Error: campo no válido")
+                    return
+
+                # Store conversation state
+                with self._edit_conversations_lock:
+                    self._edit_conversations[chat_id] = {
+                        'client_number': client_number,
+                        'field_name': field_name
+                    }
+
+                await query.edit_message_text(
+                    f"✏️ Por favor, envía el nuevo valor para <b>{safe_html(field_name)}</b> del cliente <code>{safe_html(client_number)}</code>:",
+                    parse_mode='HTML'
+                )
+
+            elif query.data == "edit_cancel":
+                # User cancelled edit
+                with self._edit_conversations_lock:
+                    if chat_id in self._edit_conversations:
+                        del self._edit_conversations[chat_id]
+
+                EnhancedUserActivityLogger.log_user_action(update, "EDIT_CANCELLED", "User cancelled edit")
+                await query.edit_message_text("✅ Edición cancelada.")
+
+        except Exception as e:
+            logger.error(f"❌ Error handling edit callback: {e}", exc_info=True)
+            try:
+                await query.edit_message_text(f"❌ Error procesando la solicitud: {str(e)}")
+            except Exception as e2:
+                logger.error(f"Failed to send error message: {e2}")
+
+    async def handle_edit_input(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Handle field value input when in edit conversation state"""
+        try:
+            chat_id = update.effective_chat.id
+            user = update.effective_user
+            message_text = (update.message.text or "").strip()
+
+            with self._edit_conversations_lock:
+                if chat_id not in self._edit_conversations:
+                    # Not in an edit conversation, ignore
+                    return
+
+                conv_data = self._edit_conversations[chat_id]
+                client_number = conv_data.get('client_number')
+                field_name = conv_data.get('field_name')
+
+            if not message_text:
+                await update.message.reply_text("❌ Por favor, envía un valor válido.")
+                return
+
+            # Update the field
+            await update.message.reply_text("🔄 Actualizando campo en Google Sheets...")
+
+            success, error_message = await self.sheets_manager.update_field_async(client_number, field_name, message_text)
+
+            if success:
+                EnhancedUserActivityLogger.log_user_action(
+                    update,
+                    "FIELD_UPDATED",
+                    f"Client: {client_number}, Field: {field_name}, Value: {message_text}",
+                    client_number=client_number,
+                    success="SUCCESS"
+                )
+                await update.message.reply_text(
+                    f"✅ <b>Campo actualizado exitosamente</b>\n\n"
+                    f"Cliente: <code>{safe_html(client_number)}</code>\n"
+                    f"Campo: <b>{safe_html(field_name)}</b>\n"
+                    f"Nuevo valor: {safe_html(message_text)}",
+                    parse_mode='HTML'
+                )
+            else:
+                EnhancedUserActivityLogger.log_user_action(
+                    update,
+                    "FIELD_UPDATE_FAILED",
+                    f"Client: {client_number}, Field: {field_name}, Error: {error_message}",
+                    client_number=client_number,
+                    success="FAILURE"
+                )
+                await update.message.reply_text(
+                    f"❌ <b>No pude actualizar el campo</b>\n\n"
+                    f"<b>Error:</b> {safe_html(error_message)}",
+                    parse_mode='HTML'
+                )
+
+            # Clean up conversation state
+            with self._edit_conversations_lock:
+                if chat_id in self._edit_conversations:
+                    del self._edit_conversations[chat_id]
+
+        except Exception as e:
+            logger.error(f"Error handling edit input: {e}")
+            try:
+                await update.message.reply_text("❌ Error procesando el valor del campo.")
+            except:
+                pass
+
     def setup_handlers(self):
         # Command handlers
         self.application.add_handler(CommandHandler("start", self.start_command))
@@ -1361,7 +1648,10 @@ class TelegramBot:
         self.application.add_handler(CommandHandler("whoami", self.whoami_command))
         self.application.add_handler(CommandHandler("stats", self.stats_command))
         self.application.add_handler(CommandHandler("plogs", self.persistent_logs_command))
-        
+
+        # Callback query handler for inline keyboard buttons
+        self.application.add_handler(CallbackQueryHandler(self.handle_edit_callback))
+
         # More efficient message handling
         # 1. Private chats (any text)
         self.application.add_handler(
@@ -1441,8 +1731,19 @@ class TelegramBot:
                     display_key = field_mappings.get(key_name.lower().strip(), key_name.strip())
                     parts.append(f"{safe_html(display_key)}: {safe_html(value)}")
                 response_html = "\n".join(parts)
+
+                # Add edit button
+                keyboard = [[InlineKeyboardButton("✏️ Editar campo", callback_data=f"edit_{client_number}")]]
+                reply_markup = InlineKeyboardMarkup(keyboard)
+
                 try:
-                    await bot.send_message(chat_id=chat_id, text=response_html, parse_mode='HTML', reply_to_message_id=reply_to_message_id)
+                    await bot.send_message(
+                        chat_id=chat_id,
+                        text=response_html,
+                        parse_mode='HTML',
+                        reply_to_message_id=reply_to_message_id,
+                        reply_markup=reply_markup
+                    )
                 except Exception:
                     try:
                         await bot.send_message(chat_id=chat_id, text="✅ Cliente encontrado")
