@@ -68,22 +68,22 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ECOM-01 | Phase 1 | Pending |
-| ECOM-02 | Phase 1 | Pending |
-| ECOM-03 | Phase 1 | Pending |
-| INFRA-01 | Phase 1 | Pending |
-| INFRA-02 | Phase 1 | Pending |
-| INFRA-03 | Phase 1 | Pending |
-| INFRA-04 | Phase 1 | Pending |
-| INFRA-05 | Phase 2 | Pending |
-| BOT-01 | Phase 2 | Pending |
-| BOT-02 | Phase 2 | Pending |
-| BOT-03 | Phase 2 | Pending |
-| BOT-04 | Phase 2 | Pending |
-| PLAT-01 | Phase 2 | Pending |
-| PLAT-02 | Phase 2 | Pending |
-| PLAT-03 | Phase 2 | Pending |
-| PLAT-04 | Phase 2 | Pending |
+| ECOM-01 | Phase 1: Site + Infrastructure | Pending |
+| ECOM-02 | Phase 1: Site + Infrastructure | Pending |
+| ECOM-03 | Phase 1: Site + Infrastructure | Pending |
+| INFRA-01 | Phase 1: Site + Infrastructure | Pending |
+| INFRA-02 | Phase 1: Site + Infrastructure | Pending |
+| INFRA-03 | Phase 1: Site + Infrastructure | Pending |
+| INFRA-04 | Phase 1: Site + Infrastructure | Pending |
+| INFRA-05 | Phase 2: WhatsApp Bot Platform | Pending |
+| BOT-01 | Phase 2: WhatsApp Bot Platform | Pending |
+| BOT-02 | Phase 2: WhatsApp Bot Platform | Pending |
+| BOT-03 | Phase 2: WhatsApp Bot Platform | Pending |
+| BOT-04 | Phase 2: WhatsApp Bot Platform | Pending |
+| PLAT-01 | Phase 2: WhatsApp Bot Platform | Pending |
+| PLAT-02 | Phase 2: WhatsApp Bot Platform | Pending |
+| PLAT-03 | Phase 2: WhatsApp Bot Platform | Pending |
+| PLAT-04 | Phase 2: WhatsApp Bot Platform | Pending |
 
 **Coverage:**
 - v1 requirements: 16 total
@@ -92,4 +92,4 @@
 
 ---
 *Requirements defined: 2026-03-14*
-*Last updated: 2026-03-14 after initial definition*
+*Last updated: 2026-03-14 after roadmap creation — phase names finalized*
