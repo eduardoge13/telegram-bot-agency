@@ -26,11 +26,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. All WhatsApp links on the site open a conversation with 5572408666 (not the old placeholder number)
   3. nginx serves the site on port 3000 and the process survives a VPS reboot via PM2
   4. Certbot auto-renewal is configured and the cert expiry is at least 89 days out
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 01-01: Fix WhatsApp number and configure Next.js standalone output
-- [ ] 01-02: Provision VPS — nginx, PM2, Certbot, deploy Next.js site
+- [ ] 01-01-PLAN.md — Fix WhatsApp number, add SPEI section, design improvements, Docker files
+- [ ] 01-02-PLAN.md — Deploy to VPS with nginx, Docker, and Certbot SSL
 
 ### Phase 2: WhatsApp Bot Platform
 **Goal**: A multi-tenant WhatsApp bot is live on the VPS, receiving Twilio webhooks, responding in Spanish via Gemini AI, and looking up products from Google Sheets — with architecture that supports adding a second business via config only
