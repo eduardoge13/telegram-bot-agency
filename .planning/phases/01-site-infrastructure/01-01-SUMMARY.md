@@ -125,5 +125,15 @@ Each task was committed atomically (in spike-ecommerce-web repo):
 - Plan 02 only needs to: clone repo, `docker compose up -d`, configure Nginx reverse proxy
 
 ---
+## Self-Check: PASSED
+
+- lib/constants.ts: FOUND
+- components/SpeiPaymentSection.tsx: FOUND
+- Dockerfile: FOUND
+- docker-compose.yml: FOUND
+- SUMMARY.md: FOUND
+- Task 1 commit 205d479: FOUND
+- Task 2 commit 52e4e16: FOUND
+
 *Phase: 01-site-infrastructure*
 *Completed: 2026-03-16*
