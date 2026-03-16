@@ -7,9 +7,9 @@
 
 ### E-commerce Site
 
-- [ ] **ECOM-01**: Fix WhatsApp number to 5572408666 in all site files (replace placeholder 5215512345678)
-- [ ] **ECOM-02**: Configure Next.js standalone output for VPS deployment
-- [ ] **ECOM-03**: Site is accessible via public URL on Hostinger VPS
+- [x] **ECOM-01**: Fix WhatsApp number to 5572408666 in all site files (replace placeholder 5215512345678)
+- [x] **ECOM-02**: Configure Next.js standalone output for VPS deployment
+- [x] **ECOM-03**: Site is accessible via public URL on Hostinger VPS
 
 ### VPS Infrastructure
 
@@ -68,9 +68,9 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ECOM-01 | Phase 1: Site + Infrastructure | Pending |
-| ECOM-02 | Phase 1: Site + Infrastructure | Pending |
-| ECOM-03 | Phase 1: Site + Infrastructure | Pending |
+| ECOM-01 | Phase 1: Site + Infrastructure | Complete |
+| ECOM-02 | Phase 1: Site + Infrastructure | Complete |
+| ECOM-03 | Phase 1: Site + Infrastructure | Complete |
 | INFRA-01 | Phase 1: Site + Infrastructure | Pending |
 | INFRA-02 | Phase 1: Site + Infrastructure | Pending |
 | INFRA-03 | Phase 1: Site + Infrastructure | Pending |

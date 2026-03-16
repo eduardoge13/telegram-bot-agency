@@ -26,7 +26,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. All WhatsApp links on the site open a conversation with 5572408666 (not the old placeholder number)
   3. nginx serves the site on port 3000 and the process survives a VPS reboot via PM2
   4. Certbot auto-renewal is configured and the cert expiry is at least 89 days out
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 
 Plans:
 - [ ] 01-01-PLAN.md — Fix WhatsApp number, add SPEI section, design improvements, Docker files
@@ -56,5 +56,5 @@ Phases execute in numeric order: 1 → 2
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Site + Infrastructure | 0/2 | Not started | - |
+| 1. Site + Infrastructure | 1/2 | In Progress|  |
 | 2. WhatsApp Bot Platform | 0/3 | Not started | - |

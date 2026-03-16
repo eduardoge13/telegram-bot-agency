@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Phase 1 context gathered
-last_updated: "2026-03-15T06:18:26.989Z"
+stopped_at: Completed 01-site-infrastructure-01-PLAN.md
+last_updated: "2026-03-16T15:02:09.495Z"
 last_activity: 2026-03-14 — Roadmap created
 progress:
   total_phases: 2
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_plans: 2
+  completed_plans: 1
   percent: 0
 ---
 
@@ -50,6 +50,7 @@ Progress: [░░░░░░░░░░] 0%
 - Trend: —
 
 *Updated after each plan completion*
+| Phase 01-site-infrastructure P01 | 5 | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -61,6 +62,9 @@ Recent decisions affecting current work:
 - Project init: Domain name not yet acquired — SSL (INFRA-02) will block until domain is in hand
 - Project init: Twilio credentials pending — bot build can proceed with stubs but production testing blocked
 - Project init: Payments deferred to v2 — no checkout flows in v1 scope
+- [Phase 01-site-infrastructure]: WHATSAPP_NUMBER and SPEI_CLABE centralized in lib/constants.ts to prevent future drift
+- [Phase 01-site-infrastructure]: SPEI_CLABE placeholder (000000000000000000) with TODO — client must provide real CLABE before launch
+- [Phase 01-site-infrastructure]: Carousel slides derived from getAllProducts() to eliminate data duplication between page.tsx and products.json
 
 ### Pending Todos
 
@@ -73,6 +77,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-15T06:18:26.983Z
-Stopped at: Phase 1 context gathered
-Resume file: .planning/phases/01-site-infrastructure/01-CONTEXT.md
+Last session: 2026-03-16T15:02:09.494Z
+Stopped at: Completed 01-site-infrastructure-01-PLAN.md
+Resume file: None
