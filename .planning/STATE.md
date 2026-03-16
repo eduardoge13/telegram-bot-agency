@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: planning
-stopped_at: Completed 01-site-infrastructure-01-PLAN.md
-last_updated: "2026-03-16T15:02:09.495Z"
-last_activity: 2026-03-14 — Roadmap created
+status: executing
+stopped_at: Completed 01-site-infrastructure plans (01-01, 01-02)
+last_updated: "2026-03-16T18:30:00.000Z"
+last_activity: 2026-03-16 — Phase 1 plans executed, site deployed to VPS
 progress:
   total_phases: 2
   completed_phases: 0
   total_plans: 2
-  completed_plans: 1
-  percent: 0
+  completed_plans: 2
+  percent: 50
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-14)
 
 **Core value:** Customers interact with an AI WhatsApp bot for product info, while a live e-commerce site showcases products — both deployed on a single VPS
-**Current focus:** Phase 1 — Site + Infrastructure
+**Current focus:** Phase 1 — Site + Infrastructure (executing)
 
 ## Current Position
 
 Phase: 1 of 2 (Site + Infrastructure)
-Plan: 0 of 2 in current phase
-Status: Ready to plan
-Last activity: 2026-03-14 — Roadmap created
+Plan: 2 of 2 in current phase (all complete)
+Status: Awaiting phase verification
+Last activity: 2026-03-16 — Both plans executed, site deployed to VPS
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [█████░░░░░] 50%
 
 ## Performance Metrics
 
@@ -50,7 +50,8 @@ Progress: [░░░░░░░░░░] 0%
 - Trend: —
 
 *Updated after each plan completion*
-| Phase 01-site-infrastructure P01 | 5 | 2 tasks | 8 files |
+| Phase 01-site-infrastructure P01 | 5min | 2 tasks | 8 files |
+| Phase 01-site-infrastructure P02 | 8min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -65,6 +66,9 @@ Recent decisions affecting current work:
 - [Phase 01-site-infrastructure]: WHATSAPP_NUMBER and SPEI_CLABE centralized in lib/constants.ts to prevent future drift
 - [Phase 01-site-infrastructure]: SPEI_CLABE placeholder (000000000000000000) with TODO — client must provide real CLABE before launch
 - [Phase 01-site-infrastructure]: Carousel slides derived from getAllProducts() to eliminate data duplication between page.tsx and products.json
+- [Phase 01-site-infrastructure]: Used Traefik (existing on VPS for n8n) instead of nginx — auto-SSL via ACME TLS challenge, Docker labels for routing
+- [Phase 01-site-infrastructure]: Site deployed at https://shop.srv1175749.hstgr.cloud using Hostinger wildcard DNS
+- [Phase 01-site-infrastructure]: New services on VPS should use Traefik Docker labels + n8n_default network (not nginx)
 
 ### Pending Todos
 
@@ -72,11 +76,11 @@ None yet.
 
 ### Blockers/Concerns
 
-- No domain name acquired yet — HTTPS cert (INFRA-02) requires a domain; raw IP will not work with Certbot
+- Domain resolved: using shop.srv1175749.hstgr.cloud (Hostinger wildcard DNS) — INFRA-02 (HTTPS) now satisfied via Traefik auto-SSL
 - Twilio credentials not yet available — bot can be built and tested locally but Twilio webhook integration requires real credentials
 
 ## Session Continuity
 
-Last session: 2026-03-16T15:02:09.494Z
-Stopped at: Completed 01-site-infrastructure-01-PLAN.md
+Last session: 2026-03-16T18:30:00.000Z
+Stopped at: Phase 1 all plans complete — awaiting verification
 Resume file: None
