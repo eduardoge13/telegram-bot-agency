@@ -45,7 +45,7 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 02-01: Build WhatsApp bot service — Twilio webhook, Gemini AI, product lookup
+- [x] 02-01: Build WhatsApp bot service — Twilio webhook, Gemini AI, product lookup
 - [ ] 02-02: Implement multi-tenant platform architecture — business registry, modular handlers, context isolation
 - [ ] 02-03: Deploy bot service to VPS port 3001 and wire nginx routing
 
