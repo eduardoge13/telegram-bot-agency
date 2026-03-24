@@ -8,7 +8,8 @@ class GeminiClient:
 
     def __init__(self, api_key: str):
         """Initialize the Gemini client with the given API key."""
-        self._client = genai.Client(api_key=api_key)
+        self._api_key = api_key
+        self._client = genai.Client(api_key=api_key) if api_key else None
 
     def create_chat(self, system_prompt: str):
         """Create a new Gemini chat object with the given system instruction.
@@ -16,6 +17,8 @@ class GeminiClient:
         Returns a Chat object that maintains conversation history automatically.
         Each call to send_message() includes all prior history.
         """
+        if not self._client:
+            raise RuntimeError("GEMINI_API_KEY is not configured")
         return self._client.chats.create(
             model="gemini-2.0-flash",
             config=types.GenerateContentConfig(
