@@ -1,6 +1,6 @@
 """Tests for ProductSheetsClient — product search with mocked Sheets API."""
 import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 from app.sheets.client import ProductSheetsClient
 
 
@@ -17,13 +17,8 @@ MOCK_SHEET_DATA = {
 
 
 def make_client(mock_service):
-    """Helper to create a ProductSheetsClient with a mocked service."""
-    with patch("app.sheets.client.build", return_value=mock_service), \
-         patch("app.sheets.client.Credentials") as mock_creds, \
-         patch.dict("os.environ", {"GOOGLE_CREDENTIALS_JSON": '{"type": "service_account"}'}):
-        mock_creds.from_service_account_info.return_value = MagicMock()
-        client = ProductSheetsClient(spreadsheet_id="test-sheet-id")
-    client.service = mock_service
+    """Helper to create a ProductSheetsClient with a mocked service (injected via _service)."""
+    client = ProductSheetsClient(spreadsheet_id="test-sheet-id", _service=mock_service)
     return client
 
 

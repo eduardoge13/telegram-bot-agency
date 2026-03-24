@@ -32,16 +32,21 @@ class ProductSheetsClient:
         spreadsheet_id: str,
         sheets_range: str = "Sheet1!A:D",
         credentials_json: str | None = None,
+        _service=None,
     ) -> None:
         self.spreadsheet_id = spreadsheet_id
         self.sheets_range = sheets_range
 
-        creds_json = credentials_json or os.environ.get("GOOGLE_CREDENTIALS_JSON", "{}")
-        creds = Credentials.from_service_account_info(
-            json.loads(creds_json),
-            scopes=[self.READWRITE_SCOPE],
-        )
-        self.service = build("sheets", "v4", credentials=creds, cache_discovery=False)
+        if _service is not None:
+            # Injected service (testing only)
+            self.service = _service
+        else:
+            creds_json = credentials_json or os.environ.get("GOOGLE_CREDENTIALS_JSON", "{}")
+            creds = Credentials.from_service_account_info(
+                json.loads(creds_json),
+                scopes=[self.READWRITE_SCOPE],
+            )
+            self.service = build("sheets", "v4", credentials=creds, cache_discovery=False)
 
         # In-memory cache
         self._cache: list[dict] | None = None
