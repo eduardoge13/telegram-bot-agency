@@ -13,7 +13,7 @@ Two delivery moments: first, the Punto Clave MX e-commerce site goes live on the
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [ ] **Phase 1: Site + Infrastructure** - E-commerce site fixed, deployed, and accessible over HTTPS on the VPS
-- [ ] **Phase 2: WhatsApp Bot Platform** - Multi-tenant WhatsApp bot live on VPS, handling AI responses and product lookups
+- [x] **Phase 2: WhatsApp Bot Platform** - Multi-tenant WhatsApp bot live on VPS, handling AI responses and product lookups (completed 2026-03-24)
 
 ## Phase Details
 
@@ -47,7 +47,7 @@ Plans:
 Plans:
 - [x] 02-01: Build WhatsApp bot service — Twilio webhook, Gemini AI, product lookup
 - [x] 02-02: Implement multi-tenant platform architecture — business registry, modular handlers, context isolation
-- [ ] 02-03: Deploy bot service to VPS port 3001 and wire nginx routing
+- [x] 02-03: Deploy bot service to VPS port 3001 and wire nginx routing
 
 ## Progress
 
@@ -57,4 +57,4 @@ Phases execute in numeric order: 1 → 2
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Site + Infrastructure | 1/2 | In Progress|  |
-| 2. WhatsApp Bot Platform | 2/3 | In Progress|  |
+| 2. WhatsApp Bot Platform | 3/3 | Complete   | 2026-03-24 |

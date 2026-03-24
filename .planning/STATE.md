@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Ready to execute
-stopped_at: Completed 02-02-PLAN.md
-last_updated: "2026-03-24T20:01:07.344Z"
+status: Phase complete — ready for verification
+stopped_at: Completed 02-03-PLAN.md
+last_updated: "2026-03-24T21:10:53.554Z"
 progress:
   total_phases: 2
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 5
-  completed_plans: 4
+  completed_plans: 5
 ---
 
 # Project State
@@ -50,6 +50,7 @@ Plan: 3 of 3
 | Phase 01-site-infrastructure P02 | 8min | 2 tasks | 2 files |
 | Phase 02-whatsapp-bot-platform P01 | 4 | 2 tasks | 17 files |
 | Phase 02-whatsapp-bot-platform P02 | 6 | 2 tasks | 12 files |
+| Phase 02-whatsapp-bot-platform P03 | 45 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -74,6 +75,8 @@ Recent decisions affecting current work:
 - [Phase 02-whatsapp-bot-platform]: Dispatcher uses getattr(module, FlightHandler) instead of _flight_available flag — enables test patches on module-level name
 - [Phase 02-whatsapp-bot-platform]: AmadeusProvider reads AMADEUS_CLIENT_ID/SECRET from os.environ directly — decoupled from flights-price-panel pydantic-settings
 - [Phase 02-whatsapp-bot-platform]: OrderHandler writes to Pedidos sheet tab; on write failure still confirms to customer — order never silently lost
+- [Phase 02-whatsapp-bot-platform]: GeminiClient deferred init: lazy instantiation on first use enables container startup without GEMINI_API_KEY in .env
+- [Phase 02-whatsapp-bot-platform]: No host port binding in docker-compose.yml: Traefik discovers container via Docker socket over n8n_default network, consistent with Phase 1 shop service
 
 ### Pending Todos
 
@@ -86,6 +89,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-24T20:01:07.342Z
-Stopped at: Completed 02-02-PLAN.md
+Last session: 2026-03-24T21:10:53.551Z
+Stopped at: Completed 02-03-PLAN.md
 Resume file: None
