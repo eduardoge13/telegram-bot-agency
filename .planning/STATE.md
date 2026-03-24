@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Ready to execute
-stopped_at: Completed 02-01-PLAN.md
-last_updated: "2026-03-24T19:51:48.021Z"
+stopped_at: Completed 02-02-PLAN.md
+last_updated: "2026-03-24T20:01:07.344Z"
 progress:
   total_phases: 2
   completed_phases: 1
   total_plans: 5
-  completed_plans: 3
+  completed_plans: 4
 ---
 
 # Project State
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-03-14)
 ## Current Position
 
 Phase: 02 (whatsapp-bot-platform) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 
 ## Performance Metrics
 
@@ -49,6 +49,7 @@ Plan: 2 of 3
 | Phase 01-site-infrastructure P01 | 5min | 2 tasks | 8 files |
 | Phase 01-site-infrastructure P02 | 8min | 2 tasks | 2 files |
 | Phase 02-whatsapp-bot-platform P01 | 4 | 2 tasks | 17 files |
+| Phase 02-whatsapp-bot-platform P02 | 6 | 2 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -69,6 +70,10 @@ Recent decisions affecting current work:
 - [Phase 02-whatsapp-bot-platform]: GeminiClient injected into SessionStore constructor (not instantiated inside) enables testing without real API calls
 - [Phase 02-whatsapp-bot-platform]: WEBHOOK_BASE_URL setting used for Twilio URL reconstruction (reliable behind Traefik) instead of x-forwarded-proto header inspection
 - [Phase 02-whatsapp-bot-platform]: python-multipart added to requirements — required by FastAPI for form parsing of Twilio webhook payloads
+- [Phase 02-whatsapp-bot-platform]: _service injection parameter added to ProductSheetsClient for unit test isolation (avoids real Google credentials in tests)
+- [Phase 02-whatsapp-bot-platform]: Dispatcher uses getattr(module, FlightHandler) instead of _flight_available flag — enables test patches on module-level name
+- [Phase 02-whatsapp-bot-platform]: AmadeusProvider reads AMADEUS_CLIENT_ID/SECRET from os.environ directly — decoupled from flights-price-panel pydantic-settings
+- [Phase 02-whatsapp-bot-platform]: OrderHandler writes to Pedidos sheet tab; on write failure still confirms to customer — order never silently lost
 
 ### Pending Todos
 
@@ -81,6 +86,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-24T19:51:48.019Z
-Stopped at: Completed 02-01-PLAN.md
+Last session: 2026-03-24T20:01:07.342Z
+Stopped at: Completed 02-02-PLAN.md
 Resume file: None

@@ -23,13 +23,13 @@
 
 - [x] **BOT-01**: Express server receives Twilio WhatsApp webhook messages with signature validation
 - [x] **BOT-02**: Gemini AI generates contextual responses in Spanish based on business system prompt
-- [ ] **BOT-03**: Bot looks up product info from Google Sheets when customer asks about products
-- [ ] **BOT-04**: Bot sends formatted product details (name, price, availability) via WhatsApp
+- [x] **BOT-03**: Bot looks up product info from Google Sheets when customer asks about products
+- [x] **BOT-04**: Bot sends formatted product details (name, price, availability) via WhatsApp
 
 ### Bot Platform Architecture
 
 - [x] **PLAT-01**: Business context registry — config-driven system where each business is defined by: Twilio number, system prompt, Google Sheets ID, enabled features
-- [ ] **PLAT-02**: Message handler architecture is modular (separate handlers for product lookup, Q&A, etc.) so new capabilities can be plugged in per business
+- [x] **PLAT-02**: Message handler architecture is modular (separate handlers for product lookup, Q&A, etc.) so new capabilities can be plugged in per business
 - [x] **PLAT-03**: Conversation context isolation — state keyed on (businessId, customerPhone), no cross-business bleed
 - [x] **PLAT-04**: New business onboarding requires only config changes (no code changes) for basic Q&A + product lookup
 
@@ -78,10 +78,10 @@
 | INFRA-05 | Phase 2: WhatsApp Bot Platform | Pending |
 | BOT-01 | Phase 2: WhatsApp Bot Platform | Complete |
 | BOT-02 | Phase 2: WhatsApp Bot Platform | Complete |
-| BOT-03 | Phase 2: WhatsApp Bot Platform | Pending |
-| BOT-04 | Phase 2: WhatsApp Bot Platform | Pending |
+| BOT-03 | Phase 2: WhatsApp Bot Platform | Complete |
+| BOT-04 | Phase 2: WhatsApp Bot Platform | Complete |
 | PLAT-01 | Phase 2: WhatsApp Bot Platform | Complete |
-| PLAT-02 | Phase 2: WhatsApp Bot Platform | Pending |
+| PLAT-02 | Phase 2: WhatsApp Bot Platform | Complete |
 | PLAT-03 | Phase 2: WhatsApp Bot Platform | Complete |
 | PLAT-04 | Phase 2: WhatsApp Bot Platform | Complete |
 
