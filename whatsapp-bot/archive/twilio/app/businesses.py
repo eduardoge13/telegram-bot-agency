@@ -1,5 +1,5 @@
-"""Business registry: maps Meta phone number IDs to BusinessConfig instances."""
-from dataclasses import dataclass
+"""Business registry: maps Twilio numbers to BusinessConfig instances."""
+from dataclasses import dataclass, field
 
 
 @dataclass
@@ -7,20 +7,19 @@ class BusinessConfig:
     """Configuration for a single business using the WhatsApp bot platform."""
 
     business_id: str
-    phone_number_id: str
+    twilio_number: str
     system_prompt: str
     sheets_id: str | None
     handlers: list[str]
-    display_phone_number: str | None = None
     sheets_range: str = "Sheet1!A:D"
     language: str = "es"
 
 
 BUSINESSES: dict[str, BusinessConfig] = {
     # Punto Clave MX — e-commerce (tech products)
-    "872722092595815": BusinessConfig(
+    "whatsapp:+15005550006": BusinessConfig(
         business_id="puntoclave",
-        phone_number_id="872722092595815",
+        twilio_number="whatsapp:+15005550006",
         system_prompt=(
             "Eres el asistente virtual de Punto Clave MX, una tienda en línea de productos tecnológicos en México. "
             "Responde siempre en español de manera amigable y conversacional, como si fuera una persona real. "
@@ -33,12 +32,11 @@ BUSINESSES: dict[str, BusinessConfig] = {
         ),
         sheets_id=None,  # Will be replaced with real SPREADSHEET_ID
         handlers=["product", "order", "qa"],
-        display_phone_number="+52 81 4821 7361",
     ),
     # Travel Agency — flight search (Amadeus API)
-    "987654321098765": BusinessConfig(
+    "whatsapp:+15005550007": BusinessConfig(
         business_id="travel",
-        phone_number_id="987654321098765",
+        twilio_number="whatsapp:+15005550007",
         system_prompt=(
             "Eres el asistente de viajes de una agencia de turismo en México. "
             "Responde siempre en español de manera profesional y amigable. "
@@ -51,6 +49,5 @@ BUSINESSES: dict[str, BusinessConfig] = {
         ),
         sheets_id=None,
         handlers=["flight", "qa"],
-        display_phone_number="15550000002",
     ),
 }

@@ -1,14 +1,16 @@
-"""Tests for /webhook endpoint: Twilio signature validation, routing, TwiML responses."""
-import pytest
+"""Tests for /webhook endpoint using Meta WhatsApp Cloud API payloads."""
+import hashlib
+import hmac
+import json
 import sys
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import patch, MagicMock, AsyncMock
 
 
-# Shared test constants
-VALID_TWILIO_NUMBER = "whatsapp:+15005550006"
-CUSTOMER_NUMBER = "whatsapp:+521234567890"
-WEBHOOK_BASE_URL = "https://bot.srv1175749.hstgr.cloud"
+VALID_PHONE_NUMBER_ID = "123456789012345"
+CUSTOMER_NUMBER = "521234567890"
 
 
 def _clear_app_modules():
@@ -20,155 +22,201 @@ def _clear_app_modules():
 
 def _make_mock_settings():
     settings = MagicMock()
-    settings.twilio_auth_token = "test_auth_token"
-    settings.twilio_account_sid = "test_account_sid"
+    settings.whatsapp_access_token = "test_access_token"
+    settings.whatsapp_verify_token = "verify-me"
+    settings.whatsapp_app_secret = ""
+    settings.whatsapp_api_version = "v24.0"
     settings.gemini_api_key = "test_gemini_key"
-    settings.webhook_base_url = WEBHOOK_BASE_URL
+    settings.google_credentials_json = "{}"
+    settings.amadeus_client_id = "test_amadeus_id"
+    settings.amadeus_client_secret = "test_amadeus_secret"
+    settings.amadeus_base_url = "https://test.api.amadeus.com"
     return settings
 
 
-def _make_mock_chat():
-    mock_chat = MagicMock()
-    mock_chat.send_message_async = AsyncMock(
-        return_value=MagicMock(text="Hola, ¿en qué te puedo ayudar?")
-    )
-    return mock_chat
-
-
-def _webhook_form_data(to=VALID_TWILIO_NUMBER, from_=CUSTOMER_NUMBER, body="Hola"):
-    """Build form data for a webhook POST."""
+def _meta_text_payload(phone_number_id=VALID_PHONE_NUMBER_ID, body="Hola"):
     return {
-        "To": to,
-        "From": from_,
-        "Body": body,
-        "MessageSid": "SM123456789",
+        "object": "whatsapp_business_account",
+        "entry": [
+            {
+                "id": "waba-123",
+                "changes": [
+                    {
+                        "field": "messages",
+                        "value": {
+                            "messaging_product": "whatsapp",
+                            "metadata": {
+                                "display_phone_number": "15550000001",
+                                "phone_number_id": phone_number_id,
+                            },
+                            "contacts": [
+                                {
+                                    "profile": {"name": "Cliente Demo"},
+                                    "wa_id": CUSTOMER_NUMBER,
+                                }
+                            ],
+                            "messages": [
+                                {
+                                    "from": CUSTOMER_NUMBER,
+                                    "id": "wamid.ABC123",
+                                    "timestamp": "1710000000",
+                                    "text": {"body": body},
+                                    "type": "text",
+                                }
+                            ],
+                        },
+                    }
+                ],
+            }
+        ],
+    }
+
+
+def _meta_status_payload():
+    return {
+        "object": "whatsapp_business_account",
+        "entry": [
+            {
+                "id": "waba-123",
+                "changes": [
+                    {
+                        "field": "messages",
+                        "value": {
+                            "messaging_product": "whatsapp",
+                            "metadata": {
+                                "display_phone_number": "15550000001",
+                                "phone_number_id": VALID_PHONE_NUMBER_ID,
+                            },
+                            "statuses": [
+                                {
+                                    "id": "wamid.ABC123",
+                                    "status": "delivered",
+                                    "timestamp": "1710000001",
+                                    "recipient_id": CUSTOMER_NUMBER,
+                                }
+                            ],
+                        },
+                    }
+                ],
+            }
+        ],
     }
 
 
 @pytest.fixture
-def valid_client():
-    """TestClient with valid Twilio signature (bypassed validator)."""
-    _clear_app_modules()
-    mock_settings = _make_mock_settings()
-    mock_chat = _make_mock_chat()
-
-    with patch("app.config.get_settings", return_value=mock_settings):
-        with patch("app.gemini_client.GeminiClient") as MockGeminiClient:
-            MockGeminiClient.return_value.create_chat.return_value = mock_chat
-            with patch(
-                "twilio.request_validator.RequestValidator.validate",
-                return_value=True,
-            ):
-                from app.main import app
-                with TestClient(app) as client:
-                    yield client
-
-
-@pytest.fixture
-def invalid_client():
-    """TestClient where Twilio signature validation always fails."""
+def client():
+    """FastAPI test client with mocked settings and lifespan triggered."""
     _clear_app_modules()
     mock_settings = _make_mock_settings()
 
     with patch("app.config.get_settings", return_value=mock_settings):
         with patch("app.gemini_client.GeminiClient") as MockGeminiClient:
             MockGeminiClient.return_value.create_chat.return_value = MagicMock()
-            with patch(
-                "twilio.request_validator.RequestValidator.validate",
-                return_value=False,
-            ):
-                from app.main import app
-                with TestClient(app) as client:
-                    yield client
+            from app.main import app
+            with TestClient(app) as test_client:
+                test_client.app.state.whatsapp_client.send_text_message = AsyncMock(
+                    return_value={"messages": [{"id": "wamid.REPLY"}]}
+                )
+                yield test_client
 
 
-def test_signature_valid(valid_client):
-    """POST /webhook with valid Twilio signature returns 200 with TwiML XML."""
-    response = valid_client.post(
+def test_webhook_verification_success(client):
+    """GET /webhook returns the hub challenge when verify token matches."""
+    response = client.get(
         "/webhook",
-        data=_webhook_form_data(),
-        headers={
-            "X-Twilio-Signature": "valid_signature",
-            "Content-Type": "application/x-www-form-urlencoded",
+        params={
+            "hub.mode": "subscribe",
+            "hub.verify_token": "verify-me",
+            "hub.challenge": "123456",
         },
     )
     assert response.status_code == 200
-    assert "application/xml" in response.headers["content-type"]
-    assert "<Response>" in response.text
+    assert response.text == "123456"
 
 
-def test_signature_invalid(invalid_client):
-    """POST /webhook with invalid Twilio signature returns 403."""
-    response = invalid_client.post(
+def test_webhook_verification_invalid_token(client):
+    """GET /webhook rejects invalid verification tokens."""
+    response = client.get(
         "/webhook",
-        data=_webhook_form_data(),
-        headers={
-            "X-Twilio-Signature": "invalid_signature",
-            "Content-Type": "application/x-www-form-urlencoded",
+        params={
+            "hub.mode": "subscribe",
+            "hub.verify_token": "wrong-token",
+            "hub.challenge": "123456",
         },
     )
     assert response.status_code == 403
 
 
-def test_url_reconstruction():
-    """validate_twilio reconstructs HTTPS URL using WEBHOOK_BASE_URL env setting."""
-    _clear_app_modules()
-    mock_settings = _make_mock_settings()
-    captured_url = {}
+def test_webhook_processes_incoming_text_message(client):
+    """POST /webhook dispatches an inbound text message and sends a reply through Meta."""
+    with patch(
+        "app.main.dispatch",
+        new=AsyncMock(return_value="Hola, ¿en qué te puedo ayudar?"),
+    ) as mock_dispatch:
+        response = client.post("/webhook", json=_meta_text_payload())
 
-    def capture_validate(url, form, sig):
-        captured_url["url"] = url
-        return True
-
-    with patch("app.config.get_settings", return_value=mock_settings):
-        with patch("app.gemini_client.GeminiClient") as MockGeminiClient:
-            MockGeminiClient.return_value.create_chat.return_value = _make_mock_chat()
-            with patch(
-                "twilio.request_validator.RequestValidator.validate",
-                side_effect=capture_validate,
-            ):
-                from app.main import app
-                with TestClient(app) as client:
-                    client.post(
-                        "/webhook",
-                        data=_webhook_form_data(),
-                        headers={
-                            "X-Twilio-Signature": "test_sig",
-                            "Content-Type": "application/x-www-form-urlencoded",
-                        },
-                    )
-
-    assert WEBHOOK_BASE_URL in captured_url.get("url", ""), (
-        f"Expected WEBHOOK_BASE_URL in reconstructed URL, got: {captured_url.get('url')}"
-    )
-
-
-def test_unknown_business(valid_client):
-    """POST /webhook with valid signature but unknown To number returns graceful TwiML."""
-    response = valid_client.post(
-        "/webhook",
-        data=_webhook_form_data(to="whatsapp:+19999999999"),
-        headers={
-            "X-Twilio-Signature": "valid_signature",
-            "Content-Type": "application/x-www-form-urlencoded",
-        },
-    )
     assert response.status_code == 200
-    assert "application/xml" in response.headers["content-type"]
-    assert "<Response>" in response.text
-    # Should return a graceful error message in Spanish
-    assert "Lo siento" in response.text or "disponible" in response.text.lower()
-
-
-def test_webhook_returns_twiml_message(valid_client):
-    """POST /webhook returns TwiML with <Message> element."""
-    response = valid_client.post(
-        "/webhook",
-        data=_webhook_form_data(),
-        headers={
-            "X-Twilio-Signature": "valid_signature",
-            "Content-Type": "application/x-www-form-urlencoded",
-        },
+    assert response.json() == {"status": "ok"}
+    mock_dispatch.assert_awaited_once()
+    client.app.state.whatsapp_client.send_text_message.assert_awaited_once_with(
+        phone_number_id=VALID_PHONE_NUMBER_ID,
+        to=CUSTOMER_NUMBER,
+        body="Hola, ¿en qué te puedo ayudar?",
     )
+
+
+def test_webhook_ignores_unknown_business(client):
+    """POST /webhook returns 200 but skips dispatch when phone number ID is unknown."""
+    with patch("app.main.dispatch", new=AsyncMock()) as mock_dispatch:
+        response = client.post("/webhook", json=_meta_text_payload(phone_number_id="000000000000000"))
+
     assert response.status_code == 200
-    assert "<Message>" in response.text
+    mock_dispatch.assert_not_awaited()
+    client.app.state.whatsapp_client.send_text_message.assert_not_awaited()
+
+
+def test_webhook_ignores_status_updates(client):
+    """POST /webhook returns 200 for status updates without generating replies."""
+    with patch("app.main.dispatch", new=AsyncMock()) as mock_dispatch:
+        response = client.post("/webhook", json=_meta_status_payload())
+
+    assert response.status_code == 200
+    mock_dispatch.assert_not_awaited()
+    client.app.state.whatsapp_client.send_text_message.assert_not_awaited()
+
+
+def test_webhook_validates_meta_signature_when_app_secret_set(client):
+    """POST /webhook rejects requests with an invalid Meta signature."""
+    client.app.state.settings.whatsapp_app_secret = "super-secret"
+    response = client.post(
+        "/webhook",
+        json=_meta_text_payload(),
+        headers={"X-Hub-Signature-256": "sha256=bad"},
+    )
+    assert response.status_code == 403
+
+
+def test_webhook_accepts_valid_meta_signature(client):
+    """POST /webhook accepts valid HMAC signatures when an app secret is configured."""
+    client.app.state.settings.whatsapp_app_secret = "super-secret"
+    raw_body = json.dumps(_meta_text_payload(), separators=(",", ":")).encode("utf-8")
+    signature = "sha256=" + hmac.new(
+        b"super-secret",
+        raw_body,
+        hashlib.sha256,
+    ).hexdigest()
+
+    with patch(
+        "app.main.dispatch",
+        new=AsyncMock(return_value="Hola, ¿en qué te puedo ayudar?"),
+    ):
+        response = client.post(
+            "/webhook",
+            content=raw_body,
+            headers={
+                "Content-Type": "application/json",
+                "X-Hub-Signature-256": signature,
+            },
+        )
+
+    assert response.status_code == 200

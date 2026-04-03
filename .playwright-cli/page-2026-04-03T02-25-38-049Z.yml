@@ -1,0 +1,35 @@
+- generic [ref=e8]:
+  - heading "BLUESKY TRAVEL" [level=1] [ref=e9]
+  - paragraph [ref=e10]:
+    - generic [ref=e11]:
+      - text: Haz realidad tu próximo viaje con nosotros.
+      - text: Blue Sky Travel 💙✈️
+      - text: Atención confiable y personalizada.
+  - list [ref=e12]:
+    - listitem [ref=e13]:
+      - button "Who We Are" [ref=e14] [cursor=pointer]
+    - listitem [ref=e15]:
+      - button "Services" [ref=e16] [cursor=pointer]
+    - listitem [ref=e17]:
+      - button "Contact" [ref=e18] [cursor=pointer]
+  - generic [ref=e20]:
+    - heading "Horario en nuestros destinos 🌎" [level=3] [ref=e21]
+    - generic [ref=e22]:
+      - generic [ref=e23]:
+        - generic [ref=e24]: 🇲🇽 CDMX
+        - text: 08:25:37 p.m.
+      - generic [ref=e25]:
+        - generic [ref=e26]: 🇬🇧 London
+        - text: 03:25:37 a.m.
+      - generic [ref=e27]:
+        - generic [ref=e28]: 🇺🇸 New York
+        - text: 10:25:37 p.m.
+      - generic [ref=e29]:
+        - generic [ref=e30]: 🇯🇵 Tokyo
+        - text: 11:25:37 a.m.
+  - generic [ref=e32]:
+    - generic [ref=e33]: ⭐⭐⭐⭐⭐ 5.0 / 5
+    - generic [ref=e34]: “
+    - generic [ref=e35]: Cargando...
+  - link "WA" [ref=e36] [cursor=pointer]:
+    - /url: https://wa.me/528148217361?text=Listo%20para%20mi%20pr%C3%B3ximo%20viaje%20con%20BlueSky%20Travel%20%F0%9F%8C%8E

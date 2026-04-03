@@ -1,0 +1,53 @@
+---
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import '../styles/global.css';
+import { brand, type Locale } from '../config/site';
+
+interface Props {
+	locale: Locale;
+	title: string;
+	description: string;
+	path: string;
+	alternatePath: string;
+	isHome?: boolean;
+}
+
+const { locale, title, description, path, alternatePath, isHome = false } = Astro.props;
+const canonical = new URL(path, brand.website).toString();
+const alternate = new URL(alternatePath, brand.website).toString();
+const homeUrl = new URL('/', brand.website).toString();
+const ogImage = new URL('/images/hero-social.jpg', brand.website).toString();
+---
+
+<!doctype html>
+<html lang={locale}>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>{title}</title>
+		<meta name="description" content={description} />
+		<meta name="generator" content={Astro.generator} />
+		<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+		<link rel="canonical" href={canonical} />
+		<link rel="alternate" href={alternate} hreflang={locale === 'es' ? 'en' : 'es'} />
+		<link rel="alternate" href={homeUrl} hreflang="x-default" />
+		<meta property="og:type" content="website" />
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={description} />
+		<meta property="og:url" content={canonical} />
+		<meta property="og:site_name" content={brand.name} />
+		<meta property="og:image" content={ogImage} />
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:title" content={title} />
+		<meta name="twitter:description" content={description} />
+		<meta name="twitter:image" content={ogImage} />
+	</head>
+	<body>
+		<div class="site-shell">
+			<Header locale={locale} isHome={isHome} alternatePath={alternatePath} />
+			<slot />
+			<Footer locale={locale} />
+		</div>
+	</body>
+</html>

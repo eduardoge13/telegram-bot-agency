@@ -1,0 +1,53 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { dataDeletionContent, localizedPaths, brand } from '../../config/site';
+
+const copy = dataDeletionContent.en;
+---
+
+<BaseLayout
+	locale="en"
+	title={`Blue Sky Travel | ${copy.title}`}
+	description={copy.description}
+	path={localizedPaths.dataDeletion.en}
+	alternatePath={localizedPaths.dataDeletion.es}
+>
+	<main class="legal-main">
+		<section class="legal-hero">
+			<div class="container legal-hero__grid">
+				<div>
+					<p class="eyebrow">Legal</p>
+					<h1>{copy.title}</h1>
+					<p class="lead">{copy.intro}</p>
+				</div>
+				<div class="legal-contact-card">
+					<h2>Contact</h2>
+					<p>Use this route for access, correction, or deletion requests related to your information.</p>
+					<dl class="contact-list">
+						<dt>Email</dt>
+						<dd>{brand.privacyEmail}</dd>
+						<dt>WhatsApp</dt>
+						<dd>{brand.whatsappDisplay}</dd>
+					</dl>
+				</div>
+			</div>
+		</section>
+
+		<section class="legal-warning">
+			<div class="container">
+				<p>{copy.timing}</p>
+			</div>
+		</section>
+
+		<section class="legal-sections">
+			<div class="container legal-section-grid">
+				<article class="legal-card">
+					<h2>Suggested process</h2>
+					<ul class="legal-list">
+						{copy.steps.map((step) => <li>{step}</li>)}
+					</ul>
+				</article>
+			</div>
+		</section>
+	</main>
+</BaseLayout>

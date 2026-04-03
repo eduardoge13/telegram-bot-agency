@@ -4,8 +4,8 @@ from app.businesses import BusinessConfig, BUSINESSES
 
 
 def test_business_lookup():
-    """PLAT-01: BUSINESSES dict resolves correct config by Twilio number."""
-    config = BUSINESSES.get("whatsapp:+15005550006")
+    """PLAT-01: BUSINESSES dict resolves correct config by phone number ID."""
+    config = BUSINESSES.get("123456789012345")
     assert config is not None
     assert isinstance(config, BusinessConfig)
     assert config.business_id == "puntoclave"
@@ -13,18 +13,18 @@ def test_business_lookup():
 
 
 def test_business_lookup_unknown():
-    """PLAT-01: Unknown Twilio number returns None."""
-    config = BUSINESSES.get("whatsapp:+19999999999")
+    """PLAT-01: Unknown phone number ID returns None."""
+    config = BUSINESSES.get("000000000000000")
     assert config is None
 
 
 def test_new_business_no_code_change():
     """PLAT-04: Adding a third entry to BUSINESSES makes it resolvable without code change."""
     # Add a third business dynamically — simulates what config-driven onboarding does
-    test_number = "whatsapp:+15005550099"
+    test_number = "555555555555555"
     new_business = BusinessConfig(
         business_id="testbiz",
-        twilio_number=test_number,
+        phone_number_id=test_number,
         system_prompt="Test system prompt",
         sheets_id=None,
         handlers=["qa"],
@@ -41,10 +41,10 @@ def test_new_business_no_code_change():
 
 def test_business_config_has_required_fields():
     """BusinessConfig dataclass has expected fields."""
-    config = BUSINESSES.get("whatsapp:+15005550006")
+    config = BUSINESSES.get("123456789012345")
     assert config is not None
     assert hasattr(config, "business_id")
-    assert hasattr(config, "twilio_number")
+    assert hasattr(config, "phone_number_id")
     assert hasattr(config, "system_prompt")
     assert hasattr(config, "handlers")
     assert hasattr(config, "language")
@@ -53,7 +53,7 @@ def test_business_config_has_required_fields():
 
 def test_travel_business_exists():
     """Travel agency business is configured."""
-    config = BUSINESSES.get("whatsapp:+15005550007")
+    config = BUSINESSES.get("987654321098765")
     assert config is not None
     assert config.business_id == "travel"
     assert "flight" in config.handlers

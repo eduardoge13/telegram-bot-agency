@@ -18,7 +18,7 @@ def make_session(state=None):
 def puntoclave_business():
     return BusinessConfig(
         business_id="puntoclave",
-        twilio_number="whatsapp:+15005550006",
+        phone_number_id="123456789012345",
         system_prompt="Eres el asistente de Punto Clave MX.",
         sheets_id="test-sheet-id",
         handlers=["product", "order", "qa"],
@@ -29,7 +29,7 @@ def puntoclave_business():
 def travel_business():
     return BusinessConfig(
         business_id="travel",
-        twilio_number="whatsapp:+15005550007",
+        phone_number_id="987654321098765",
         system_prompt="Eres el asistente de viajes.",
         sheets_id=None,
         handlers=["flight", "qa"],

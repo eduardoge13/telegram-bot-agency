@@ -1,0 +1,18 @@
+---
+import HomePage from '../components/HomePage.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { homeContent, localizedPaths } from '../config/site';
+
+const copy = homeContent.es;
+---
+
+<BaseLayout
+	locale="es"
+	title={copy.title}
+	description={copy.description}
+	path={localizedPaths.home.es}
+	alternatePath={localizedPaths.home.en}
+	isHome={true}
+>
+	<HomePage locale="es" />
+</BaseLayout>

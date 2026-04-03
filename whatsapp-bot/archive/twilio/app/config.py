@@ -6,11 +6,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     """Application settings loaded from environment variables or .env file."""
 
-    # WhatsApp Cloud API credentials
-    whatsapp_access_token: str = ""
-    whatsapp_verify_token: str = ""
-    whatsapp_app_secret: str = ""
-    whatsapp_api_version: str = "v24.0"
+    # Twilio credentials
+    twilio_auth_token: str = ""
+    twilio_account_sid: str = ""
 
     # Google Gemini API
     gemini_api_key: str = ""
@@ -22,6 +20,9 @@ class Settings(BaseSettings):
     amadeus_client_id: str = ""
     amadeus_client_secret: str = ""
     amadeus_base_url: str = "https://test.api.amadeus.com"
+
+    # Webhook public URL (required for Twilio signature validation behind Traefik)
+    webhook_base_url: str = "https://bot.srv1175749.hstgr.cloud"
 
     model_config = SettingsConfigDict(
         env_file=".env",

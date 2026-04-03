@@ -1,0 +1,71 @@
+---
+import { brand, legalWarning, type Locale } from '../config/site';
+
+interface Props {
+	locale: Locale;
+	title: string;
+	intro: string;
+	description: string;
+	contactCard: readonly (readonly [string, string])[];
+	sections: readonly {
+		title: string;
+		paragraphs?: readonly string[];
+		items?: readonly string[];
+	}[];
+}
+
+const { locale, title, intro, description, contactCard, sections } = Astro.props;
+---
+
+<main class="legal-main">
+	<section class="legal-hero">
+		<div class="container legal-hero__grid">
+			<div>
+				<p class="eyebrow">{locale === 'es' ? 'Legal' : 'Legal'}</p>
+				<h1>{title}</h1>
+				<p class="lead">{intro}</p>
+				<p class="legal-meta">
+					{locale === 'es' ? 'Última actualización' : 'Last updated'}: {brand.lastUpdated}
+				</p>
+			</div>
+			<div class="legal-contact-card">
+				<h2>{locale === 'es' ? 'Datos de contacto' : 'Contact details'}</h2>
+				<p>{description}</p>
+				<dl class="contact-list">
+					{contactCard.map(([label, value]) => (
+						<>
+							<dt>{label}</dt>
+							<dd>{value}</dd>
+						</>
+					))}
+				</dl>
+			</div>
+		</div>
+	</section>
+
+	{brand.legalReviewRequired && (
+		<section class="legal-warning">
+			<div class="container">
+				<p>{legalWarning[locale]}</p>
+			</div>
+		</section>
+	)}
+
+	<section class="legal-sections">
+		<div class="container legal-section-grid">
+			{sections.map((section) => (
+				<article class="legal-card">
+					<h2>{section.title}</h2>
+					{section.paragraphs?.map((paragraph) => <p>{paragraph}</p>)}
+					{section.items && (
+						<ul class="legal-list">
+							{section.items.map((item) => (
+								<li>{item}</li>
+							))}
+						</ul>
+					)}
+				</article>
+			))}
+		</div>
+	</section>
+</main>

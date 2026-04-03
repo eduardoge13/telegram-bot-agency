@@ -1,0 +1,247 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - link "Blue Sky Travel" [ref=e5] [cursor=pointer]:
+          - /url: /
+          - generic [ref=e7]: Blue Sky Travel
+        - navigation "Principal" [ref=e8]:
+          - link "Servicios" [ref=e9] [cursor=pointer]:
+            - /url: "#services"
+          - link "Proceso" [ref=e10] [cursor=pointer]:
+            - /url: "#process"
+          - link "FAQ" [ref=e11] [cursor=pointer]:
+            - /url: "#faq"
+          - link "Privacidad" [ref=e12] [cursor=pointer]:
+            - /url: /privacy-policy
+        - generic [ref=e13]:
+          - link "EN" [ref=e14] [cursor=pointer]:
+            - /url: /en/
+          - link "WhatsApp" [ref=e15] [cursor=pointer]:
+            - /url: https://wa.me/528148217361?text=Hola%2C%20quiero%20planear%20un%20viaje%20con%20Blue%20Sky%20Travel.
+    - main [ref=e16]:
+      - generic [ref=e18]:
+        - generic [ref=e19]:
+          - paragraph [ref=e20]: Travel design for a faster sales funnel
+          - heading "Una experiencia de viajes premium que se siente sólida desde el primer clic." [level=1] [ref=e21]
+          - paragraph [ref=e22]: Blue Sky Travel convierte mejor cuando la marca, la claridad y el acceso por WhatsApp trabajan juntos. Esta fase crea la base visual, legal y comercial para vender con autoridad.
+          - generic [ref=e23]:
+            - link "Planear por WhatsApp" [ref=e24] [cursor=pointer]:
+              - /url: https://wa.me/528148217361?text=Hola%2C%20quiero%20planear%20un%20viaje%20con%20Blue%20Sky%20Travel.
+            - link "Ver proceso" [ref=e25] [cursor=pointer]:
+              - /url: "#process"
+          - list [ref=e26]:
+            - listitem [ref=e27]: Bilingüe
+            - listitem [ref=e28]: WhatsApp-first
+            - listitem [ref=e29]: Sin fricción en el primer contacto
+        - generic [ref=e30]:
+          - figure [ref=e31]:
+            - img "Cordillera nevada utilizada como imagen editorial principal de Blue Sky Travel." [ref=e32]
+          - generic [ref=e33]:
+            - paragraph [ref=e34]: Vista previa de experiencia
+            - heading "Itinerarios claros, handoff directo y CTA lista para vender." [level=2] [ref=e35]
+            - paragraph [ref=e36]: La homepage organiza discovery, confianza y acción. El cliente entiende el valor, sabe qué esperar y encuentra el siguiente paso sin ruido.
+          - generic [ref=e37]:
+            - article [ref=e38]:
+              - text: Canal principal
+              - strong [ref=e39]: WhatsApp
+            - article [ref=e40]:
+              - text: Idiomas
+              - strong [ref=e41]: ES / EN
+            - article [ref=e42]:
+              - text: Fase 1
+              - strong [ref=e43]: Homepage + legal
+          - generic [ref=e44]:
+            - article [ref=e45]:
+              - paragraph [ref=e46]: Corporate travel
+              - heading "Coordina viajes ejecutivos sin perder tiempo en explicaciones innecesarias." [level=3] [ref=e47]
+            - article [ref=e48]:
+              - paragraph [ref=e49]: Celebration travel
+              - heading "Escapadas premium, luna de miel y fechas clave con un tono más elevado." [level=3] [ref=e50]
+            - article [ref=e51]:
+              - paragraph [ref=e52]: Family planning
+              - heading "Requisitos, ritmo del viaje y decisiones más claras desde el inicio." [level=3] [ref=e53]
+      - generic [ref=e56]:
+        - article [ref=e57]:
+          - paragraph [ref=e58]: Señal de confianza
+          - heading "Claridad comercial" [level=2] [ref=e59]
+          - paragraph [ref=e60]: La propuesta, el proceso y la acción principal se entienden de inmediato.
+        - article [ref=e61]:
+          - paragraph [ref=e62]: Señal de confianza
+          - heading "Tono premium" [level=2] [ref=e63]
+          - paragraph [ref=e64]: Visuales, tipografía y mensajes alineados a una marca de viajes de mayor valor.
+        - article [ref=e65]:
+          - paragraph [ref=e66]: Señal de confianza
+          - heading "Salida directa" [level=2] [ref=e67]
+          - paragraph [ref=e68]: "El sitio prepara la conversación y empuja al canal donde ya operas: WhatsApp."
+      - generic [ref=e70]:
+        - generic [ref=e71]:
+          - paragraph [ref=e72]: Servicios clave
+          - heading "La página vende mejor cuando el cliente entiende dónde encaja." [level=2] [ref=e73]
+          - paragraph [ref=e74]: La estructura muestra escenarios concretos de compra para que el usuario se identifique rápido y llegue a WhatsApp con una necesidad mejor definida.
+        - generic [ref=e75]:
+          - article [ref=e76]:
+            - paragraph [ref=e77]: Entrada principal
+            - heading "Escapadas premium" [level=3] [ref=e78]
+            - paragraph [ref=e79]: Curaduría de hoteles, vuelos y ritmo de viaje para clientes que quieren una experiencia más pulida.
+          - article [ref=e80]:
+            - heading "Viaje corporativo" [level=3] [ref=e81]
+            - paragraph [ref=e82]: Coordinación más clara para ejecutivos, equipos y agendas donde el tiempo importa.
+          - article [ref=e83]:
+            - heading "Celebraciones y ocasiones especiales" [level=3] [ref=e84]
+            - paragraph [ref=e85]: Luna de miel, aniversarios y viajes importantes con una narrativa más emocional y ordenada.
+          - article [ref=e86]:
+            - heading "Planeación bilingüe" [level=3] [ref=e87]
+            - paragraph [ref=e88]: Comunicación en español o inglés para viajeros internacionales, clientes mixtos y soporte más flexible.
+      - generic [ref=e90]:
+        - generic [ref=e91]:
+          - generic [ref=e92]:
+            - paragraph [ref=e93]: Por qué funciona
+            - heading "No es solo una página bonita. Es una página que organiza la venta." [level=2] [ref=e94]
+            - paragraph [ref=e95]: "Cada bloque reduce fricción: posicionamiento claro, prueba de proceso, rutas de decisión simples y una salida directa al canal de cierre."
+          - generic [ref=e96]:
+            - article [ref=e97]:
+              - generic [ref=e98]: "01"
+              - generic [ref=e99]:
+                - heading "Discovery mejor guiado" [level=3] [ref=e100]
+                - paragraph [ref=e101]: El usuario entiende desde la homepage qué tipo de viaje puede resolver contigo y qué datos conviene llevar a WhatsApp.
+            - article [ref=e102]:
+              - generic [ref=e103]: "02"
+              - generic [ref=e104]:
+                - heading "Confianza legal visible" [level=3] [ref=e105]
+                - paragraph [ref=e106]: Privacy policy, terms y data deletion disponibles desde el footer para pasar Meta y operar con una base más seria.
+            - article [ref=e107]:
+              - generic [ref=e108]: "03"
+              - generic [ref=e109]:
+                - heading "Arquitectura lista para crecer" [level=3] [ref=e110]
+                - paragraph [ref=e111]: La implementación queda preparada para sumar formularios, tracking y entry points más sofisticados en la siguiente fase.
+        - complementary [ref=e112]:
+          - paragraph [ref=e113]: Criterio visual
+          - heading "El sitio debe sentirse concreto, humano y listo para vender." [level=3] [ref=e114]
+          - paragraph [ref=e115]: La combinación correcta no es más efectos. Es una promesa clara, una imagen real, señales de legitimidad y una salida rápida a WhatsApp.
+      - generic [ref=e117]:
+        - generic [ref=e118]:
+          - paragraph [ref=e119]: Proceso
+          - heading "Cuatro pasos para mover la conversación desde interés hasta cotización." [level=2] [ref=e120]
+          - paragraph [ref=e121]: La narrativa de proceso reduce dudas y ayuda a que el primer mensaje por WhatsApp sea más útil para tu equipo o para el agente.
+        - generic [ref=e122]:
+          - article [ref=e123]:
+            - generic [ref=e124]: "01"
+            - generic [ref=e125]:
+              - heading "El cliente aterriza en la oferta correcta" [level=3] [ref=e126]
+              - paragraph [ref=e127]: La homepage segmenta por necesidad y comunica el valor sin pedir demasiado esfuerzo.
+          - article [ref=e128]:
+            - generic [ref=e129]: "02"
+            - generic [ref=e130]:
+              - heading "WhatsApp concentra el discovery" [level=3] [ref=e131]
+              - paragraph [ref=e132]: El CTA principal lleva directo al canal donde ya vive la conversación comercial.
+          - article [ref=e133]:
+            - generic [ref=e134]: "03"
+            - generic [ref=e135]:
+              - heading "La solicitud llega mas clara" [level=3] [ref=e136]
+              - paragraph [ref=e137]: Destino, tono del viaje y contexto se entienden mejor desde el primer intercambio.
+          - article [ref=e138]:
+            - generic [ref=e139]: "04"
+            - generic [ref=e140]:
+              - heading "El handoff queda listo para crecer" [level=3] [ref=e141]
+              - paragraph [ref=e142]: La base visual y legal queda preparada para conectar formularios, tracking o automatización más adelante.
+      - generic [ref=e144]:
+        - generic [ref=e145]:
+          - paragraph [ref=e146]: Escenarios de compra
+          - heading "La página habla con distintos tipos de viaje sin perder coherencia." [level=2] [ref=e147]
+          - paragraph [ref=e148]: Esto ayuda a vender más de una clase de experiencia sin que el sitio se sienta disperso.
+        - generic [ref=e149]:
+          - article [ref=e150]:
+            - paragraph [ref=e151]: Escenario 01
+            - heading "Corporate itinerary" [level=3] [ref=e152]
+            - paragraph [ref=e153]: Viajes ejecutivos con velocidad, claridad y una imagen más seria frente al cliente.
+          - article [ref=e154]:
+            - paragraph [ref=e155]: Escenario 02
+            - heading "Luxury getaway" [level=3] [ref=e156]
+            - paragraph [ref=e157]: Estancias, upgrade de experiencia y tono editorial para tickets más altos.
+          - article [ref=e158]:
+            - paragraph [ref=e159]: Escenario 03
+            - heading "Family coordination" [level=3] [ref=e160]
+            - paragraph [ref=e161]: Viajes con más variables, pero con una estructura de decisión que sigue siendo clara.
+          - article [ref=e162]:
+            - paragraph [ref=e163]: Escenario 04
+            - heading "Special occasion" [level=3] [ref=e164]
+            - paragraph [ref=e165]: Momentos donde el viaje importa emocionalmente y la marca debe verse a la altura.
+      - generic [ref=e167]:
+        - generic [ref=e168]:
+          - paragraph [ref=e169]: Primer mensaje ideal
+          - heading "Qué conviene enviar por WhatsApp para acelerar la cotización." [level=2] [ref=e170]
+          - paragraph [ref=e171]: La página no obliga formularios en fase 1, pero sí prepara al cliente para llegar mejor orientado.
+        - list [ref=e173]:
+          - listitem [ref=e174]: Destino o idea de viaje.
+          - listitem [ref=e175]: Fechas o ventana aproximada.
+          - listitem [ref=e176]: Número de viajeros.
+          - listitem [ref=e177]: "Prioridad principal: lujo, velocidad, presupuesto o celebración."
+      - generic [ref=e179]:
+        - generic [ref=e180]:
+          - paragraph [ref=e181]: FAQ
+          - heading "Dudas que la página debe resolver antes del clic." [level=2] [ref=e182]
+          - paragraph [ref=e183]: Un FAQ corto y directo ayuda a sostener la conversión sin empujar al usuario fuera del flujo.
+        - generic [ref=e184]:
+          - group [ref=e185]:
+            - generic "¿Qué pasa cuando escribo por WhatsApp?" [ref=e186] [cursor=pointer]
+          - group [ref=e187]:
+            - generic "¿Puedo atender clientes en inglés?" [ref=e188] [cursor=pointer]
+          - group [ref=e189]:
+            - generic "¿Esta fase ya incluye un motor de reservas?" [ref=e190] [cursor=pointer]
+          - group [ref=e191]:
+            - generic "¿La privacy policy ya es suficiente para Meta?" [ref=e192] [cursor=pointer]
+      - generic [ref=e194]:
+        - generic [ref=e195]:
+          - paragraph [ref=e196]: Siguiente paso
+          - heading "Si el sitio ya comunica mejor, el siguiente paso debe ser igual de simple." [level=2] [ref=e197]
+          - paragraph [ref=e198]: Abre WhatsApp y lleva la conversación al canal donde ya estás construyendo el agente y el proceso comercial.
+        - generic [ref=e199]:
+          - link "Abrir WhatsApp" [ref=e200] [cursor=pointer]:
+            - /url: https://wa.me/528148217361?text=Hola%2C%20quiero%20planear%20un%20viaje%20con%20Blue%20Sky%20Travel.
+          - link "Leer privacidad" [ref=e201] [cursor=pointer]:
+            - /url: /privacy-policy
+    - contentinfo [ref=e202]:
+      - generic [ref=e203]:
+        - generic [ref=e204]:
+          - generic [ref=e207]: Blue Sky Travel
+          - paragraph [ref=e208]: Planeación de viajes bilingüe diseñada para sostener ventas premium, claridad legal y un handoff más limpio hacia WhatsApp.
+        - generic [ref=e209]:
+          - paragraph [ref=e210]: Legal
+          - list [ref=e211]:
+            - listitem [ref=e212]:
+              - link "Privacidad" [ref=e213] [cursor=pointer]:
+                - /url: /privacy-policy
+            - listitem [ref=e214]:
+              - link "Términos" [ref=e215] [cursor=pointer]:
+                - /url: /terms
+            - listitem [ref=e216]:
+              - link "Eliminación de datos" [ref=e217] [cursor=pointer]:
+                - /url: /data-deletion
+        - generic [ref=e218]:
+          - paragraph [ref=e219]: Contact
+          - list [ref=e220]:
+            - listitem [ref=e221]:
+              - link "hola@blueskytravelmx.com" [ref=e222] [cursor=pointer]:
+                - /url: mailto:hola@blueskytravelmx.com
+            - listitem [ref=e223]:
+              - link "privacy@blueskytravelmx.com" [ref=e224] [cursor=pointer]:
+                - /url: mailto:privacy@blueskytravelmx.com
+            - listitem [ref=e225]:
+              - link "+52 81 4821 7361" [ref=e226] [cursor=pointer]:
+                - /url: https://wa.me/528148217361
+  - generic [ref=e229]:
+    - button "Menu" [ref=e230]:
+      - img [ref=e232]
+      - generic: Menu
+    - button "Inspect" [ref=e236]:
+      - img [ref=e238]
+      - generic: Inspect
+    - button "Audit" [ref=e240]:
+      - generic [ref=e241]:
+        - img [ref=e242]
+        - img [ref=e245]
+      - generic: Audit
+    - button "Settings" [ref=e248]:
+      - img [ref=e250]
+      - generic: Settings

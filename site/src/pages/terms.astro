@@ -1,0 +1,24 @@
+---
+import LegalPage from '../components/LegalPage.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { localizedPaths, termsContent } from '../config/site';
+
+const copy = termsContent.es;
+---
+
+<BaseLayout
+	locale="es"
+	title={`Blue Sky Travel | ${copy.title}`}
+	description={copy.description}
+	path={localizedPaths.terms.es}
+	alternatePath={localizedPaths.terms.en}
+>
+	<LegalPage
+		locale="es"
+		title={copy.title}
+		intro={copy.intro}
+		description={copy.description}
+		contactCard={copy.contactCard}
+		sections={copy.sections}
+	/>
+</BaseLayout>

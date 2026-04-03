@@ -1,0 +1,243 @@
+---
+import { homeContent, localizedPaths, whatsappHref, type Locale } from '../config/site';
+
+interface Props {
+	locale: Locale;
+}
+
+const { locale } = Astro.props;
+const copy = homeContent[locale];
+---
+
+<main>
+	<section class="hero-section">
+		<div class="container hero-grid">
+			<div class="hero-copy">
+				<p class="eyebrow">{copy.hero.eyebrow}</p>
+				<h1>{copy.hero.headline}</h1>
+				<p class="lead">{copy.hero.body}</p>
+
+				<div class="cta-row">
+					<a class="button button--primary" href={whatsappHref(locale)} target="_blank" rel="noreferrer">
+						{copy.hero.primaryCta}
+					</a>
+					<a class="button button--secondary" href="#process">
+						{copy.hero.secondaryCta}
+					</a>
+				</div>
+
+				<ul class="badge-list">
+					{copy.hero.badges.map((badge) => (
+						<li>{badge}</li>
+					))}
+				</ul>
+			</div>
+
+			<div class="hero-media">
+				<figure class="hero-image-frame">
+					<img
+						src="/images/hero-summit.jpg"
+						alt={locale === 'es'
+							? 'Cordillera nevada utilizada como imagen editorial principal de Blue Sky Travel.'
+							: 'Snow-capped mountain range used as Blue Sky Travel’s main editorial image.'}
+						loading="eager"
+					/>
+				</figure>
+
+				<div class="hero-editorial-card">
+					<p class="eyebrow eyebrow--soft">{copy.hero.spotlightLabel}</p>
+					<h2>{copy.hero.spotlightTitle}</h2>
+					<p>{copy.hero.spotlightBody}</p>
+				</div>
+
+				<div class="hero-panel__stats">
+					{copy.hero.spotlightStats.map((item) => (
+						<article class="stat-card">
+							<span>{item.label}</span>
+							<strong>{item.value}</strong>
+						</article>
+					))}
+				</div>
+
+				<div class="journey-strip">
+					{copy.hero.journeyCards.map((card) => (
+						<article class="journey-card">
+							<p>{card.kicker}</p>
+							<h3>{card.title}</h3>
+						</article>
+					))}
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section class="proof-section">
+		<div class="container">
+			<div class="proof-ribbon">
+				{copy.proof.map((item) => (
+					<article class="proof-chip">
+						<p class="eyebrow eyebrow--soft">{locale === 'es' ? 'Señal de confianza' : 'Trust signal'}</p>
+						<h2>{item.title}</h2>
+						<p>{item.body}</p>
+					</article>
+				))}
+			</div>
+		</div>
+	</section>
+
+	<section class="section" id="services">
+		<div class="container">
+			<div class="section-heading">
+				<p class="eyebrow">{copy.servicesHeading.eyebrow}</p>
+				<h2>{copy.servicesHeading.title}</h2>
+				<p>{copy.servicesHeading.body}</p>
+			</div>
+			<div class="services-editorial">
+				{copy.services.map((item, index) => (
+					<article class:list={['service-card', index === 0 && 'service-card--feature']}>
+						{index === 0 && (
+							<p class="eyebrow eyebrow--soft">
+								{locale === 'es' ? 'Entrada principal' : 'Primary entry point'}
+							</p>
+						)}
+						<h3>{item.title}</h3>
+						<p>{item.body}</p>
+					</article>
+				))}
+			</div>
+		</div>
+	</section>
+
+	<section class="section section--contrast">
+		<div class="container split-story">
+			<div>
+				<div class="section-heading">
+					<p class="eyebrow">{copy.differentiatorsHeading.eyebrow}</p>
+					<h2>{copy.differentiatorsHeading.title}</h2>
+					<p>{copy.differentiatorsHeading.body}</p>
+				</div>
+				<div class="value-rail">
+					{copy.differentiators.map((item, index) => (
+						<article class="value-row">
+							<span class="value-index">{String(index + 1).padStart(2, '0')}</span>
+							<div>
+								<h3>{item.title}</h3>
+								<p>{item.body}</p>
+							</div>
+						</article>
+					))}
+				</div>
+			</div>
+			<aside class="story-card">
+				<p class="eyebrow eyebrow--soft">
+					{locale === 'es' ? 'Criterio visual' : 'Visual criteria'}
+				</p>
+				<h3>
+					{locale === 'es'
+						? 'El sitio debe sentirse concreto, humano y listo para vender.'
+						: 'The site needs to feel concrete, human, and ready to sell.'}
+				</h3>
+				<p>
+					{locale === 'es'
+						? 'La combinación correcta no es más efectos. Es una promesa clara, una imagen real, señales de legitimidad y una salida rápida a WhatsApp.'
+						: 'The right mix is not more effects. It is a clear promise, a real image, legitimacy signals, and a fast path into WhatsApp.'}
+				</p>
+			</aside>
+		</div>
+	</section>
+
+	<section class="section" id="process">
+		<div class="container process-layout">
+			<div class="section-heading section-heading--compact">
+				<p class="eyebrow">{copy.processHeading.eyebrow}</p>
+				<h2>{copy.processHeading.title}</h2>
+				<p>{copy.processHeading.body}</p>
+			</div>
+			<div class="process-timeline">
+				{copy.process.map((item) => (
+					<article class="process-step-card">
+						<span class="process-step">{item.step}</span>
+						<div>
+							<h3>{item.title}</h3>
+							<p>{item.body}</p>
+						</div>
+					</article>
+				))}
+			</div>
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="container">
+			<div class="section-heading">
+				<p class="eyebrow">{copy.showcaseHeading.eyebrow}</p>
+				<h2>{copy.showcaseHeading.title}</h2>
+				<p>{copy.showcaseHeading.body}</p>
+			</div>
+			<div class="showcase-mosaic">
+				{copy.showcase.map((item, index) => (
+					<article class:list={['showcase-card', (index === 0 || index === 3) && 'showcase-card--wide']}>
+						<p class="eyebrow eyebrow--soft">
+							{locale === 'es' ? 'Escenario' : 'Scenario'} {String(index + 1).padStart(2, '0')}
+						</p>
+						<h3>{item.title}</h3>
+						<p>{item.body}</p>
+					</article>
+				))}
+			</div>
+		</div>
+	</section>
+
+	<section class="section section--contrast">
+		<div class="container split-panel">
+			<div class="section-heading section-heading--compact">
+				<p class="eyebrow">{copy.briefHeading.eyebrow}</p>
+				<h2>{copy.briefHeading.title}</h2>
+				<p>{copy.briefHeading.body}</p>
+			</div>
+			<div class="checklist-card">
+				<ul class="checklist">
+					{copy.brief.map((item) => (
+						<li>{item}</li>
+					))}
+				</ul>
+			</div>
+		</div>
+	</section>
+
+	<section class="section" id="faq">
+		<div class="container">
+			<div class="section-heading">
+				<p class="eyebrow">{copy.faqHeading.eyebrow}</p>
+				<h2>{copy.faqHeading.title}</h2>
+				<p>{copy.faqHeading.body}</p>
+			</div>
+			<div class="faq-list">
+				{copy.faq.map((item) => (
+					<details class="faq-item">
+						<summary>{item.question}</summary>
+						<p>{item.answer}</p>
+					</details>
+				))}
+			</div>
+		</div>
+	</section>
+
+	<section class="cta-banner">
+		<div class="container cta-banner__inner">
+			<div>
+				<p class="eyebrow eyebrow--soft">{locale === 'es' ? 'Siguiente paso' : 'Next step'}</p>
+				<h2>{copy.cta.title}</h2>
+				<p>{copy.cta.body}</p>
+			</div>
+			<div class="cta-row">
+				<a class="button button--primary" href={whatsappHref(locale)} target="_blank" rel="noreferrer">
+					{copy.cta.primary}
+				</a>
+				<a class="button button--secondary" href={localizedPaths.privacy[locale]}>
+					{copy.cta.secondary}
+				</a>
+			</div>
+		</div>
+	</section>
+</main>

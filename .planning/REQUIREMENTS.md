@@ -17,7 +17,7 @@
 - [ ] **INFRA-02**: SSL/HTTPS enabled via Certbot with auto-renewal (requires domain)
 - [ ] **INFRA-03**: Process management via PM2 or Docker (consistent with existing VPS setup) with auto-restart
 - [ ] **INFRA-04**: Next.js site running on VPS port 3000
-- [ ] **INFRA-05**: WhatsApp bot service running on VPS port 3001
+- [x] **INFRA-05**: WhatsApp bot service running on VPS port 3001
 
 ### WhatsApp Bot (Twilio)
 
@@ -75,7 +75,7 @@
 | INFRA-02 | Phase 1: Site + Infrastructure | Pending |
 | INFRA-03 | Phase 1: Site + Infrastructure | Pending |
 | INFRA-04 | Phase 1: Site + Infrastructure | Pending |
-| INFRA-05 | Phase 2: WhatsApp Bot Platform | Pending |
+| INFRA-05 | Phase 2: WhatsApp Bot Platform | Complete |
 | BOT-01 | Phase 2: WhatsApp Bot Platform | Complete |
 | BOT-02 | Phase 2: WhatsApp Bot Platform | Complete |
 | BOT-03 | Phase 2: WhatsApp Bot Platform | Complete |

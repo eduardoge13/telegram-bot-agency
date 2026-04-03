@@ -1,0 +1,30 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { localizedPaths } from '../config/site';
+---
+
+<BaseLayout
+	locale="es"
+	title="Blue Sky Travel | Pagina no encontrada"
+	description="La pagina solicitada no existe o se movio dentro del nuevo sitio de Blue Sky Travel."
+	path="/404"
+	alternatePath="/en/"
+>
+	<main class="legal-main">
+		<section class="legal-hero">
+			<div class="container legal-hero__grid">
+				<div>
+					<p class="eyebrow">404</p>
+					<h1>La ruta que buscas no esta aqui.</h1>
+					<p class="lead">
+						Regresa a la homepage o abre WhatsApp para continuar la conversacion comercial.
+					</p>
+					<div class="cta-row">
+						<a class="button button--primary" href={localizedPaths.home.es}>Volver al inicio</a>
+						<a class="button button--secondary" href={localizedPaths.privacy.es}>Privacidad</a>
+					</div>
+				</div>
+			</div>
+		</section>
+	</main>
+</BaseLayout>

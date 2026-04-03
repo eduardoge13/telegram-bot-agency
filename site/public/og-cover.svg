@@ -1,0 +1,20 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="630" fill="#091421"/>
+  <rect x="24" y="24" width="1152" height="582" rx="36" fill="url(#paint0_linear)"/>
+  <circle cx="970" cy="140" r="180" fill="#79D8FF" fill-opacity="0.18"/>
+  <circle cx="220" cy="500" r="220" fill="#F0B967" fill-opacity="0.14"/>
+  <path d="M170 440C282 318 390 260 510 260C617 260 721 318 856 318C959 318 1030 287 1092 226" stroke="#F7E2AF" stroke-width="4" stroke-dasharray="10 12"/>
+  <rect x="104" y="112" width="544" height="300" rx="28" fill="#0E2035" fill-opacity="0.72" stroke="#7AC4E3" stroke-opacity="0.32"/>
+  <text x="152" y="190" fill="#DCEFF7" font-family="Georgia, serif" font-size="64" font-weight="700">Blue Sky Travel</text>
+  <text x="152" y="255" fill="#A8C7D6" font-family="Arial, sans-serif" font-size="28">Bilingual travel planning built for WhatsApp-first sales.</text>
+  <text x="152" y="304" fill="#A8C7D6" font-family="Arial, sans-serif" font-size="28">Premium itineraries. Fast coordination. Clear next steps.</text>
+  <rect x="152" y="350" width="252" height="62" rx="31" fill="#F7E2AF"/>
+  <text x="196" y="390" fill="#0E2035" font-family="Arial, sans-serif" font-size="24" font-weight="700">blueskytravelmx.com</text>
+  <defs>
+    <linearGradient id="paint0_linear" x1="88" y1="72" x2="1097" y2="610" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#15304E"/>
+      <stop offset="0.52" stop-color="#0A1624"/>
+      <stop offset="1" stop-color="#1D3A54"/>
+    </linearGradient>
+  </defs>
+</svg>

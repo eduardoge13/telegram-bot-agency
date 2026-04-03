@@ -1,0 +1,42 @@
+---
+import { localizedPaths, type Locale, homeContent, whatsappHref } from '../config/site';
+
+interface Props {
+	locale: Locale;
+	isHome: boolean;
+	alternatePath: string;
+}
+
+const { locale, isHome, alternatePath } = Astro.props;
+const copy = homeContent[locale];
+const homePath = localizedPaths.home[locale];
+const navItems = copy.nav.map((item) => ({
+	label: item.label,
+	href: isHome ? item.href : `${homePath}${item.href}`,
+}));
+---
+
+<header class="topbar">
+	<div class="container topbar__inner">
+		<a class="brand-mark" href={homePath}>
+			<span class="brand-mark__star" aria-hidden="true"></span>
+			<span>{copy.title.split('|')[0].trim()}</span>
+		</a>
+
+		<nav class="topbar__nav" aria-label={locale === 'es' ? 'Principal' : 'Primary'}>
+			{navItems.map((item) => (
+				<a href={item.href}>{item.label}</a>
+			))}
+			<a href={localizedPaths.privacy[locale]}>{locale === 'es' ? 'Privacidad' : 'Privacy'}</a>
+		</nav>
+
+		<div class="topbar__actions">
+			<a class="language-switch" href={alternatePath}>
+				{copy.languageLabel}
+			</a>
+			<a class="button button--ghost button--small" href={whatsappHref(locale)} target="_blank" rel="noreferrer">
+				{locale === 'es' ? 'WhatsApp' : 'WhatsApp'}
+			</a>
+		</div>
+	</div>
+</header>

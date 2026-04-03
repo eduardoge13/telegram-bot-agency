@@ -17,10 +17,11 @@ def client():
     """FastAPI test client with mocked settings and lifespan triggered."""
     _clear_app_modules()
     mock_settings = MagicMock()
-    mock_settings.twilio_auth_token = "test_auth_token"
-    mock_settings.twilio_account_sid = "test_account_sid"
+    mock_settings.whatsapp_access_token = "test_access_token"
+    mock_settings.whatsapp_verify_token = "test_verify_token"
+    mock_settings.whatsapp_app_secret = ""
+    mock_settings.whatsapp_api_version = "v24.0"
     mock_settings.gemini_api_key = "test_gemini_key"
-    mock_settings.webhook_base_url = "https://bot.srv1175749.hstgr.cloud"
 
     with patch("app.config.get_settings", return_value=mock_settings):
         with patch("app.gemini_client.GeminiClient") as MockGeminiClient:
