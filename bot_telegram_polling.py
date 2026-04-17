@@ -8,7 +8,9 @@ import logging
 import asyncio
 import sys
 import json
+import sqlite3
 import time
+import hashlib
 import threading
 from concurrent.futures import ThreadPoolExecutor
 import pytz
@@ -91,6 +93,218 @@ def get_secret(project_id: str, secret_id: str, version_id: str = "latest") -> O
         logger.error(f"❌ Failed to retrieve secret '{secret_id}': {e}")
         return None
 
+
+def build_sheets_credentials_from_env() -> Optional[Credentials]:
+    """Build Google service account credentials from local env/file fallback."""
+    try:
+        inline_json = os.getenv('GOOGLE_SERVICE_ACCOUNT_JSON')
+        if inline_json:
+            logger.info("Using Google Sheets credentials from GOOGLE_SERVICE_ACCOUNT_JSON")
+            credentials_data = json.loads(inline_json)
+            return Credentials.from_service_account_info(
+                credentials_data,
+                scopes=['https://www.googleapis.com/auth/spreadsheets']
+            )
+
+        credentials_file = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
+        if credentials_file and os.path.exists(credentials_file):
+            logger.info("Using Google Sheets credentials from GOOGLE_APPLICATION_CREDENTIALS file")
+            return Credentials.from_service_account_file(
+                credentials_file,
+                scopes=['https://www.googleapis.com/auth/spreadsheets']
+            )
+    except Exception as e:
+        logger.error(f"❌ Failed to build local Google Sheets credentials: {e}")
+    return None
+
+
+class SQLiteClientStore:
+    """Local persistent cache for fast indexed client lookups on the VPS.
+
+    This is intentionally lightweight: single-file SQLite with WAL mode and a
+    primary-key lookup on normalized phone numbers. It works well for the
+    current single-bot deployment model and avoids introducing another service
+    dependency into the systemd-based runtime.
+    """
+
+    def __init__(self):
+        self.enabled = os.getenv('CLIENT_DB_ENABLED', 'true').lower() in ('1', 'true', 'yes')
+        self.path = os.getenv('CLIENT_DB_PATH', './data/clients.db')
+        self._write_lock = threading.Lock()
+        if self.enabled:
+            self._setup()
+
+    def _connect(self) -> sqlite3.Connection:
+        conn = sqlite3.connect(self.path, timeout=30, check_same_thread=False)
+        conn.row_factory = sqlite3.Row
+        conn.execute('PRAGMA journal_mode=WAL')
+        conn.execute('PRAGMA synchronous=NORMAL')
+        conn.execute('PRAGMA temp_store=MEMORY')
+        conn.execute('PRAGMA busy_timeout=30000')
+        return conn
+
+    def _setup(self):
+        os.makedirs(os.path.dirname(self.path) or '.', exist_ok=True)
+        with self._connect() as conn:
+            conn.execute(
+                '''
+                CREATE TABLE IF NOT EXISTS client_records (
+                    normalized_phone TEXT PRIMARY KEY,
+                    raw_phone TEXT NOT NULL,
+                    payload_json TEXT NOT NULL,
+                    sheet_id TEXT,
+                    sheet_name TEXT,
+                    row_num INTEGER,
+                    updated_at TEXT NOT NULL
+                )
+                '''
+            )
+            conn.execute(
+                'CREATE INDEX IF NOT EXISTS idx_client_records_updated_at ON client_records(updated_at)'
+            )
+
+    def get_client_data(self, normalized_phone: str) -> Optional[Dict[str, str]]:
+        if not self.enabled or not normalized_phone:
+            return None
+        with self._connect() as conn:
+            row = conn.execute(
+                'SELECT payload_json FROM client_records WHERE normalized_phone = ?',
+                (normalized_phone,)
+            ).fetchone()
+        if not row:
+            return None
+        try:
+            payload = json.loads(row['payload_json'])
+            if isinstance(payload, dict):
+                return payload
+        except Exception as e:
+            logger.warning(f"⚠️ Failed to decode SQLite payload for {normalized_phone}: {e}")
+        return None
+
+    def upsert_client(
+        self,
+        normalized_phone: str,
+        raw_phone: str,
+        payload: Dict[str, str],
+        sheet_id: Optional[str] = None,
+        sheet_name: Optional[str] = None,
+        row_num: Optional[int] = None
+    ):
+        if not self.enabled or not normalized_phone or not payload:
+            return
+        with self._write_lock:
+            with self._connect() as conn:
+                conn.execute(
+                    '''
+                    INSERT INTO client_records (
+                        normalized_phone,
+                        raw_phone,
+                        payload_json,
+                        sheet_id,
+                        sheet_name,
+                        row_num,
+                        updated_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                    ON CONFLICT(normalized_phone) DO UPDATE SET
+                        raw_phone=excluded.raw_phone,
+                        payload_json=excluded.payload_json,
+                        sheet_id=excluded.sheet_id,
+                        sheet_name=excluded.sheet_name,
+                        row_num=excluded.row_num,
+                        updated_at=excluded.updated_at
+                    ''',
+                    (
+                        normalized_phone,
+                        raw_phone,
+                        json.dumps(payload, ensure_ascii=False),
+                        sheet_id,
+                        sheet_name,
+                        row_num,
+                        datetime.now(MEXICO_CITY_TZ).isoformat()
+                    )
+                )
+
+    def bulk_upsert(self, rows: List[Tuple[str, str, Dict[str, str], str, str, int]]) -> int:
+        if not self.enabled or not rows:
+            return 0
+        now = datetime.now(MEXICO_CITY_TZ).isoformat()
+        payload = [
+            (
+                normalized_phone,
+                raw_phone,
+                json.dumps(record, ensure_ascii=False),
+                sheet_id,
+                sheet_name,
+                row_num,
+                now
+            )
+            for normalized_phone, raw_phone, record, sheet_id, sheet_name, row_num in rows
+            if normalized_phone and record
+        ]
+        if not payload:
+            return 0
+        with self._write_lock:
+            with self._connect() as conn:
+                conn.executemany(
+                    '''
+                    INSERT INTO client_records (
+                        normalized_phone,
+                        raw_phone,
+                        payload_json,
+                        sheet_id,
+                        sheet_name,
+                        row_num,
+                        updated_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                    ON CONFLICT(normalized_phone) DO UPDATE SET
+                        raw_phone=excluded.raw_phone,
+                        payload_json=excluded.payload_json,
+                        sheet_id=excluded.sheet_id,
+                        sheet_name=excluded.sheet_name,
+                        row_num=excluded.row_num,
+                        updated_at=excluded.updated_at
+                    ''',
+                    payload
+                )
+        return len(payload)
+
+    def update_field(self, normalized_phone: str, field_name: str, new_value: str) -> bool:
+        if not self.enabled or not normalized_phone or not field_name:
+            return False
+        with self._write_lock:
+            with self._connect() as conn:
+                row = conn.execute(
+                    'SELECT payload_json FROM client_records WHERE normalized_phone = ?',
+                    (normalized_phone,)
+                ).fetchone()
+                if not row:
+                    return False
+                try:
+                    payload = json.loads(row['payload_json'])
+                except Exception:
+                    return False
+                payload[field_name] = new_value
+                conn.execute(
+                    '''
+                    UPDATE client_records
+                    SET payload_json = ?, updated_at = ?
+                    WHERE normalized_phone = ?
+                    ''',
+                    (
+                        json.dumps(payload, ensure_ascii=False),
+                        datetime.now(MEXICO_CITY_TZ).isoformat(),
+                        normalized_phone
+                    )
+                )
+        return True
+
+    def get_total_clients(self) -> int:
+        if not self.enabled:
+            return 0
+        with self._connect() as conn:
+            row = conn.execute('SELECT COUNT(*) AS total FROM client_records').fetchone()
+        return int(row['total']) if row else 0
+
 class PersistentLogger:
     """Store all logs permanently in Google Sheets"""
     
@@ -102,23 +316,24 @@ class PersistentLogger:
     def _setup_sheets_service(self):
         """Setup Google Sheets service for logging"""
         try:
-            # GCP Project ID from environment
+            creds = None
+            # GCP Project ID from environment (Cloud Run / Secret Manager path)
             project_id = os.getenv('GCP_PROJECT_ID')
-            if not project_id:
-                logger.warning("⚠️ GCP_PROJECT_ID not set. Cannot fetch secrets from Secret Manager.")
-                return
+            if project_id:
+                credentials_json = get_secret(project_id, 'google-credentials-json')
+                if credentials_json:
+                    logger.info("Using persistent logging credentials from Secret Manager")
+                    credentials_data = json.loads(credentials_json)
+                    creds = Credentials.from_service_account_info(
+                        credentials_data,
+                        scopes=['https://www.googleapis.com/auth/spreadsheets']
+                    )
 
-            # Fetch credentials from Secret Manager
-            credentials_json = get_secret(project_id, 'google-credentials-json')
-            if credentials_json:
-                logger.info("Using persistent logging credentials from Secret Manager")
-                credentials_data = json.loads(credentials_json)
-                creds = Credentials.from_service_account_info(
-                    credentials_data, 
-                    scopes=['https://www.googleapis.com/auth/spreadsheets']
-                )
-            else:
-                logger.warning("⚠️ Could not fetch 'google-credentials-json' from Secret Manager.")
+            # VPS/local fallback path
+            if not creds:
+                creds = build_sheets_credentials_from_env()
+            if not creds:
+                logger.warning("⚠️ No Google credentials available for persistent logging.")
                 self.service = None
                 return
             
@@ -338,16 +553,48 @@ persistent_logger = PersistentLogger()
 class GoogleSheetsManager:
     def __init__(self):
         self.service = None
+        self.local_db = SQLiteClientStore()
         self.headers = []
         self.client_column = 0
         self.spreadsheet_id = os.getenv('SPREADSHEET_ID')
-        # In-memory index: normalized_client_number -> row dict
-        # Lightweight index: phone -> row number (int)
-        self.index_phone_to_row: Dict[str, int] = {}
+        self.primary_sheet_name = (os.getenv('PRIMARY_SHEET_NAME') or 'Sheet1').strip() or 'Sheet1'
+        archive_sheet_names_raw = os.getenv('ARCHIVE_SHEET_NAMES', '')
+        self.archive_sheet_names = [
+            name.strip()
+            for name in archive_sheet_names_raw.split(',')
+            if name.strip() and name.strip() != self.primary_sheet_name
+        ]
+        archive_ids_raw = os.getenv('ARCHIVE_SPREADSHEET_IDS', '')
+        self.archive_spreadsheet_ids = [
+            sid.strip()
+            for sid in archive_ids_raw.split(',')
+            if sid.strip() and sid.strip() != self.spreadsheet_id
+        ]
+
+        read_sources: List[Tuple[Optional[str], str]] = []
+        for sid in self.archive_spreadsheet_ids:
+            read_sources.append((sid, self.primary_sheet_name))
+        for sheet_name in self.archive_sheet_names:
+            read_sources.append((self.spreadsheet_id, sheet_name))
+        read_sources.append((self.spreadsheet_id, self.primary_sheet_name))
+
+        dedupe = set()
+        self.read_sources: List[Tuple[str, str]] = []
+        for sid, sheet_name in read_sources:
+            if not sid:
+                continue
+            key = (sid, sheet_name)
+            if key in dedupe:
+                continue
+            dedupe.add(key)
+            self.read_sources.append(key)
+
+        # Lightweight index: phone -> {sheet_id, sheet_name, row_num}
+        self.index_phone_to_row: Dict[str, Dict[str, Any]] = {}
         self.index_timestamp = 0
         self.index_ttl = int(os.getenv('INDEX_TTL_SECONDS', '600'))  # default 10 minutes
-        # Row cache (LRU) to avoid re-reading frequently used rows
-        self.row_cache: OrderedDict = OrderedDict()
+        # Row cache (LRU) to avoid re-reading frequently used rows across sheets
+        self.row_cache: OrderedDict[Tuple[str, str, int], Dict[str, str]] = OrderedDict()
         # Default row cache reduced for small-memory Cloud Run instances (512Mi)
         self.row_cache_size = int(os.getenv('ROW_CACHE_SIZE', '200'))
         self.sheets_retry_attempts = int(os.getenv('SHEETS_RETRY_ATTEMPTS', '3'))
@@ -444,26 +691,64 @@ class GoogleSheetsManager:
             letters.append(chr(65 + remainder))
         return ''.join(reversed(letters))
 
-    def _fetch_row_client_data(self, row_num: int) -> Optional[Dict[str, str]]:
-        if row_num <= 0:
+    def _range_on_sheet(self, sheet_name: str, cell_range: str) -> str:
+        escaped_sheet = sheet_name.replace("'", "''")
+        return f"'{escaped_sheet}'!{cell_range}"
+
+    def _source_label(self, sheet_id: str, sheet_name: str) -> str:
+        return f"{sheet_id[:8]}:{sheet_name}"
+
+    def _index_cache_path(self) -> str:
+        if len(self.read_sources) == 1:
+            sid, sheet_name = self.read_sources[0]
+            digest = hashlib.sha1(sheet_name.encode('utf-8')).hexdigest()[:8]
+            return f"/tmp/sheets_index_rows_{sid}_{digest}.json"
+        cache_key = '|'.join(f"{sid}:{sheet_name}" for sid, sheet_name in self.read_sources) if self.read_sources else 'none'
+        digest = hashlib.sha1(cache_key.encode('utf-8')).hexdigest()[:16]
+        return f"/tmp/sheets_index_rows_{digest}.json"
+
+    def _parse_row_ref(self, row_ref: Any) -> Tuple[Optional[str], Optional[str], Optional[int]]:
+        sheet_id = self.spreadsheet_id
+        sheet_name = self.primary_sheet_name
+        row_num = row_ref
+        if isinstance(row_ref, dict):
+            sheet_id = row_ref.get('sheet_id') or self.spreadsheet_id
+            sheet_name = row_ref.get('sheet_name') or self.primary_sheet_name
+            row_num = row_ref.get('row_num')
+        if row_num is None:
+            return None, None, None
+        try:
+            row_num = int(row_num)
+        except Exception:
+            return None, None, None
+        if not sheet_id or not sheet_name or row_num <= 0:
+            return None, None, None
+        return sheet_id, sheet_name, row_num
+
+    def _fetch_row_client_data(self, spreadsheet_id: str, sheet_name: str, row_num: int) -> Optional[Dict[str, str]]:
+        if not spreadsheet_id or not sheet_name or row_num <= 0:
+            return None
+        if not self.service:
             return None
 
-        if row_num in self.row_cache:
+        cache_key = (spreadsheet_id, sheet_name, row_num)
+
+        if cache_key in self.row_cache:
             with self._row_cache_lock:
-                entry = self.row_cache.pop(row_num)
-                self.row_cache[row_num] = entry
+                entry = self.row_cache.pop(cache_key)
+                self.row_cache[cache_key] = entry
             return entry
 
         max_col_idx = max(3, len(self.headers) - 1) if self.headers else 3
         end_col = self._col_to_letter(max_col_idx)
-        rng = f"Sheet1!A{row_num}:{end_col}{row_num}"
+        rng = self._range_on_sheet(sheet_name, f"A{row_num}:{end_col}{row_num}")
         result = self._execute_with_retry(
             self.service.spreadsheets().values().get(
-                spreadsheetId=self.spreadsheet_id,
+                spreadsheetId=spreadsheet_id,
                 range=rng
             ),
-            f"fetch row {row_num}"
-        )
+            f"fetch row {row_num} from {self._source_label(spreadsheet_id, sheet_name)}"
+        ) or {}
         values = result.get('values', [])
         if not values:
             return None
@@ -475,9 +760,25 @@ class GoogleSheetsManager:
             client_data[hdr] = row[i].strip() if i < len(row) and row[i] is not None else ''
 
         with self._row_cache_lock:
-            self.row_cache[row_num] = client_data
+            self.row_cache[cache_key] = client_data
             while len(self.row_cache) > self.row_cache_size:
                 self.row_cache.popitem(last=False)
+
+        try:
+            phone_header = self.headers[self.client_column] if self.headers and self.client_column < len(self.headers) else ''
+            raw_phone = client_data.get(phone_header, '') if phone_header else ''
+            normalized_phone = self._normalize_phone(raw_phone)
+            if normalized_phone:
+                self.local_db.upsert_client(
+                    normalized_phone=normalized_phone,
+                    raw_phone=raw_phone,
+                    payload=client_data,
+                    sheet_id=spreadsheet_id,
+                    sheet_name=sheet_name,
+                    row_num=row_num
+                )
+        except Exception as e:
+            logger.debug(f"Failed to write SQLite cache entry for row {row_num}: {e}")
 
         return client_data
 
@@ -486,7 +787,7 @@ class GoogleSheetsManager:
             while True:
                 try:
                     time.sleep(max(10, self.index_ttl))
-                    if self.service and self.spreadsheet_id:
+                    if self.service and self.read_sources:
                         logger.debug('Index refresher: refreshing lightweight index')
                         self._schedule_index_rebuild('periodic refresher')
                 except Exception:
@@ -498,22 +799,25 @@ class GoogleSheetsManager:
     
     def _authenticate(self):
         try:
+            creds = None
             project_id = os.getenv('GCP_PROJECT_ID')
-            if not project_id:
-                logger.error("❌ GCP_PROJECT_ID environment variable not set.")
-                self.service = None
-                return
+            if project_id:
+                credentials_json = get_secret(project_id, 'google-credentials-json')
+                if credentials_json:
+                    logger.info("Using Google Sheets credentials from Secret Manager")
+                    credentials_data = json.loads(credentials_json)
+                    creds = Credentials.from_service_account_info(
+                        credentials_data,
+                        scopes=['https://www.googleapis.com/auth/spreadsheets']
+                    )
 
-            credentials_json = get_secret(project_id, 'google-credentials-json')
-            if credentials_json:
-                logger.info("Using Google Sheets credentials from Secret Manager")
-                credentials_data = json.loads(credentials_json)
-                creds = Credentials.from_service_account_info(
-                    credentials_data,
-                    scopes=['https://www.googleapis.com/auth/spreadsheets']
+            # VPS/local fallback path
+            if not creds:
+                creds = build_sheets_credentials_from_env()
+            if not creds:
+                raise ValueError(
+                    "❌ Could not load Google Sheets credentials from Secret Manager or local environment."
                 )
-            else:
-                raise ValueError("❌ Failed to fetch 'google-credentials-json' from Secret Manager.")
             
             # Disable discovery cache to avoid noisy logs in server environments
             self.service = build('sheets', 'v4', credentials=creds, cache_discovery=False)
@@ -532,7 +836,7 @@ class GoogleSheetsManager:
                 return
             result = self.service.spreadsheets().values().get(
                 spreadsheetId=self.spreadsheet_id,
-                range='Sheet1!1:1'
+                range=self._range_on_sheet(self.primary_sheet_name, '1:1')
             ).execute()
             
             self.headers = result.get('values', [[]])[0]
@@ -550,6 +854,15 @@ class GoogleSheetsManager:
         except Exception as e:
             logger.error(f"❌ Error finding client column: {e}")
 
+    def _find_client_column_in_headers(self, headers: List[str]) -> int:
+        if not headers:
+            return 0
+        client_keywords = ['client', 'number', 'id', 'code']
+        for i, header in enumerate(headers):
+            if any(keyword in header.lower().strip() for keyword in client_keywords):
+                return i
+        return 0
+
     def _normalize_phone(self, raw: str) -> str:
         if not raw:
             return ""
@@ -563,33 +876,52 @@ class GoogleSheetsManager:
         This reads the sheet once and builds a dictionary for O(1) lookups.
         """
         try:
-            if not self.service or not self.spreadsheet_id:
-                logger.warning("⚠️ Cannot load index: Sheets service or spreadsheet ID missing")
+            if not self.service or not self.read_sources:
+                logger.warning("⚠️ Cannot load index: Sheets service or read sources missing")
                 return
 
-            # Read full header row to keep response mapping aligned with sheet structure
-            header_result = self._execute_with_retry(
-                self.service.spreadsheets().values().get(
-                    spreadsheetId=self.spreadsheet_id,
-                    range='Sheet1!1:1'
-                ),
-                'read sheet headers for index'
-            )
-            headers = header_result.get('values', [[]])[0]
+            # Read headers from the first sheet that returns a non-empty header row.
+            headers = []
+            header_sources = [(self.spreadsheet_id, self.primary_sheet_name)]
+            for src in self.read_sources:
+                if src not in header_sources:
+                    header_sources.append(src)
+
+            for sid, sheet_name in header_sources:
+                header_result = self._execute_with_retry(
+                    self.service.spreadsheets().values().get(
+                        spreadsheetId=sid,
+                        range=self._range_on_sheet(sheet_name, '1:1')
+                    ),
+                    f"read sheet headers for index ({self._source_label(sid, sheet_name)})"
+                ) or {}
+                headers = header_result.get('values', [[]])[0]
+                if headers:
+                    break
             if not headers:
                 logger.warning("⚠️ No headers found when loading index")
                 return
             self.headers = headers
 
-            cache_path = f"/tmp/sheets_index_rows_{self.spreadsheet_id}.json"
+            cache_path = self._index_cache_path()
             try:
                 if os.path.exists(cache_path):
                     with open(cache_path, 'r', encoding='utf-8') as f:
                         cached = json.load(f)
                     ts = cached.get('_ts', 0)
                     if time.time() - ts < self.index_ttl:
+                        cached_index = cached.get('index', {})
+                        normalized_cached: Dict[str, Dict[str, Any]] = {}
+                        for phone, row_ref in cached_index.items():
+                            sid, sheet_name, row_num = self._parse_row_ref(row_ref)
+                            if sid and sheet_name and row_num:
+                                normalized_cached[phone] = {
+                                    'sheet_id': sid,
+                                    'sheet_name': sheet_name,
+                                    'row_num': row_num
+                                }
                         with self._index_lock:
-                            self.index_phone_to_row = cached.get('index', {})
+                            self.index_phone_to_row = normalized_cached
                             self.index_timestamp = ts
                         logger.info(f"✅ Loaded lightweight index from cache with {len(self.index_phone_to_row)} entries")
                         return
@@ -604,21 +936,32 @@ class GoogleSheetsManager:
             except Exception:
                 column_letter = 'A'
 
-            result = self._execute_with_retry(
-                self.service.spreadsheets().values().get(
-                    spreadsheetId=self.spreadsheet_id,
-                    range=f'Sheet1!{column_letter}2:{column_letter}'
-                ),
-                f"read phone column {column_letter}"
-            )
+            # Build index across all configured sources (archives first, primary last).
+            # This guarantees primary source values win on duplicate phone numbers.
+            search_order = list(self.read_sources)
 
-            phones = result.get('values', [])
-            index_map: Dict[str, int] = {}
-            for i, row in enumerate(phones, start=2):
-                raw_phone = row[0] if row and len(row) > 0 else ''
-                normalized = self._normalize_phone(raw_phone)
-                if normalized:
-                    index_map[normalized] = i
+            index_map: Dict[str, Dict[str, Any]] = {}
+            for sid, sheet_name in search_order:
+                try:
+                    result = self._execute_with_retry(
+                        self.service.spreadsheets().values().get(
+                            spreadsheetId=sid,
+                            range=self._range_on_sheet(sheet_name, f"{column_letter}2:{column_letter}")
+                        ),
+                        f"read phone column {column_letter} from {self._source_label(sid, sheet_name)}"
+                    ) or {}
+                    phones = result.get('values', [])
+                    for i, row in enumerate(phones, start=2):
+                        raw_phone = row[0] if row and len(row) > 0 else ''
+                        normalized = self._normalize_phone(raw_phone)
+                        if normalized:
+                            index_map[normalized] = {
+                                'sheet_id': sid,
+                                'sheet_name': sheet_name,
+                                'row_num': i
+                            }
+                except Exception as e:
+                    logger.warning(f"⚠️ Could not index source {self._source_label(sid, sheet_name)}: {e}")
 
             with self._index_lock:
                 self.index_phone_to_row = index_map
@@ -659,14 +1002,20 @@ class GoogleSheetsManager:
     def get_client_data(self, client_number: str) -> Optional[Dict[str, str]]:
         # Lightweight index lookup -> then fetch single row and cache it (LRU)
         try:
-            self._ensure_index()
             normalized = self._normalize_phone(client_number)
             if not normalized:
                 return None
+
+            local_hit = self.local_db.get_client_data(normalized)
+            if local_hit:
+                return local_hit
+
+            self._ensure_index()
             with self._index_lock:
-                row_num = self.index_phone_to_row.get(normalized)
-            if row_num:
-                return self._fetch_row_client_data(row_num)
+                row_ref = self.index_phone_to_row.get(normalized)
+            sheet_id, sheet_name, row_num = self._parse_row_ref(row_ref)
+            if sheet_id and sheet_name and row_num:
+                return self._fetch_row_client_data(sheet_id, sheet_name, row_num)
 
             # Fallback: attempt suffix matching before rebuilding the index.
             # This helps when sheet stores numbers with country code or extra prefixes.
@@ -675,18 +1024,18 @@ class GoogleSheetsManager:
                     idx_copy = dict(self.index_phone_to_row)
                 if idx_copy:
                     # find best suffix match (longest match)
-                    best_match_row = None
+                    best_match_row_ref = None
                     best_match_len = 0
                     for k, rn in idx_copy.items():
                         if k.endswith(normalized) and len(normalized) <= len(k):
                             match_len = len(normalized)
                             if match_len > best_match_len:
                                 best_match_len = match_len
-                                best_match_row = rn
+                                best_match_row_ref = rn
 
-                    if best_match_row:
-                        row_num = best_match_row
-                        return self._fetch_row_client_data(row_num)
+                    sheet_id, sheet_name, row_num = self._parse_row_ref(best_match_row_ref)
+                    if sheet_id and sheet_name and row_num:
+                        return self._fetch_row_client_data(sheet_id, sheet_name, row_num)
             except Exception:
                 logger.debug("Suffix matching fallback failed; will rebuild index if needed")
 
@@ -721,6 +1070,13 @@ class GoogleSheetsManager:
     
     def get_sheet_info(self) -> Dict[str, Any]:
         try:
+            local_total = self.local_db.get_total_clients()
+            if local_total:
+                return {
+                    'total_clients': local_total,
+                    'headers': self.headers,
+                    'client_column': self.headers[self.client_column] if self.headers and self.client_column < len(self.headers) else 'Unknown'
+                }
             if not self.spreadsheet_id:
                 logger.warning("⚠️ SPREADSHEET_ID not set. Returning empty sheet info.")
                 return {'total_clients': 0, 'headers': [], 'client_column': 'Unknown'}
@@ -729,7 +1085,7 @@ class GoogleSheetsManager:
             
             result = self.service.spreadsheets().values().get(
                 spreadsheetId=self.spreadsheet_id,
-                range='Sheet1!A:A'
+                range=self._range_on_sheet(self.primary_sheet_name, 'A:A')
             ).execute()
             
             values = result.get('values', [])
@@ -751,9 +1107,9 @@ class GoogleSheetsManager:
             tuple[bool, str]: (success, error_message)
         """
         try:
-            if not self.service or not self.spreadsheet_id:
+            if not self.service or not self.read_sources:
                 error_msg = "Servicio de Sheets no disponible"
-                logger.error(f"❌ Cannot update field: Sheets service or spreadsheet ID missing")
+                logger.error("❌ Cannot update field: Sheets service or read sources missing")
                 return False, error_msg
 
             # Find the row number for the client
@@ -764,9 +1120,11 @@ class GoogleSheetsManager:
                 return False, error_msg
 
             with self._index_lock:
-                row_num = self.index_phone_to_row.get(normalized)
+                row_ref = self.index_phone_to_row.get(normalized)
 
-            if not row_num:
+            target_sheet_id, target_sheet_name, row_num = self._parse_row_ref(row_ref)
+
+            if not target_sheet_id or not target_sheet_name or not row_num:
                 error_msg = f"Cliente {client_number} no encontrado"
                 logger.error(f"❌ Client {client_number} not found in index")
                 return False, error_msg
@@ -799,11 +1157,11 @@ class GoogleSheetsManager:
 
             # Update the cell
             column_letter = self._col_to_letter(field_column_idx)
-            cell_range = f"Sheet1!{column_letter}{row_num}"
+            cell_range = self._range_on_sheet(target_sheet_name, f"{column_letter}{row_num}")
 
             self._execute_with_retry(
                 self.service.spreadsheets().values().update(
-                    spreadsheetId=self.spreadsheet_id,
+                    spreadsheetId=target_sheet_id,
                     range=cell_range,
                     valueInputOption='RAW',
                     body={'values': [[new_value]]}
@@ -812,12 +1170,16 @@ class GoogleSheetsManager:
             )
 
             # Clear row cache for this client to force refresh
+            cache_key = (target_sheet_id, target_sheet_name, row_num)
             with self._row_cache_lock:
-                if row_num in self.row_cache:
-                    del self.row_cache[row_num]
-                    logger.debug(f"🗑️ Cleared cache for row {row_num}")
+                if cache_key in self.row_cache:
+                    del self.row_cache[cache_key]
+                    logger.debug(
+                        f"🗑️ Cleared cache for row {row_num} in {self._source_label(target_sheet_id, target_sheet_name)}"
+                    )
 
             logger.info(f"✅ Successfully updated {field_name} for client {client_number} to {new_value}")
+            self.local_db.update_field(normalized, field_name, new_value)
             return True, ""
 
         except Exception as e:
@@ -838,6 +1200,73 @@ class GoogleSheetsManager:
             error_msg = f"Error en operación asíncrona: {str(e)}"
             logger.error(f"❌ Async update_field error: {e}")
             return False, error_msg
+
+    def sync_local_db(self, batch_size: int = 5000) -> int:
+        """Import all configured Google Sheets rows into the local SQLite cache."""
+        if not self.local_db.enabled:
+            logger.warning("⚠️ Local SQLite cache disabled; skipping sync")
+            return 0
+        if not self.service or not self.read_sources:
+            logger.warning("⚠️ Sheets service unavailable; cannot sync local SQLite cache")
+            return 0
+
+        total_imported = 0
+        for sid, sheet_name in self.read_sources:
+            try:
+                header_result = self._execute_with_retry(
+                    self.service.spreadsheets().values().get(
+                        spreadsheetId=sid,
+                        range=self._range_on_sheet(sheet_name, '1:1')
+                    ),
+                    f"read headers for SQLite sync ({self._source_label(sid, sheet_name)})"
+                ) or {}
+                headers = header_result.get('values', [[]])[0]
+                if not headers:
+                    logger.warning(f"⚠️ No headers found for {self._source_label(sid, sheet_name)}")
+                    continue
+
+                client_col = self._find_client_column_in_headers(headers)
+                last_col = self._col_to_letter(max(0, len(headers) - 1))
+                start_row = 2
+
+                while True:
+                    end_row = start_row + batch_size - 1
+                    result = self._execute_with_retry(
+                        self.service.spreadsheets().values().get(
+                            spreadsheetId=sid,
+                            range=self._range_on_sheet(sheet_name, f"A{start_row}:{last_col}{end_row}")
+                        ),
+                        f"sync rows {start_row}-{end_row} from {self._source_label(sid, sheet_name)}"
+                    ) or {}
+                    values = result.get('values', [])
+                    if not values:
+                        break
+
+                    batch_rows: List[Tuple[str, str, Dict[str, str], str, str, int]] = []
+                    for row_num, row in enumerate(values, start=start_row):
+                        record: Dict[str, str] = {}
+                        for i, header in enumerate(headers):
+                            record[header] = row[i].strip() if i < len(row) and row[i] is not None else ''
+                        raw_phone = row[client_col].strip() if client_col < len(row) and row[client_col] is not None else ''
+                        normalized_phone = self._normalize_phone(raw_phone)
+                        if normalized_phone:
+                            batch_rows.append((normalized_phone, raw_phone, record, sid, sheet_name, row_num))
+
+                    imported = self.local_db.bulk_upsert(batch_rows)
+                    total_imported += imported
+                    logger.info(
+                        f"✅ Synced {imported} rows from {self._source_label(sid, sheet_name)} "
+                        f"(rows {start_row}-{start_row + len(values) - 1})"
+                    )
+
+                    if len(values) < batch_size:
+                        break
+                    start_row += batch_size
+            except Exception as e:
+                logger.error(f"❌ Failed SQLite sync for {self._source_label(sid, sheet_name)}: {e}")
+
+        logger.info(f"✅ SQLite sync completed with {total_imported} imported or updated records")
+        return total_imported
 
 class TelegramBot:
     def __init__(self):
