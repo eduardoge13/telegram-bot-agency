@@ -13,6 +13,12 @@ services:
       - traefik.http.routers.bluesky-prod.tls=true
       - traefik.http.routers.bluesky-prod.tls.certresolver=mytlschallenge
       - traefik.http.routers.bluesky-prod.service=bluesky-site
+
+      - traefik.http.routers.vps-yoga-verde.rule=Host(`yoga-verde.srv1175749.hstgr.cloud`)
+      - traefik.http.routers.vps-yoga-verde.entrypoints=web,websecure
+      - traefik.http.routers.vps-yoga-verde.tls=true
+      - traefik.http.routers.vps-yoga-verde.tls.certresolver=mytlschallenge
+      - traefik.http.routers.vps-yoga-verde.service=bluesky-site
     networks:
       - traefik
 
