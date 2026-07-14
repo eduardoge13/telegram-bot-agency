@@ -6,6 +6,7 @@ Telegram Bot for Client Data Management - Cloud Run Version
 import os
 import logging
 import asyncio
+import subprocess
 import sys
 import json
 import sqlite3
@@ -166,9 +167,19 @@ class SQLiteClientStore:
     def get_client_data(self, normalized_phone: str) -> Optional[Dict[str, str]]:
         if not self.enabled or not normalized_phone:
             return None
+        record = self.get_client_record(normalized_phone)
+        return record.get('payload') if record else None
+
+    def get_client_record(self, normalized_phone: str) -> Optional[Dict[str, Any]]:
+        if not self.enabled or not normalized_phone:
+            return None
         with self._connect() as conn:
             row = conn.execute(
-                'SELECT payload_json FROM client_records WHERE normalized_phone = ?',
+                '''
+                SELECT payload_json, sheet_id, sheet_name, row_num
+                FROM client_records
+                WHERE normalized_phone = ?
+                ''',
                 (normalized_phone,)
             ).fetchone()
         if not row:
@@ -176,10 +187,32 @@ class SQLiteClientStore:
         try:
             payload = json.loads(row['payload_json'])
             if isinstance(payload, dict):
-                return payload
+                return {
+                    'payload': payload,
+                    'sheet_id': row['sheet_id'],
+                    'sheet_name': row['sheet_name'],
+                    'row_num': row['row_num'],
+                }
         except Exception as e:
             logger.warning(f"⚠️ Failed to decode SQLite payload for {normalized_phone}: {e}")
         return None
+
+    def get_expected_headers(self, sheet_id: Optional[str], sheet_name: Optional[str]) -> List[str]:
+        if not self.enabled or not sheet_id or not sheet_name:
+            return []
+        sync_key = f"{sheet_id}:{sheet_name}"
+        try:
+            with self._connect() as conn:
+                row = conn.execute(
+                    'SELECT headers_json FROM sync_state WHERE sync_key = ?',
+                    (sync_key,)
+                ).fetchone()
+            if not row or not row['headers_json']:
+                return []
+            headers = json.loads(row['headers_json'])
+            return [str(header or '').strip() for header in headers] if isinstance(headers, list) else []
+        except Exception:
+            return []
 
     def upsert_client(
         self,
@@ -725,7 +758,37 @@ class GoogleSheetsManager:
             return None, None, None
         return sheet_id, sheet_name, row_num
 
-    def _fetch_row_client_data(self, spreadsheet_id: str, sheet_name: str, row_num: int) -> Optional[Dict[str, str]]:
+    def _fetch_headers_for_source(self, spreadsheet_id: str, sheet_name: str) -> List[str]:
+        if not spreadsheet_id or not sheet_name or not self.service:
+            return []
+        try:
+            result = self._execute_with_retry(
+                self.service.spreadsheets().values().get(
+                    spreadsheetId=spreadsheet_id,
+                    range=self._range_on_sheet(sheet_name, '1:1')
+                ),
+                f"fetch headers from {self._source_label(spreadsheet_id, sheet_name)}"
+            ) or {}
+            headers = result.get('values', [[]])[0]
+            headers = [str(header or '').strip() for header in headers]
+            if headers and spreadsheet_id == self.spreadsheet_id and sheet_name == self.primary_sheet_name:
+                self.headers = headers
+                self.client_column = self._find_client_column_in_headers(headers)
+            elif headers and not self.headers:
+                self.headers = headers
+                self.client_column = self._find_client_column_in_headers(headers)
+            return headers
+        except Exception as e:
+            logger.warning(f"⚠️ Could not refresh headers for {self._source_label(spreadsheet_id, sheet_name)}: {e}")
+            return []
+
+    def _fetch_row_client_data(
+        self,
+        spreadsheet_id: str,
+        sheet_name: str,
+        row_num: int,
+        force_refresh: bool = False
+    ) -> Optional[Dict[str, str]]:
         if not spreadsheet_id or not sheet_name or row_num <= 0:
             return None
         if not self.service:
@@ -733,13 +796,17 @@ class GoogleSheetsManager:
 
         cache_key = (spreadsheet_id, sheet_name, row_num)
 
-        if cache_key in self.row_cache:
+        if not force_refresh and cache_key in self.row_cache:
             with self._row_cache_lock:
                 entry = self.row_cache.pop(cache_key)
                 self.row_cache[cache_key] = entry
             return entry
 
-        max_col_idx = max(3, len(self.headers) - 1) if self.headers else 3
+        headers = self._fetch_headers_for_source(spreadsheet_id, sheet_name)
+        if not headers:
+            headers = self.headers if self.headers else ['client phone number', 'cliente', 'correo', 'other info']
+
+        max_col_idx = max(3, len(headers) - 1) if headers else 3
         end_col = self._col_to_letter(max_col_idx)
         rng = self._range_on_sheet(sheet_name, f"A{row_num}:{end_col}{row_num}")
         result = self._execute_with_retry(
@@ -754,7 +821,6 @@ class GoogleSheetsManager:
             return None
 
         row = values[0]
-        headers = self.headers if self.headers else ['client phone number', 'cliente', 'correo', 'other info']
         client_data = {}
         for i, hdr in enumerate(headers):
             client_data[hdr] = row[i].strip() if i < len(row) and row[i] is not None else ''
@@ -765,7 +831,8 @@ class GoogleSheetsManager:
                 self.row_cache.popitem(last=False)
 
         try:
-            phone_header = self.headers[self.client_column] if self.headers and self.client_column < len(self.headers) else ''
+            client_col = self._find_client_column_in_headers(headers)
+            phone_header = headers[client_col] if headers and client_col < len(headers) else ''
             raw_phone = client_data.get(phone_header, '') if phone_header else ''
             normalized_phone = self._normalize_phone(raw_phone)
             if normalized_phone:
@@ -781,6 +848,18 @@ class GoogleSheetsManager:
             logger.debug(f"Failed to write SQLite cache entry for row {row_num}: {e}")
 
         return client_data
+
+    def _cached_record_needs_header_refresh(self, record: Dict[str, Any]) -> bool:
+        payload = record.get('payload') or {}
+        if not isinstance(payload, dict):
+            return False
+        expected_headers = self.local_db.get_expected_headers(
+            record.get('sheet_id'),
+            record.get('sheet_name'),
+        )
+        if not expected_headers:
+            return False
+        return any(header and header not in payload for header in expected_headers)
 
     def _start_index_refresher(self):
         def refresher():
@@ -1006,9 +1085,16 @@ class GoogleSheetsManager:
             if not normalized:
                 return None
 
-            local_hit = self.local_db.get_client_data(normalized)
-            if local_hit:
-                return local_hit
+            local_record = self.local_db.get_client_record(normalized)
+            if local_record:
+                if self._cached_record_needs_header_refresh(local_record):
+                    sheet_id = local_record.get('sheet_id')
+                    sheet_name = local_record.get('sheet_name')
+                    row_num = local_record.get('row_num')
+                    refreshed = self._fetch_row_client_data(sheet_id, sheet_name, row_num, force_refresh=True)
+                    if refreshed:
+                        return refreshed
+                return local_record.get('payload')
 
             self._ensure_index()
             with self._index_lock:
@@ -1576,32 +1662,73 @@ class TelegramBot:
             except Exception:
                 logger.debug('Failed to send info message')
     
+    @staticmethod
+    def _collect_vps_services_status():
+        """Estado de contenedores Docker de produccion (restart always/unless-stopped)."""
+        lines = []
+        try:
+            names_proc = subprocess.run(
+                ["docker", "ps", "-a", "--format", "{{.Names}}"],
+                capture_output=True, text=True, timeout=20
+            )
+            names = [n for n in names_proc.stdout.strip().splitlines() if n]
+            if not names:
+                return ["(sin contenedores)"]
+            inspect_proc = subprocess.run(
+                ["docker", "inspect"] + names,
+                capture_output=True, text=True, timeout=30
+            )
+            for info in json.loads(inspect_proc.stdout):
+                name = info["Name"].lstrip("/")
+                policy = info["HostConfig"]["RestartPolicy"]["Name"]
+                if policy not in ("always", "unless-stopped"):
+                    continue
+                state = info["State"]
+                health = (state.get("Health") or {}).get("Status")
+                if not state.get("Running"):
+                    icon, detail = "❌", state.get("Status", "detenido")
+                elif health and health not in ("healthy", "starting"):
+                    icon, detail = "⚠️", health
+                else:
+                    icon, detail = "✅", health or "running"
+                lines.append(f"{icon} <code>{safe_html(name)}</code> ({safe_html(detail)})")
+        except Exception as exc:
+            lines.append(f"❌ Error consultando Docker: {safe_html(str(exc))}")
+        return lines
+
     async def status_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Check bot and system status"""
         # Log the action
         EnhancedUserActivityLogger.log_user_action(update, "STATUS_COMMAND")
-        
+
         try:
             # Test Google Sheets connection
             test_info = self.sheets_manager.get_sheet_info()
             sheets_status = "✅ Connected"
         except:
             sheets_status = "❌ Disconnected"
-        
+
         # Test persistent logging
         try:
             persistent_logger.get_recent_logs(limit=1)
             logs_status = "✅ Working"
         except:
             logs_status = "❌ Error"
-        
+
+        try:
+            vps_lines = await asyncio.to_thread(self._collect_vps_services_status)
+        except Exception:
+            vps_lines = ["❌ No disponible"]
+
         status_message = (
             "🔍 <b>Bot Status:</b>\n\n"
             f"🤖 <b>Bot:</b> ✅ Running\n"
             f"📊 <b>Google Sheets:</b> {safe_html(sheets_status)}\n"
             f"📝 <b>Persistent Logs:</b> {safe_html(logs_status)}\n"
             f"📋 <b>Total clients:</b> {safe_html(str(self.sheet_info.get('total_clients', 'Unknown')))}\n\n"
-            f"🚀 <b>Ready to search!</b>"
+            "🖥 <b>Servicios VPS:</b>\n"
+            + "\n".join(vps_lines) +
+            "\n\n🚀 <b>Ready to search!</b>"
         )
         try:
             await update.message.reply_text(status_message, parse_mode='HTML')
