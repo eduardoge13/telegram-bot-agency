@@ -1,0 +1,1163 @@
+---
+import {
+  ANNOUNCEMENT,
+  BENEFIT_ITEMS,
+  FREE_SHIPPING_THRESHOLD,
+  KITS,
+  PRODUCTS,
+  SHIPPING_FLAT,
+  SHOP_NEEDS,
+  TAX_RATE,
+  TESTIMONIALS,
+} from "../../data/yoga-verde-store";
+import "../../styles/yoga-verde.css";
+
+const money = new Intl.NumberFormat("es-MX", {
+  style: "currency",
+  currency: "MXN",
+  maximumFractionDigits: 0,
+});
+
+const formatMoney = (value: number) => money.format(value);
+const stars = Array.from({ length: 5 }, (_, index) => index + 1);
+
+const bestSellers = PRODUCTS.filter((product) => product.featured).slice(0, 4);
+
+const useFilters = Array.from(
+  new Map(PRODUCTS.map((product) => [product.use, { slug: product.use, label: product.useLabel }])).values(),
+);
+const typeFilters = Array.from(
+  new Map(PRODUCTS.map((product) => [product.type, { slug: product.type, label: product.typeLabel }])).values(),
+);
+const originFilters = Array.from(
+  new Map(
+    PRODUCTS.map((product) => [product.origin, { slug: product.origin, label: product.originLabel }]),
+  ).values(),
+);
+const countsByUse = Object.fromEntries(
+  SHOP_NEEDS.map((need) => [need.slug, PRODUCTS.filter((product) => product.use === need.slug).length]),
+);
+
+const storeData = {
+  announcement: ANNOUNCEMENT,
+  freeShippingThreshold: FREE_SHIPPING_THRESHOLD,
+  shippingFlat: SHIPPING_FLAT,
+  taxRate: TAX_RATE,
+  products: PRODUCTS,
+  kits: KITS,
+};
+---
+
+<html class="light" lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Yoga Verde | Herbolario ancestral y tienda botánica</title>
+    <meta
+      content="Yoga Verde es un herbolario ancestral con shop-first experience: botánicos curados, kits, filtros vivos y carrito para comprar fácil desde móvil o desktop."
+      name="description"
+    />
+    <meta content="Yoga Verde | Herbolario ancestral y tienda botánica" property="og:title" />
+    <meta
+      content="Compra raíces, hojas y kits con una experiencia comercial clara, móvil y fiel al universo botánico de Yoga Verde."
+      property="og:description"
+    />
+    <meta content="website" property="og:type" />
+    <meta content="https://yoga-verde.srv1175749.hstgr.cloud/" property="og:url" />
+    <meta
+      content="https://yoga-verde.srv1175749.hstgr.cloud/yoga-verde/assets/image-01.png"
+      property="og:image"
+    />
+    <link href="/favicon.svg" rel="icon" type="image/svg+xml" />
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300..800;1,6..72,300..800&family=Manrope:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
+    <link href="https://yoga-verde.srv1175749.hstgr.cloud/" rel="canonical" />
+  </head>
+  <body class="bg-surface text-on-surface selection:bg-secondary/20 selection:text-primary">
+    <script id="yoga-verde-data" is:inline set:html={JSON.stringify(storeData)} type="application/json"></script>
+
+    <div class="min-h-screen bg-surface pb-28 md:pb-0">
+      <div class="sticky top-0 z-[70]">
+        <div class="bg-primary px-4 py-2 text-center text-[11px] font-semibold uppercase tracking-[0.22em] text-on-primary-container sm:text-xs">
+          {ANNOUNCEMENT}
+        </div>
+        <header class="border-b border-outline-variant/45 bg-[#fcf9f0]/90 backdrop-blur-xl">
+          <nav class="mx-auto flex h-20 max-w-screen-2xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center gap-3">
+              <button
+                aria-label="Abrir menú"
+                class="inline-flex h-11 w-11 items-center justify-center rounded-full border border-outline-variant/60 bg-surface-container-lowest text-primary transition hover:border-secondary/40 hover:text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/40 md:hidden"
+                data-open-menu
+                type="button"
+              >
+                <span class="material-symbols-outlined">menu</span>
+              </button>
+              <a class="font-headline text-3xl font-semibold tracking-tight text-primary" href="#inicio">
+                Yoga Verde
+              </a>
+            </div>
+
+            <div class="hidden items-center gap-7 md:flex">
+              <button
+                class="text-sm font-medium text-on-surface-variant transition-colors hover:text-secondary focus-visible:outline-none focus-visible:text-secondary"
+                data-scroll-to="inicio"
+                type="button"
+              >
+                Inicio
+              </button>
+              <button
+                class="text-sm font-medium text-on-surface-variant transition-colors hover:text-secondary focus-visible:outline-none focus-visible:text-secondary"
+                data-scroll-to="best-sellers"
+                type="button"
+              >
+                Best Sellers
+              </button>
+              <button
+                class="border-b-2 border-secondary pb-1 font-headline text-lg font-semibold text-secondary"
+                data-scroll-to="catalogo"
+                type="button"
+              >
+                Catálogo
+              </button>
+              <button
+                class="text-sm font-medium text-on-surface-variant transition-colors hover:text-secondary focus-visible:outline-none focus-visible:text-secondary"
+                data-scroll-to="kits"
+                type="button"
+              >
+                Kits
+              </button>
+              <button
+                class="text-sm font-medium text-on-surface-variant transition-colors hover:text-secondary focus-visible:outline-none focus-visible:text-secondary"
+                data-scroll-to="testimonios"
+                type="button"
+              >
+                Testimonios
+              </button>
+              <button
+                class="text-sm font-medium text-on-surface-variant transition-colors hover:text-secondary focus-visible:outline-none focus-visible:text-secondary"
+                data-scroll-to="contacto"
+                type="button"
+              >
+                Contacto
+              </button>
+            </div>
+
+            <div class="flex items-center gap-3">
+              <button
+                aria-label="Buscar en el catálogo"
+                class="hidden items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-low px-4 py-2 text-sm text-on-surface-variant transition hover:border-secondary/40 hover:text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35 lg:inline-flex"
+                data-focus-search
+                type="button"
+              >
+                <span class="material-symbols-outlined text-base">search</span>
+                Buscar botánicos
+              </button>
+              <button
+                aria-label="Abrir carrito"
+                class="group relative inline-flex h-12 w-12 items-center justify-center rounded-full border border-outline-variant/50 bg-surface-container-lowest text-primary transition hover:-translate-y-0.5 hover:border-secondary/50 hover:text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35"
+                data-open-cart
+                type="button"
+              >
+                <span class="material-symbols-outlined">shopping_cart</span>
+                <span
+                  class="absolute -right-1 -top-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-secondary px-1 text-[10px] font-bold text-white"
+                  data-cart-count
+                >
+                  0
+                </span>
+              </button>
+            </div>
+          </nav>
+        </header>
+      </div>
+
+      <main>
+        <section class="paper-grid relative overflow-hidden border-b border-outline-variant/35" id="inicio">
+          <div class="mx-auto grid max-w-screen-2xl gap-12 px-4 py-14 sm:px-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,520px)] lg:items-center lg:px-8 lg:py-20">
+            <div class="max-w-3xl">
+              <span class="mb-5 inline-flex items-center gap-2 rounded-full border border-secondary/20 bg-secondary/10 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-secondary sm:text-xs">
+                <span class="material-symbols-outlined text-base">spa</span>
+                Herbolario ancestral, listo para comprar
+              </span>
+              <h1 class="font-headline text-5xl leading-[0.92] text-primary sm:text-6xl lg:text-[6.1rem]">
+                Botánica viva para tu
+                <span class="block font-semibold italic text-secondary">ritual diario</span>
+              </h1>
+              <p class="mt-6 max-w-2xl text-lg leading-relaxed text-on-surface-variant sm:text-xl">
+                Yoga Verde une curaduría editorial y claridad comercial: raíces, hojas y kits
+                seleccionados para comprar fácil, desde móvil o desktop, sin perder el relato de
+                origen botánico y cosecha ética.
+              </p>
+
+              <div class="mt-8 flex flex-col gap-4 sm:flex-row">
+                <button
+                  class="inline-flex items-center justify-center gap-2 rounded-2xl bg-primary px-7 py-4 text-base font-semibold text-on-primary transition hover:bg-primary-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35"
+                  data-scroll-to="catalogo"
+                  type="button"
+                >
+                  Comprar ahora
+                  <span class="material-symbols-outlined text-lg">south_east</span>
+                </button>
+                <button
+                  class="inline-flex items-center justify-center gap-2 rounded-2xl border border-outline-variant/60 bg-surface-container-lowest px-7 py-4 text-base font-semibold text-primary transition hover:border-secondary/40 hover:text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35"
+                  data-scroll-to="kits"
+                  type="button"
+                >
+                  Ver kits
+                  <span class="material-symbols-outlined text-lg">inventory_2</span>
+                </button>
+              </div>
+
+              <div class="mt-10 flex flex-wrap gap-3">
+                <div class="rounded-2xl bg-surface-container-lowest px-5 py-4 shadow-parchment">
+                  <p class="text-[11px] uppercase tracking-[0.22em] text-on-surface-variant">
+                    Botánicos vivos
+                  </p>
+                  <p class="mt-2 font-headline text-4xl text-primary">{PRODUCTS.length}</p>
+                </div>
+                <div class="rounded-2xl bg-surface-container-lowest px-5 py-4 shadow-parchment">
+                  <p class="text-[11px] uppercase tracking-[0.22em] text-on-surface-variant">
+                    Kits curados
+                  </p>
+                  <p class="mt-2 font-headline text-4xl text-primary">{KITS.length}</p>
+                </div>
+                <div class="rounded-2xl bg-surface-container-lowest px-5 py-4 shadow-parchment">
+                  <p class="text-[11px] uppercase tracking-[0.22em] text-on-surface-variant">
+                    Envío gratis
+                  </p>
+                  <p class="mt-2 font-headline text-4xl text-primary">
+                    {formatMoney(FREE_SHIPPING_THRESHOLD)}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="relative">
+              <div class="card-grain relative overflow-hidden rounded-[36px] bg-soil-glow bg-surface-container-lowest p-4 shadow-float sm:p-6">
+                <img
+                  alt="Raíces vivas cubiertas de musgo"
+                  class="aspect-[4/5] w-full rounded-[30px] object-cover"
+                  src="/yoga-verde/assets/image-01.png"
+                />
+              </div>
+              <div class="absolute -left-2 bottom-6 max-w-[220px] rounded-[28px] bg-surface-container-lowest p-5 shadow-parchment sm:-left-8">
+                <p class="text-[11px] uppercase tracking-[0.22em] text-on-surface-variant">
+                  Best seller del mes
+                </p>
+                <h2 class="mt-2 font-headline text-3xl text-primary">Ashwagandha Vital</h2>
+                <p class="mt-2 text-sm leading-6 text-on-surface-variant">
+                  Un ritual diario para empezar con raíz, calma y estructura.
+                </p>
+                <button
+                  class="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-secondary transition hover:text-primary focus-visible:outline-none"
+                  data-add-item="ashwagandha-vital"
+                  type="button"
+                >
+                  Añadir al carrito
+                  <span class="material-symbols-outlined text-base">add_shopping_cart</span>
+                </button>
+              </div>
+              <div class="absolute -right-2 top-6 rounded-[28px] bg-primary px-5 py-4 text-on-primary shadow-line sm:-right-8">
+                <p class="text-[11px] uppercase tracking-[0.22em] text-on-primary-container">
+                  Compra protegida
+                </p>
+                <p class="mt-2 font-headline text-3xl text-white">Checkout demo</p>
+                <p class="mt-2 max-w-[200px] text-sm leading-6 text-on-primary-container">
+                  Hoy el pedido termina en demo, pero el carrito ya está listo para vender mejor.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="mx-auto max-w-screen-2xl px-4 py-8 sm:px-6 lg:px-8">
+          <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+            {BENEFIT_ITEMS.map((benefit) => (
+              <article class="rounded-[28px] bg-surface-container-lowest p-5 shadow-parchment">
+                <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/8 text-primary">
+                  <span class="material-symbols-outlined">{benefit.icon}</span>
+                </div>
+                <h2 class="mt-4 font-headline text-2xl text-primary">{benefit.title}</h2>
+                <p class="mt-2 text-sm leading-7 text-on-surface-variant">{benefit.copy}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section class="mx-auto max-w-screen-2xl px-4 py-10 sm:px-6 lg:px-8" id="best-sellers">
+          <div class="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div class="max-w-2xl">
+              <p class="text-xs font-semibold uppercase tracking-[0.22em] text-secondary">
+                Best Sellers
+              </p>
+              <h2 class="mt-3 font-headline text-5xl text-primary">Lo más pedido esta temporada</h2>
+              <p class="mt-4 text-lg leading-8 text-on-surface-variant">
+                Inspirado por las mejores prácticas comerciales de marcas directas al consumidor:
+                selección clara, beneficios rápidos y compra simple sin perder el tono editorial.
+              </p>
+            </div>
+            <button
+              class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-5 py-3 text-sm font-semibold text-primary transition hover:border-secondary/40 hover:text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35"
+              data-scroll-to="catalogo"
+              type="button"
+            >
+              Ver catálogo completo
+              <span class="material-symbols-outlined text-base">arrow_forward</span>
+            </button>
+          </div>
+
+          <div class="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+            {bestSellers.map((product) => (
+              <article class="group overflow-hidden rounded-[30px] bg-surface-container-lowest shadow-parchment transition-transform hover:-translate-y-1">
+                <div class="relative overflow-hidden bg-surface-container-low p-4">
+                  <span class="absolute left-4 top-4 z-10 rounded-full bg-surface px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                    {product.badge}
+                  </span>
+                  <img
+                    alt={product.name}
+                    class="aspect-[5/4] w-full rounded-[24px] object-cover transition duration-500 group-hover:scale-105"
+                    src={product.image}
+                  />
+                </div>
+                <div class="p-6">
+                  <div class="flex items-start justify-between gap-4">
+                    <div>
+                      <p class="text-[11px] uppercase tracking-[0.22em] text-on-surface-variant">
+                        {product.originLabel}
+                      </p>
+                      <h3 class="mt-2 font-headline text-4xl leading-none text-primary">{product.name}</h3>
+                    </div>
+                    <span class="font-headline text-3xl text-secondary">{formatMoney(product.price)}</span>
+                  </div>
+                  <div class="mt-4 flex items-center gap-3 text-sm text-on-surface-variant">
+                    <div class="flex items-center gap-1 text-secondary">
+                      {stars.map((star) => (
+                        <span aria-hidden="true">{star <= Math.round(product.rating) ? "★" : "☆"}</span>
+                      ))}
+                    </div>
+                    <span>{product.rating.toFixed(1)} · {product.reviewsCount} reseñas</span>
+                  </div>
+                  <p class="mt-4 text-sm italic leading-7 text-on-surface-variant">{product.short}</p>
+                  <div class="mt-5 flex flex-wrap gap-2">
+                    <span class="rounded-full bg-surface-container-low px-3 py-2 text-xs font-semibold text-primary">
+                      {product.useLabel}
+                    </span>
+                    <span class="rounded-full bg-surface-container-low px-3 py-2 text-xs font-semibold text-on-surface-variant">
+                      {product.typeLabel}
+                    </span>
+                  </div>
+                  <div class="mt-6 flex items-center justify-between gap-3 border-t border-outline-variant/40 pt-5">
+                    <button
+                      class="inline-flex items-center gap-2 text-sm font-semibold text-primary transition hover:text-secondary focus-visible:outline-none"
+                      data-open-detail={product.id}
+                      type="button"
+                    >
+                      <span class="material-symbols-outlined text-base">auto_stories</span>
+                      Ver detalle
+                    </button>
+                    <button
+                      class="inline-flex items-center gap-2 rounded-2xl bg-primary px-4 py-3 text-sm font-semibold text-on-primary transition hover:bg-primary-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35"
+                      data-add-item={product.id}
+                      type="button"
+                    >
+                      Añadir al carrito
+                    </button>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section class="mx-auto max-w-screen-2xl px-4 py-10 sm:px-6 lg:px-8">
+          <div class="mb-8 max-w-2xl">
+            <p class="text-xs font-semibold uppercase tracking-[0.22em] text-secondary">
+              Comprar por necesidad
+            </p>
+            <h2 class="mt-3 font-headline text-5xl text-primary">Encuentra tu ritual por intención</h2>
+            <p class="mt-4 text-lg leading-8 text-on-surface-variant">
+              Una ruta más comercial para quienes llegan con una necesidad clara y quieren comprar
+              sin perder contexto ni lenguaje de marca.
+            </p>
+          </div>
+
+          <div class="grid gap-6 lg:grid-cols-2 xl:grid-cols-4">
+            {SHOP_NEEDS.map((need) => (
+              <article class="overflow-hidden rounded-[32px] bg-surface-container-lowest shadow-parchment">
+                <div class="relative overflow-hidden bg-primary/6 p-5">
+                  <img
+                    alt={need.title}
+                    class="aspect-[4/3] w-full rounded-[24px] object-cover"
+                    src={need.image}
+                  />
+                  <div class="absolute left-9 top-9 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-white shadow-line">
+                    <span class="material-symbols-outlined">{need.icon}</span>
+                  </div>
+                </div>
+                <div class="p-6">
+                  <div class="flex items-center justify-between gap-4">
+                    <h3 class="font-headline text-3xl text-primary">{need.title}</h3>
+                    <span class="rounded-full bg-secondary/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.22em] text-secondary">
+                      {countsByUse[need.slug]} opciones
+                    </span>
+                  </div>
+                  <p class="mt-4 text-sm leading-7 text-on-surface-variant">{need.copy}</p>
+                  <button
+                    class="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-primary transition hover:text-secondary focus-visible:outline-none"
+                    data-apply-use={need.slug}
+                    type="button"
+                  >
+                    Comprar esta selección
+                    <span class="material-symbols-outlined text-base">arrow_forward</span>
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section class="mx-auto max-w-screen-2xl px-4 py-10 sm:px-6 lg:px-8" id="kits">
+          <div class="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div class="max-w-2xl">
+              <p class="text-xs font-semibold uppercase tracking-[0.22em] text-secondary">
+                Kits recomendados
+              </p>
+              <h2 class="mt-3 font-headline text-5xl text-primary">Comprar mejor, en menos pasos</h2>
+              <p class="mt-4 text-lg leading-8 text-on-surface-variant">
+                Diseñados para primera compra, regalo o ritual guiado. Aquí la experiencia se
+                vuelve más directa, más móvil y más fácil de convertir.
+              </p>
+            </div>
+            <button
+              class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-5 py-3 text-sm font-semibold text-primary transition hover:border-secondary/40 hover:text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35"
+              data-open-cart
+              type="button"
+            >
+              Ver carrito
+              <span class="material-symbols-outlined text-base">shopping_bag</span>
+            </button>
+          </div>
+
+          <div class="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+            {KITS.map((kit) => (
+              <article class="overflow-hidden rounded-[30px] bg-surface-container-lowest shadow-parchment">
+                <div class="relative overflow-hidden p-4">
+                  <img alt={kit.name} class="aspect-[4/5] w-full rounded-[24px] object-cover" src={kit.image} />
+                  <span class="absolute left-8 top-8 rounded-full bg-primary px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-white">
+                    {kit.badge}
+                  </span>
+                </div>
+                <div class="p-6">
+                  <div class="flex items-start justify-between gap-4">
+                    <div>
+                      <p class="text-[11px] uppercase tracking-[0.22em] text-on-surface-variant">
+                        {kit.useLabel}
+                      </p>
+                      <h3 class="mt-2 font-headline text-4xl leading-none text-primary">{kit.name}</h3>
+                    </div>
+                    <span class="font-headline text-3xl text-secondary">{formatMoney(kit.price)}</span>
+                  </div>
+                  <div class="mt-4 flex items-center gap-3 text-sm text-on-surface-variant">
+                    <div class="flex items-center gap-1 text-secondary">
+                      {stars.map((star) => (
+                        <span aria-hidden="true">{star <= Math.round(kit.rating) ? "★" : "☆"}</span>
+                      ))}
+                    </div>
+                    <span>{kit.rating.toFixed(1)} · {kit.reviewsCount} reseñas</span>
+                  </div>
+                  <p class="mt-4 text-sm italic leading-7 text-on-surface-variant">{kit.short}</p>
+                  <div class="mt-5 flex flex-wrap gap-2">
+                    <span class="rounded-full bg-surface-container-low px-3 py-2 text-xs font-semibold text-primary">
+                      {kit.typeLabel}
+                    </span>
+                    <span class="rounded-full bg-surface-container-low px-3 py-2 text-xs font-semibold text-on-surface-variant">
+                      Regalo o primera compra
+                    </span>
+                  </div>
+                  <div class="mt-6 flex items-center justify-between gap-3 border-t border-outline-variant/40 pt-5">
+                    <button
+                      class="inline-flex items-center gap-2 text-sm font-semibold text-primary transition hover:text-secondary focus-visible:outline-none"
+                      data-open-detail={kit.id}
+                      type="button"
+                    >
+                      <span class="material-symbols-outlined text-base">auto_stories</span>
+                      Ver detalle
+                    </button>
+                    <button
+                      class="inline-flex items-center gap-2 rounded-2xl bg-primary px-4 py-3 text-sm font-semibold text-on-primary transition hover:bg-primary-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35"
+                      data-add-item={kit.id}
+                      type="button"
+                    >
+                      Añadir al carrito
+                    </button>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section class="mx-auto max-w-screen-2xl px-4 py-12 sm:px-6 lg:px-8" id="catalogo">
+          <div class="mb-8 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+            <div class="max-w-2xl">
+              <p class="text-xs font-semibold uppercase tracking-[0.22em] text-secondary">
+                Catálogo shop-first
+              </p>
+              <h2 class="mt-3 font-headline text-5xl text-primary">Raíces, hojas y extractos con compra fácil</h2>
+              <p class="mt-4 text-lg leading-8 text-on-surface-variant">
+                Todo el catálogo carga con productos reales por defecto. Busca por nombre, uso
+                tradicional, tags, descripción u origen y refina desde filtros claros.
+              </p>
+            </div>
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <div class="flex w-full min-w-[280px] items-center gap-3 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-3 shadow-parchment">
+                <span class="material-symbols-outlined text-on-surface-variant">search</span>
+                <input
+                  aria-label="Buscar productos"
+                  class="w-full border-none bg-transparent p-0 text-sm text-on-surface placeholder:text-on-surface-variant/70 focus:outline-none focus:ring-0"
+                  data-search-input
+                  placeholder="Buscar ashwagandha, inmunidad, ritual diario..."
+                  type="search"
+                />
+              </div>
+              <button
+                aria-label="Abrir filtros"
+                class="inline-flex items-center justify-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-5 py-3 text-sm font-semibold text-primary transition hover:border-secondary/40 hover:text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35 xl:hidden"
+                data-open-filters
+                type="button"
+              >
+                <span class="material-symbols-outlined text-base">tune</span>
+                Filtros
+              </button>
+            </div>
+          </div>
+
+          <div class="grid gap-8 xl:grid-cols-[300px_minmax(0,1fr)]">
+            <div class="pointer-events-none fixed inset-0 z-[72] bg-primary/25 opacity-0 transition xl:hidden" data-filters-overlay></div>
+            <aside
+              class="hide-scrollbar fixed inset-y-0 left-0 z-[80] w-[88vw] max-w-sm -translate-x-full overflow-y-auto bg-surface-container-low p-6 shadow-float transition duration-300 xl:sticky xl:top-28 xl:z-auto xl:w-auto xl:max-w-none xl:translate-x-0 xl:overflow-visible xl:rounded-[32px] xl:border xl:border-outline-variant/45 xl:bg-surface-container-low xl:shadow-parchment"
+              data-filters-drawer
+            >
+              <div class="mb-8 flex items-center justify-between xl:hidden">
+                <div>
+                  <p class="text-xs font-semibold uppercase tracking-[0.22em] text-secondary">
+                    Filtros
+                  </p>
+                  <h3 class="mt-2 font-headline text-3xl text-primary">Compra por afinidad</h3>
+                </div>
+                <button
+                  aria-label="Cerrar filtros"
+                  class="inline-flex h-11 w-11 items-center justify-center rounded-full border border-outline-variant/60 text-primary transition hover:border-secondary/40 hover:text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35"
+                  data-close-filters
+                  type="button"
+                >
+                  <span class="material-symbols-outlined">close</span>
+                </button>
+              </div>
+
+              <div class="space-y-8">
+                <div>
+                  <h3 class="font-headline text-2xl text-primary">Uso tradicional</h3>
+                  <div class="mt-4 flex flex-wrap gap-2">
+                    {useFilters.map((useFilter) => (
+                      <button
+                        aria-pressed="false"
+                        class="rounded-full bg-surface-container-highest px-4 py-2 text-sm font-medium text-on-surface-variant transition hover:bg-tertiary-container hover:text-on-tertiary-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35"
+                        data-filter-use={useFilter.slug}
+                        type="button"
+                      >
+                        {useFilter.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <h3 class="font-headline text-2xl text-primary">Tipo de elemento</h3>
+                  <div class="mt-4 flex flex-wrap gap-2">
+                    {typeFilters.map((typeFilter) => (
+                      <button
+                        aria-pressed="false"
+                        class="rounded-full bg-surface-container-highest px-4 py-2 text-sm font-medium text-on-surface-variant transition hover:bg-tertiary-container hover:text-on-tertiary-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35"
+                        data-filter-type={typeFilter.slug}
+                        type="button"
+                      >
+                        {typeFilter.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <h3 class="font-headline text-2xl text-primary">Origen botánico</h3>
+                  <div class="mt-4 space-y-3">
+                    {originFilters.map((originFilter) => (
+                      <button
+                        aria-pressed="false"
+                        class="block text-left text-sm text-on-surface-variant transition hover:text-secondary focus-visible:outline-none focus-visible:text-secondary"
+                        data-filter-origin={originFilter.slug}
+                        type="button"
+                      >
+                        {originFilter.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <button
+                  class="w-full rounded-2xl border border-outline-variant/70 px-4 py-3 text-sm font-semibold text-primary transition hover:border-secondary/40 hover:text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35"
+                  data-clear-filters
+                  type="button"
+                >
+                  Limpiar filtros
+                </button>
+              </div>
+            </aside>
+
+            <div class="min-w-0">
+              <div class="rounded-[32px] bg-surface-container-low p-6 shadow-parchment">
+                <div class="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+                  <div>
+                    <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-on-surface-variant">
+                      <span data-product-count>{PRODUCTS.length}</span> piezas visibles
+                    </p>
+                    <p class="mt-2 text-sm leading-7 text-on-surface-variant">
+                      Catálogo vivo con filtros por uso tradicional, tipo de elemento y origen.
+                    </p>
+                    <div class="mt-4 flex flex-wrap gap-2" data-active-filters></div>
+                  </div>
+                  <div class="flex flex-wrap gap-3">
+                    <button
+                      class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2 text-sm font-semibold text-primary transition hover:border-secondary/40 hover:text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35"
+                      data-open-cart
+                      type="button"
+                    >
+                      Ver carrito
+                      <span class="material-symbols-outlined text-base">shopping_cart</span>
+                    </button>
+                    <button
+                      class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2 text-sm font-semibold text-primary transition hover:border-secondary/40 hover:text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35"
+                      data-scroll-to="kits"
+                      type="button"
+                    >
+                      Ver kits
+                      <span class="material-symbols-outlined text-base">inventory_2</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mt-8 grid gap-6 md:grid-cols-2 2xl:grid-cols-3" data-products-grid>
+                {PRODUCTS.map((product) => (
+                  <article class="group overflow-hidden rounded-[30px] bg-surface-container-lowest shadow-parchment transition-transform hover:-translate-y-1">
+                    <div class="relative overflow-hidden bg-surface-container-low p-4">
+                      <span class="absolute left-4 top-4 z-10 rounded-full bg-surface px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                        {product.badge}
+                      </span>
+                      <img
+                        alt={product.name}
+                        class="aspect-[5/4] w-full rounded-[24px] object-cover transition duration-500 group-hover:scale-105"
+                        src={product.image}
+                      />
+                    </div>
+                    <div class="p-6">
+                      <div class="flex items-start justify-between gap-4">
+                        <div>
+                          <p class="text-[11px] uppercase tracking-[0.22em] text-on-surface-variant">
+                            {product.typeLabel} · {product.originLabel}
+                          </p>
+                          <h3 class="mt-2 font-headline text-4xl leading-none text-primary">
+                            {product.name}
+                          </h3>
+                        </div>
+                        <span class="font-headline text-3xl text-secondary">{formatMoney(product.price)}</span>
+                      </div>
+                      <div class="mt-4 flex items-center gap-3 text-sm text-on-surface-variant">
+                        <div class="flex items-center gap-1 text-secondary">
+                          {stars.map((star) => (
+                            <span aria-hidden="true">{star <= Math.round(product.rating) ? "★" : "☆"}</span>
+                          ))}
+                        </div>
+                        <span>{product.rating.toFixed(1)} · {product.reviewsCount} reseñas</span>
+                      </div>
+                      <p class="mt-4 min-h-[84px] text-sm italic leading-7 text-on-surface-variant">{product.short}</p>
+                      <div class="mt-4 flex flex-wrap gap-2">
+                        <span class="rounded-full bg-surface-container-low px-3 py-2 text-xs font-semibold text-primary">
+                          {product.useLabel}
+                        </span>
+                        <span class="rounded-full bg-surface-container-low px-3 py-2 text-xs font-semibold text-on-surface-variant">
+                          {product.originLabel}
+                        </span>
+                      </div>
+                      <div class="mt-6 flex items-center justify-between gap-3 border-t border-outline-variant/40 pt-5">
+                        <button
+                          class="inline-flex items-center gap-2 text-sm font-semibold text-primary transition hover:text-secondary focus-visible:outline-none"
+                          data-open-detail={product.id}
+                          type="button"
+                        >
+                          <span class="material-symbols-outlined text-base">auto_stories</span>
+                          Ver detalle
+                        </button>
+                        <button
+                          aria-label={`Añadir ${product.name} al carrito`}
+                          class="inline-flex items-center gap-2 rounded-2xl bg-primary px-4 py-3 text-sm font-semibold text-on-primary transition hover:bg-primary-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35"
+                          data-add-item={product.id}
+                          type="button"
+                        >
+                          Añadir al carrito
+                        </button>
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+
+              <div
+                class="mt-8 hidden rounded-[32px] border border-dashed border-outline-variant/80 bg-surface-container-low p-10 text-center shadow-parchment"
+                data-empty-state
+              >
+                <p class="font-headline text-3xl text-primary">Sin coincidencias</p>
+                <p class="mt-3 text-on-surface-variant">
+                  Cambia filtros o limpia la búsqueda para volver a ver el herbolario completo.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="mx-auto max-w-screen-2xl px-4 py-12 sm:px-6 lg:px-8">
+          <div class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
+            <article class="overflow-hidden rounded-[36px] bg-surface-container-lowest shadow-parchment">
+              <div class="grid gap-8 p-8 lg:grid-cols-[minmax(0,1fr)_220px] lg:items-center lg:p-10">
+                <div>
+                  <p class="text-xs font-semibold uppercase tracking-[0.22em] text-secondary">
+                    Nuestra filosofía
+                  </p>
+                  <h2 class="mt-3 font-headline text-5xl text-primary">Narrativa botánica, con intención comercial</h2>
+                  <blockquote class="mt-5 max-w-3xl font-headline text-2xl italic leading-relaxed text-tertiary">
+                    “No vendemos promesas exageradas. Curamos rituales diarios, origen botánico y una compra clara.”
+                  </blockquote>
+                  <div class="mt-8 grid gap-6 md:grid-cols-2">
+                    <p class="text-base leading-8 text-on-surface-variant">
+                      Yoga Verde mantiene un lenguaje natural, ancestral y confiable, pero ahora la
+                      experiencia está organizada para convertir mejor: best sellers visibles,
+                      filtros claros, kits comprables y navegación móvil más fluida.
+                    </p>
+                    <p class="text-base leading-8 text-on-surface-variant">
+                      La capa editorial sigue viva en cada detalle, aunque el centro de gravedad ya
+                      no es el blog ni la contemplación: es la tienda, el carrito y la facilidad
+                      para comprar sin fricción.
+                    </p>
+                  </div>
+                </div>
+                <div class="overflow-hidden rounded-[28px] bg-surface-container-low p-3">
+                  <img
+                    alt="Bitácora botánica abierta"
+                    class="aspect-square w-full rounded-[22px] object-cover"
+                    src="/yoga-verde/assets/image-05.png"
+                  />
+                </div>
+              </div>
+            </article>
+
+            <article class="rounded-[36px] bg-primary p-8 text-on-primary shadow-float">
+              <p class="text-xs font-semibold uppercase tracking-[0.22em] text-on-primary-container">
+                Newsletter
+              </p>
+              <h2 class="mt-3 font-headline text-5xl text-white">Guía botánica gratuita</h2>
+              <p class="mt-5 text-base leading-8 text-on-primary-container">
+                Recibe una guía botánica gratuita y nuevos lanzamientos de temporada. Es un punto
+                de captura más comercial, pero sigue hablando con la voz de Yoga Verde.
+              </p>
+              <div class="mt-8 rounded-[28px] bg-white/10 p-4">
+                <label class="sr-only" for="newsletter-email">Correo electrónico</label>
+                <div class="flex items-center gap-3 rounded-full border border-white/15 px-4 py-3">
+                  <input
+                    class="w-full border-none bg-transparent p-0 text-sm text-white placeholder:text-on-primary-container focus:outline-none focus:ring-0"
+                    id="newsletter-email"
+                    placeholder="Tu correo electrónico"
+                    type="email"
+                  />
+                  <button
+                    class="inline-flex h-11 w-11 items-center justify-center rounded-full bg-secondary text-white transition hover:bg-[#c25a42] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+                    type="button"
+                  >
+                    <span class="material-symbols-outlined">arrow_forward</span>
+                  </button>
+                </div>
+              </div>
+              <p class="mt-4 text-sm leading-7 text-on-primary-container">
+                Prometemos contenido útil: usos tradicionales, ritual diario y lanzamientos sin
+                ruido.
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <section class="mx-auto max-w-screen-2xl px-4 py-12 sm:px-6 lg:px-8" id="testimonios">
+          <div class="mb-8 max-w-2xl">
+            <p class="text-xs font-semibold uppercase tracking-[0.22em] text-secondary">
+              Testimonios
+            </p>
+            <h2 class="mt-3 font-headline text-5xl text-primary">Clientes que ya compraron con calma</h2>
+            <p class="mt-4 text-lg leading-8 text-on-surface-variant">
+              Prueba social breve, limpia y confiable para una experiencia más comercial sin
+              sacrificar sobriedad de marca.
+            </p>
+          </div>
+
+          <div class="grid gap-6 lg:grid-cols-3">
+            {TESTIMONIALS.map((testimonial) => (
+              <article class="rounded-[30px] bg-surface-container-lowest p-7 shadow-parchment">
+                <div class="flex items-center gap-1 text-secondary">
+                  {stars.map(() => (
+                    <span aria-hidden="true">★</span>
+                  ))}
+                </div>
+                <p class="mt-5 font-headline text-2xl italic leading-relaxed text-tertiary">
+                  “{testimonial.quote}”
+                </p>
+                <div class="mt-8 border-t border-outline-variant/35 pt-5">
+                  <p class="font-semibold text-primary">{testimonial.name}</p>
+                  <p class="text-sm text-on-surface-variant">{testimonial.location}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+      </main>
+
+      <footer class="bg-primary py-16 text-on-primary" id="contacto">
+        <div class="mx-auto grid max-w-screen-2xl gap-10 px-4 sm:px-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1fr)] lg:px-8">
+          <div>
+            <h2 class="font-headline text-4xl italic">Yoga Verde</h2>
+            <p class="mt-4 max-w-sm leading-8 text-on-primary-container">
+              Herbolario ancestral con compra clara, ritual diario y origen botánico confiable.
+              Preservamos lenguaje, belleza y facilidad de conversión en una sola experiencia.
+            </p>
+          </div>
+          <div>
+            <h3 class="font-headline text-2xl">Explorar</h3>
+            <div class="mt-4 space-y-3 text-on-primary-container">
+              <button class="block transition hover:text-white" data-scroll-to="catalogo" type="button">
+                Catálogo
+              </button>
+              <button class="block transition hover:text-white" data-scroll-to="best-sellers" type="button">
+                Best Sellers
+              </button>
+              <button class="block transition hover:text-white" data-scroll-to="kits" type="button">
+                Kits
+              </button>
+              <button class="block transition hover:text-white" data-open-cart type="button">
+                Carrito
+              </button>
+            </div>
+          </div>
+          <div>
+            <h3 class="font-headline text-2xl">Bienestar consciente</h3>
+            <p class="mt-4 text-on-primary-container">
+              Compra protegida, empaques reciclados y una experiencia pensada para sumar rituales
+              fáciles de sostener.
+            </p>
+            <div class="mt-5 flex flex-wrap gap-2">
+              <span class="rounded-full border border-white/15 px-3 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-on-primary-container">
+                Uso tradicional
+              </span>
+              <span class="rounded-full border border-white/15 px-3 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-on-primary-container">
+                Cosecha ética
+              </span>
+              <span class="rounded-full border border-white/15 px-3 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-on-primary-container">
+                Origen botánico
+              </span>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <div class="pointer-events-none fixed inset-x-4 bottom-20 z-[65] translate-y-24 opacity-0 transition-all md:hidden" data-mobile-cart-cta>
+      <button
+        class="pointer-events-auto flex w-full items-center justify-between rounded-2xl bg-primary px-5 py-4 text-left text-on-primary shadow-float"
+        data-open-cart
+        type="button"
+      >
+        <div>
+          <p class="text-xs uppercase tracking-[0.22em] text-on-primary-container">Tu cosecha</p>
+          <p class="mt-1 font-headline text-2xl" data-mobile-total>{formatMoney(0)}</p>
+        </div>
+        <div class="inline-flex items-center gap-2 text-sm font-semibold">
+          <span data-mobile-count>0 piezas</span>
+          <span class="material-symbols-outlined">shopping_cart</span>
+        </div>
+      </button>
+    </div>
+
+    <nav class="fixed inset-x-4 bottom-4 z-[64] rounded-[28px] border border-outline-variant/40 bg-surface-container-lowest/95 px-3 py-2 shadow-float backdrop-blur md:hidden">
+      <div class="grid grid-cols-4 gap-2">
+        <button
+          class="flex flex-col items-center justify-center gap-1 rounded-2xl px-3 py-2 text-[11px] font-semibold text-primary transition hover:bg-surface-container-low focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35"
+          data-scroll-to="inicio"
+          type="button"
+        >
+          <span class="material-symbols-outlined text-xl">home</span>
+          Inicio
+        </button>
+        <button
+          class="flex flex-col items-center justify-center gap-1 rounded-2xl px-3 py-2 text-[11px] font-semibold text-primary transition hover:bg-surface-container-low focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35"
+          data-scroll-to="catalogo"
+          type="button"
+        >
+          <span class="material-symbols-outlined text-xl">storefront</span>
+          Catálogo
+        </button>
+        <button
+          class="flex flex-col items-center justify-center gap-1 rounded-2xl px-3 py-2 text-[11px] font-semibold text-primary transition hover:bg-surface-container-low focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35"
+          data-focus-search
+          type="button"
+        >
+          <span class="material-symbols-outlined text-xl">search</span>
+          Buscar
+        </button>
+        <button
+          class="relative flex flex-col items-center justify-center gap-1 rounded-2xl px-3 py-2 text-[11px] font-semibold text-primary transition hover:bg-surface-container-low focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35"
+          data-open-cart
+          type="button"
+        >
+          <span class="material-symbols-outlined text-xl">shopping_bag</span>
+          Carrito
+          <span
+            class="absolute right-3 top-2 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-secondary px-1 text-[9px] font-bold text-white"
+            data-cart-count
+          >
+            0
+          </span>
+        </button>
+      </div>
+    </nav>
+
+    <div class="pointer-events-none fixed inset-0 z-[78] bg-primary/25 opacity-0 transition-opacity" data-menu-overlay></div>
+    <aside
+      class="fixed left-0 top-0 z-[79] flex h-full w-[88vw] max-w-sm -translate-x-full flex-col bg-surface-container-lowest shadow-float transition-transform duration-300"
+      data-menu-drawer
+    >
+      <div class="flex items-center justify-between border-b border-outline-variant/40 px-6 py-5">
+        <div>
+          <p class="text-xs uppercase tracking-[0.22em] text-on-surface-variant">Yoga Verde</p>
+          <h2 class="font-headline text-4xl text-primary">Menú</h2>
+        </div>
+        <button
+          aria-label="Cerrar menú"
+          class="inline-flex h-11 w-11 items-center justify-center rounded-full border border-outline-variant/60 text-primary transition hover:border-secondary/40 hover:text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35"
+          data-close-menu
+          type="button"
+        >
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div class="flex-1 px-6 py-6">
+        <div class="space-y-4">
+          <button class="block font-headline text-3xl text-primary" data-scroll-to="inicio" type="button">
+            Inicio
+          </button>
+          <button class="block font-headline text-3xl text-primary" data-scroll-to="best-sellers" type="button">
+            Best Sellers
+          </button>
+          <button class="block font-headline text-3xl text-primary" data-scroll-to="catalogo" type="button">
+            Catálogo
+          </button>
+          <button class="block font-headline text-3xl text-primary" data-scroll-to="kits" type="button">
+            Kits
+          </button>
+          <button class="block font-headline text-3xl text-primary" data-scroll-to="testimonios" type="button">
+            Testimonios
+          </button>
+          <button class="block font-headline text-3xl text-primary" data-scroll-to="contacto" type="button">
+            Contacto
+          </button>
+        </div>
+        <div class="mt-10 rounded-[28px] bg-primary p-6 text-on-primary shadow-line">
+          <p class="text-xs uppercase tracking-[0.22em] text-on-primary-container">Primera compra</p>
+          <p class="mt-2 font-headline text-3xl text-white">Empieza con un kit</p>
+          <p class="mt-3 text-sm leading-7 text-on-primary-container">
+            Una ruta rápida para quien llega desde móvil y quiere comprar sin pensarlo demasiado.
+          </p>
+          <button
+            class="mt-5 inline-flex items-center gap-2 rounded-full bg-white px-4 py-3 text-sm font-semibold text-primary transition hover:bg-surface-container-high focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+            data-scroll-to="kits"
+            type="button"
+          >
+            Ver kits
+            <span class="material-symbols-outlined text-base">arrow_forward</span>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <div class="pointer-events-none fixed inset-0 z-[82] bg-primary/25 opacity-0 transition-opacity" data-cart-overlay></div>
+    <aside
+      class="fixed right-0 top-0 z-[83] flex h-full w-full max-w-[460px] translate-x-full flex-col bg-surface-container-lowest shadow-[0_24px_80px_rgba(23,48,32,0.22)] transition-transform duration-300"
+      data-cart-drawer
+    >
+      <div class="flex items-center justify-between border-b border-outline-variant/40 px-6 py-5">
+        <div>
+          <p class="text-xs uppercase tracking-[0.22em] text-on-surface-variant">Carrito interactivo</p>
+          <h2 class="font-headline text-4xl text-primary">Tu cosecha</h2>
+        </div>
+        <button
+          aria-label="Cerrar carrito"
+          class="inline-flex h-11 w-11 items-center justify-center rounded-full border border-outline-variant/50 text-primary transition hover:border-secondary/40 hover:text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35"
+          data-close-cart
+          type="button"
+        >
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <div class="hide-scrollbar flex-1 overflow-y-auto px-6 py-6">
+        <div class="rounded-[28px] bg-surface-container-low p-5 shadow-parchment">
+          <div class="flex items-center justify-between gap-3">
+            <p class="text-sm font-semibold text-primary">Progreso de envío consciente</p>
+            <p class="text-xs uppercase tracking-[0.22em] text-on-surface-variant">
+              Meta {formatMoney(FREE_SHIPPING_THRESHOLD)}
+            </p>
+          </div>
+          <div class="mt-4 h-3 overflow-hidden rounded-full bg-surface-container-highest">
+            <div class="h-full rounded-full bg-secondary transition-all duration-300" data-shipping-progress style="width: 0%"></div>
+          </div>
+          <p class="mt-4 text-sm leading-7 text-on-surface-variant" data-shipping-message>
+            Te faltan {formatMoney(FREE_SHIPPING_THRESHOLD)} para envío gratis.
+          </p>
+        </div>
+
+        <div class="mt-6 space-y-4" data-cart-items></div>
+
+        <div class="mt-6 hidden rounded-[28px] bg-surface-container-low p-6 text-center shadow-parchment" data-cart-empty>
+          <span class="material-symbols-outlined text-5xl text-on-surface-variant/40">shopping_bag</span>
+          <p class="mt-4 font-headline text-3xl text-primary">Tu canasta está vacía</p>
+          <p class="mt-3 text-on-surface-variant">
+            Explora el catálogo, suma kits o empieza por un ritual según tu necesidad.
+          </p>
+        </div>
+
+        <div class="mt-6 rounded-[28px] bg-primary p-6 text-on-primary shadow-float">
+          <div class="mb-4 flex items-center gap-3">
+            <span class="material-symbols-outlined text-secondary">local_shipping</span>
+            <h3 class="font-headline text-3xl italic text-on-primary-container">Envío seguro</h3>
+          </div>
+          <p class="leading-8 text-on-primary-container/95">
+            Empaque reciclado, protección ligera y despachos preparados con el mismo cuidado con
+            el que seleccionamos cada planta.
+          </p>
+        </div>
+
+        <div class="mt-6 rounded-[28px] bg-surface-container-low p-5 shadow-parchment" data-cart-upsell></div>
+      </div>
+
+      <div class="border-t border-outline-variant/40 bg-surface px-6 py-6">
+        <div class="space-y-3 text-sm text-on-surface-variant">
+          <div class="flex items-center justify-between">
+            <span>Subtotal</span>
+            <span data-subtotal>{formatMoney(0)}</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span>Envío consciente</span>
+            <span data-shipping>{formatMoney(0)}</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span>Impuestos</span>
+            <span data-tax>{formatMoney(0)}</span>
+          </div>
+        </div>
+        <div class="mt-5 flex items-end justify-between gap-5 border-t border-outline-variant/50 pt-5">
+          <div>
+            <p class="text-xs uppercase tracking-[0.2em] text-on-surface-variant">Total</p>
+            <p class="font-headline text-4xl text-primary" data-total>{formatMoney(0)}</p>
+          </div>
+          <button
+            class="inline-flex items-center gap-2 rounded-2xl bg-primary px-5 py-4 font-semibold text-on-primary transition hover:bg-primary-container disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35"
+            data-checkout
+            disabled
+            type="button"
+          >
+            Continuar con el pedido
+            <span class="material-symbols-outlined text-lg">arrow_forward</span>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <div class="pointer-events-none fixed inset-0 z-[88] bg-primary/35 opacity-0 transition-opacity" data-modal-overlay></div>
+    <div
+      aria-labelledby="detail-title"
+      aria-modal="true"
+      class="pointer-events-none fixed left-1/2 top-1/2 z-[89] w-[min(94vw,760px)] -translate-x-1/2 -translate-y-1/2 scale-95 rounded-[32px] bg-surface-container-lowest p-6 opacity-0 shadow-float transition-all sm:p-8"
+      data-detail-modal
+      role="dialog"
+    >
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <p class="text-xs uppercase tracking-[0.22em] text-secondary" data-detail-badge>Sabiduría botánica</p>
+          <h2 class="mt-2 font-headline text-4xl text-primary sm:text-5xl" data-detail-title id="detail-title"></h2>
+        </div>
+        <button
+          aria-label="Cerrar detalle"
+          class="inline-flex h-11 w-11 items-center justify-center rounded-full border border-outline-variant/50 text-primary transition hover:border-secondary/40 hover:text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35"
+          data-close-detail
+          type="button"
+        >
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <div class="mt-8 grid gap-8 md:grid-cols-[240px_minmax(0,1fr)] md:items-start">
+        <div class="overflow-hidden rounded-[26px] bg-surface-container-low p-4">
+          <img alt="" class="aspect-square w-full rounded-[20px] object-cover" data-detail-image src="" />
+        </div>
+        <div>
+          <div class="flex flex-wrap items-center gap-3 text-sm text-on-surface-variant">
+            <div class="flex items-center gap-1 text-secondary" data-detail-rating-stars></div>
+            <span data-detail-rating-copy></span>
+          </div>
+          <p class="mt-5 text-base leading-8 text-on-surface-variant" data-detail-description></p>
+          <div class="mt-6 flex flex-wrap gap-2" data-detail-tags></div>
+
+          <div class="mt-6 grid gap-5 rounded-[28px] bg-surface-container-low p-5">
+            <div>
+              <p class="text-xs uppercase tracking-[0.22em] text-on-surface-variant">Beneficios</p>
+              <ul class="mt-3 space-y-3 text-sm leading-7 text-on-surface-variant" data-detail-benefits></ul>
+            </div>
+            <div>
+              <p class="text-xs uppercase tracking-[0.22em] text-on-surface-variant">Cómo integrarlo</p>
+              <p class="mt-3 text-sm leading-7 text-on-surface-variant" data-detail-instructions></p>
+            </div>
+          </div>
+
+          <div class="mt-8 flex items-center justify-between gap-4 border-t border-outline-variant/40 pt-6">
+            <div>
+              <p class="text-xs uppercase tracking-[0.22em] text-on-surface-variant">Precio</p>
+              <p class="font-headline text-4xl text-primary" data-detail-price></p>
+            </div>
+            <button
+              class="inline-flex items-center gap-2 rounded-2xl bg-primary px-5 py-4 font-semibold text-on-primary transition hover:bg-primary-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35"
+              data-detail-add
+              type="button"
+            >
+              Añadir al carrito
+              <span class="material-symbols-outlined text-lg">add_shopping_cart</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script defer is:inline src="/yoga-verde/shop.js"></script>
+  </body>
+</html>

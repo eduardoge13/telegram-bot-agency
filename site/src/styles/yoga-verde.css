@@ -1,0 +1,90 @@
+@import "tailwindcss";
+@source "../pages/yoga-verde/index.astro";
+@source "../../public/yoga-verde/shop.js";
+
+@theme {
+  --font-headline: "Newsreader", serif;
+  --font-body: "Manrope", sans-serif;
+
+  --color-background: #fcf9f0;
+  --color-surface: #fcf9f0;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f6f3ea;
+  --color-surface-container: #f1eee5;
+  --color-surface-container-high: #ebe8df;
+  --color-surface-container-highest: #e5e2da;
+  --color-surface-variant: #e5e2da;
+  --color-primary: #173020;
+  --color-primary-container: #2d4635;
+  --color-secondary: #a03f29;
+  --color-tertiary: #3d241d;
+  --color-outline: #737972;
+  --color-outline-variant: #c2c8c1;
+  --color-on-surface: #1c1c17;
+  --color-on-surface-variant: #424843;
+  --color-on-primary: #ffffff;
+  --color-on-primary-container: #d2ddcf;
+  --color-on-secondary: #ffffff;
+  --color-tertiary-container: #563a31;
+  --color-on-tertiary-container: #efd5cb;
+
+  --shadow-parchment: 0 24px 60px rgba(28, 28, 23, 0.07);
+  --shadow-float: 0 30px 80px rgba(23, 48, 32, 0.18);
+  --shadow-line: 0 12px 30px rgba(23, 48, 32, 0.09);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--color-surface);
+  color: var(--color-on-surface);
+}
+
+.material-symbols-outlined {
+  font-variation-settings: "FILL" 0, "wght" 300, "GRAD" 0, "opsz" 24;
+}
+
+.paper-grid::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.18), transparent 18%),
+    radial-gradient(circle at 0% 0%, rgba(163, 63, 41, 0.1), transparent 24%),
+    radial-gradient(circle at 100% 0%, rgba(23, 48, 32, 0.12), transparent 22%);
+}
+
+.card-grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.08;
+  background-image:
+    linear-gradient(transparent 0%, rgba(255, 255, 255, 0.22) 100%),
+    radial-gradient(circle at 1px 1px, rgba(23, 48, 32, 0.18) 1px, transparent 0);
+  background-size: auto, 22px 22px;
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.ui-locked {
+  overflow: hidden;
+}
+
+.bg-soil-glow {
+  background-image:
+    radial-gradient(circle at top right, rgba(160, 63, 41, 0.16), transparent 38%),
+    radial-gradient(circle at bottom left, rgba(23, 48, 32, 0.16), transparent 32%);
+}
