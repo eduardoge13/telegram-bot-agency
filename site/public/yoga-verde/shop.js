@@ -10,6 +10,11 @@ const PRODUCTS = Array.isArray(store.products) ? store.products : [];
 const KITS = Array.isArray(store.kits) ? store.kits : [];
 const ALL_ITEMS = [...PRODUCTS, ...KITS];
 const ITEM_INDEX = new Map(ALL_ITEMS.map((item) => [item.id, item]));
+const ACCENT_COLORS = store.accentColors && typeof store.accentColors === "object" ? store.accentColors : {};
+
+function accentOf(item) {
+  return (item && ACCENT_COLORS[item.use]) || ACCENT_COLORS.terracota || "#c1602f";
+}
 
 const FREE_SHIPPING_THRESHOLD = Number(store.freeShippingThreshold) || 999;
 const SHIPPING_FLAT = Number(store.shippingFlat) || 149;
@@ -194,27 +199,28 @@ function detailTagMarkup(label) {
 }
 
 function catalogCardMarkup(product) {
+  const accent = accentOf(product);
   return `
-    <article class="group overflow-hidden rounded-[30px] bg-surface-container-lowest shadow-parchment transition-transform hover:-translate-y-1">
+    <article class="group overflow-hidden rounded-[30px] bg-surface-container-lowest shadow-parchment transition-transform hover:-translate-y-1" style="--accent: ${escapeHtml(accent)}">
       <div class="relative overflow-hidden bg-surface-container-low p-4">
         <span class="absolute left-4 top-4 z-10 rounded-full bg-surface px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-primary">${escapeHtml(product.badge)}</span>
-        <img alt="${escapeHtml(product.name)}" class="aspect-[5/4] w-full rounded-[24px] object-cover transition duration-500 group-hover:scale-105" src="${escapeHtml(product.image)}" />
+        <img alt="${escapeHtml(product.name)} ${escapeHtml(product.scent || "")}" class="aspect-[5/4] w-full rounded-[24px] bg-surface-container-lowest object-contain p-5 transition duration-500 group-hover:scale-105" src="${escapeHtml(product.image)}" />
       </div>
       <div class="p-6">
         <div class="flex items-start justify-between gap-4">
           <div>
-            <p class="text-[11px] uppercase tracking-[0.22em] text-on-surface-variant">${escapeHtml(product.typeLabel)} · ${escapeHtml(product.originLabel)}</p>
+            <p class="text-[11px] uppercase tracking-[0.22em] text-on-surface-variant">${escapeHtml(product.typeLabel)} · ${escapeHtml(product.scent || product.originLabel)}</p>
             <h3 class="mt-2 font-headline text-4xl leading-none text-primary">${escapeHtml(product.name)}</h3>
           </div>
-          <span class="font-headline text-3xl text-secondary">${formatMoney(product.price)}</span>
+          <span class="font-headline text-3xl text-[var(--accent)]">${formatMoney(product.price)}</span>
         </div>
         <div class="mt-4 flex items-center gap-3 text-sm text-on-surface-variant">
-          <div class="flex items-center gap-1 text-secondary">${starMarkup(product.rating)}</div>
+          <div class="flex items-center gap-1 text-[var(--accent)]">${starMarkup(product.rating)}</div>
           <span>${product.rating.toFixed(1)} · ${product.reviewsCount} reseñas</span>
         </div>
         <p class="mt-4 min-h-[84px] text-sm italic leading-7 text-on-surface-variant">${escapeHtml(product.short)}</p>
         <div class="mt-4 flex flex-wrap gap-2">
-          <span class="rounded-full bg-surface-container-low px-3 py-2 text-xs font-semibold text-primary">${escapeHtml(product.useLabel)}</span>
+          <span class="accent-dot rounded-full bg-surface-container-low px-3 py-2 text-xs font-semibold text-primary">${escapeHtml(product.useLabel)}</span>
           <span class="rounded-full bg-surface-container-low px-3 py-2 text-xs font-semibold text-on-surface-variant">${escapeHtml(product.originLabel)}</span>
         </div>
         <div class="mt-6 flex items-center justify-between gap-3 border-t border-outline-variant/40 pt-5">
@@ -236,13 +242,13 @@ function cartItemMarkup(entry) {
   return `
     <article class="overflow-hidden rounded-[28px] bg-surface-container-low p-5 shadow-parchment">
       <div class="flex gap-4">
-        <img alt="${escapeHtml(item.name)}" class="h-28 w-28 rounded-[22px] object-cover" src="${escapeHtml(item.image)}" />
+        <img alt="${escapeHtml(item.name)}" class="h-28 w-28 rounded-[22px] bg-surface-container-lowest object-contain p-2" src="${escapeHtml(item.image)}" />
         <div class="flex flex-1 flex-col">
           <div class="flex items-start justify-between gap-4">
             <div>
               <p class="text-[11px] uppercase tracking-[0.22em] text-on-surface-variant">${escapeHtml(item.badge)}</p>
               <h3 class="mt-2 font-headline text-3xl leading-none text-primary">${escapeHtml(item.name)}</h3>
-              <p class="mt-2 text-sm text-on-surface-variant">${escapeHtml(item.useLabel)} · ${escapeHtml(item.originLabel)}</p>
+              <p class="mt-2 text-sm text-on-surface-variant">${escapeHtml(item.scent || item.useLabel)} · ${escapeHtml(item.originLabel)}</p>
             </div>
             <span class="font-headline text-3xl text-primary">${formatMoney(item.price * quantity)}</span>
           </div>
@@ -270,9 +276,9 @@ function cartItemMarkup(entry) {
 function upsellMarkup(item) {
   return `
     <div class="flex items-start gap-4">
-      <img alt="${escapeHtml(item.name)}" class="h-24 w-24 rounded-[22px] object-cover" src="${escapeHtml(item.image)}" />
+      <img alt="${escapeHtml(item.name)}" class="h-24 w-24 rounded-[22px] bg-surface-container-lowest object-contain p-2" src="${escapeHtml(item.image)}" />
       <div class="flex-1">
-        <p class="text-xs uppercase tracking-[0.22em] text-secondary">Upsell sugerido</p>
+        <p class="text-xs uppercase tracking-[0.22em] text-secondary">También te puede interesar</p>
         <h3 class="mt-2 font-headline text-3xl text-primary">${escapeHtml(item.name)}</h3>
         <p class="mt-2 text-sm leading-7 text-on-surface-variant">${escapeHtml(item.short)}</p>
         <div class="mt-4 flex items-center justify-between gap-4">
@@ -433,7 +439,7 @@ function renderCart() {
     if (totals.subtotal === 0) {
       els.shippingMessage.textContent = `Te faltan ${formatMoney(FREE_SHIPPING_THRESHOLD)} para envío gratis.`;
     } else if (totals.subtotal >= FREE_SHIPPING_THRESHOLD) {
-      els.shippingMessage.textContent = "Tu envío consciente ya es gratis.";
+      els.shippingMessage.textContent = "Tu envío ya es gratis.";
     } else {
       els.shippingMessage.textContent = `Te faltan ${formatMoney(FREE_SHIPPING_THRESHOLD - totals.subtotal)} para envío gratis.`;
     }
@@ -533,11 +539,14 @@ function openDetail(itemId) {
   state.detailItemId = itemId;
   state.detailOpen = true;
 
+  if (els.modal) {
+    els.modal.style.setProperty("--accent", accentOf(item));
+  }
   if (els.detailBadge) {
     els.detailBadge.textContent = `${item.badge} · ${item.typeLabel}`;
   }
   if (els.detailTitle) {
-    els.detailTitle.textContent = item.name;
+    els.detailTitle.textContent = item.scent ? `${item.name} · ${item.scent}` : item.name;
   }
   if (els.detailDescription) {
     els.detailDescription.textContent = item.description;
@@ -563,7 +572,7 @@ function openDetail(itemId) {
     els.detailBenefits.innerHTML = (item.benefits || [])
       .map(
         (benefit) =>
-          `<li class="flex gap-3"><span class="mt-2 h-2.5 w-2.5 rounded-full bg-secondary"></span><span>${escapeHtml(benefit)}</span></li>`,
+          `<li class="flex gap-3"><span class="mt-2 h-2.5 w-2.5 rounded-full bg-[var(--accent)]"></span><span>${escapeHtml(benefit)}</span></li>`,
       )
       .join("");
   }
