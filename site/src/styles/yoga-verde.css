@@ -2,39 +2,64 @@
 @source "../pages/yoga-verde/index.astro";
 @source "../../public/yoga-verde/shop.js";
 
+/*
+  Design direction: "Herbario vivo" — a botanical apothecary specimen board.
+  Ink-dark botanical ground (hero, catalog masthead, philosophy, footer) with
+  warm kraft-paper specimen cards mounted on top, stamped mono labels for
+  prices/badges, and a hand-drawn root system that grows in on load/scroll.
+  Token NAMES are unchanged from the previous build (only values + a couple
+  additive tokens) so shop.js's generated markup inherits this automatically.
+*/
+
 @theme {
-  --font-headline: "Newsreader", serif;
-  --font-body: "Manrope", sans-serif;
+  --font-headline: "Fraunces", serif;
+  --font-body: "Work Sans", sans-serif;
+  --font-label: "Space Mono", monospace;
 
-  --color-background: #fcf9f0;
-  --color-surface: #fcf9f0;
-  --color-surface-container-lowest: #ffffff;
-  --color-surface-container-low: #f6f3ea;
-  --color-surface-container: #f1eee5;
-  --color-surface-container-high: #ebe8df;
-  --color-surface-container-highest: #e5e2da;
-  --color-surface-variant: #e5e2da;
-  --color-primary: #173020;
-  --color-primary-container: #2d4635;
-  --color-secondary: #a03f29;
-  --color-tertiary: #3d241d;
-  --color-outline: #737972;
-  --color-outline-variant: #c2c8c1;
-  --color-on-surface: #1c1c17;
-  --color-on-surface-variant: #424843;
-  --color-on-primary: #ffffff;
-  --color-on-primary-container: #d2ddcf;
-  --color-on-secondary: #ffffff;
-  --color-tertiary-container: #563a31;
-  --color-on-tertiary-container: #efd5cb;
+  /* Paper family — the specimen-card material, not the page ground */
+  --color-background: #efe6cc;
+  --color-surface: #efe6cc;
+  --color-surface-container-lowest: #f9f3e2;
+  --color-surface-container-low: #e6d9b3;
+  --color-surface-container: #ddcda1;
+  --color-surface-container-high: #d2bd86;
+  --color-surface-container-highest: #c6ae70;
+  --color-surface-variant: #d2bd86;
 
-  --shadow-parchment: 0 24px 60px rgba(28, 28, 23, 0.07);
-  --shadow-float: 0 30px 80px rgba(23, 48, 32, 0.18);
-  --shadow-line: 0 12px 30px rgba(23, 48, 32, 0.09);
+  /* Ink family — the botanical ground: hero, catalog masthead, footer */
+  --color-primary: #172a1c;
+  --color-primary-container: #24402b;
+
+  /* Apothecary-glass amber — the accent (deliberately not terracotta) */
+  --color-secondary: #b6822a;
+
+  /* Moss — quotes, active-filter state */
+  --color-tertiary: #47572f;
+  --color-tertiary-container: #263820;
+  --color-on-tertiary-container: #e3dabb;
+
+  --color-outline: #8d8360;
+  --color-outline-variant: #cabe91;
+
+  --color-on-surface: #1c2415;
+  --color-on-surface-variant: #55502f;
+  --color-on-primary: #f3ecd6;
+  --color-on-primary-container: #cdd6bf;
+  --color-on-secondary: #241505;
+
+  --shadow-parchment: 0 20px 50px rgba(12, 16, 8, 0.16);
+  --shadow-float: 0 34px 90px rgba(6, 10, 5, 0.4);
+  --shadow-line: 0 14px 34px rgba(8, 12, 6, 0.28);
 }
 
 html {
   scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
 }
 
 body {
@@ -47,15 +72,15 @@ body {
   font-variation-settings: "FILL" 0, "wght" 300, "GRAD" 0, "opsz" 24;
 }
 
+/* Fine grain dot texture — kraft speckle on paper */
 .paper-grid::before {
   content: "";
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.18), transparent 18%),
-    radial-gradient(circle at 0% 0%, rgba(163, 63, 41, 0.1), transparent 24%),
-    radial-gradient(circle at 100% 0%, rgba(23, 48, 32, 0.12), transparent 22%);
+  background-image: radial-gradient(circle at 1px 1px, rgba(23, 42, 28, 0.16) 1px, transparent 0);
+  background-size: 18px 18px;
+  opacity: 0.5;
 }
 
 .card-grain::after {
@@ -63,11 +88,11 @@ body {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  opacity: 0.08;
+  opacity: 0.1;
   background-image:
-    linear-gradient(transparent 0%, rgba(255, 255, 255, 0.22) 100%),
-    radial-gradient(circle at 1px 1px, rgba(23, 48, 32, 0.18) 1px, transparent 0);
-  background-size: auto, 22px 22px;
+    linear-gradient(transparent 0%, rgba(23, 42, 28, 0.14) 100%),
+    radial-gradient(circle at 1px 1px, rgba(23, 42, 28, 0.22) 1px, transparent 0);
+  background-size: auto, 20px 20px;
 }
 
 .hide-scrollbar {
@@ -85,6 +110,126 @@ body {
 
 .bg-soil-glow {
   background-image:
-    radial-gradient(circle at top right, rgba(160, 63, 41, 0.16), transparent 38%),
-    radial-gradient(circle at bottom left, rgba(23, 48, 32, 0.16), transparent 32%);
+    radial-gradient(circle at top right, rgba(182, 130, 42, 0.22), transparent 38%),
+    radial-gradient(circle at bottom left, rgba(23, 42, 28, 0.3), transparent 34%);
+}
+
+/* Ink ground: used explicitly on the hero + catalog masthead so the page
+   reads as an apothecary board with paper specimens mounted on it. */
+.ink-ground {
+  background: var(--color-primary);
+  background-image:
+    radial-gradient(circle at 12% 18%, rgba(182, 130, 42, 0.14), transparent 40%),
+    radial-gradient(circle at 88% 82%, rgba(71, 87, 47, 0.4), transparent 44%);
+}
+
+.ink-ground::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(circle at 1px 1px, rgba(243, 236, 214, 0.06) 1px, transparent 0);
+  background-size: 16px 16px;
+}
+
+/* Torn-paper zigzag seam between an ink section and a paper section */
+.torn-edge {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 18px;
+  pointer-events: none;
+  background-image:
+    linear-gradient(135deg, var(--edge-color, var(--color-surface)) 50%, transparent 50%),
+    linear-gradient(45deg, var(--edge-color, var(--color-surface)) 50%, transparent 50%);
+  background-size: 26px 26px;
+  background-position: 0 0, 13px 0;
+  background-repeat: repeat-x;
+}
+
+.torn-edge--bottom {
+  bottom: -1px;
+}
+
+.torn-edge--top {
+  top: -1px;
+  transform: scaleY(-1);
+}
+
+/* Specimen stamp label — used for badges/prices rendered as if hand-stamped */
+.specimen-label {
+  font-family: var(--font-label);
+  letter-spacing: 0.08em;
+}
+
+/* Signature element: hand-drawn root system that grows in once, on reveal */
+.rhizome-path {
+  fill: none;
+  stroke: var(--color-secondary);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: var(--len, 1000);
+  stroke-dashoffset: var(--len, 1000);
+  transition: stroke-dashoffset 1.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.rhizome-path.is-grown {
+  stroke-dashoffset: 0;
+}
+
+.rhizome-leaf {
+  fill: var(--color-tertiary);
+  opacity: 0;
+  transform-origin: bottom center;
+  transition: opacity 0.9s ease 1.2s, transform 0.9s ease 1.2s;
+}
+
+.rhizome-leaf.is-grown {
+  opacity: 0.85;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .rhizome-sway {
+    animation: rhizome-sway 7s ease-in-out infinite;
+  }
+}
+
+@keyframes rhizome-sway {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(1.4deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rhizome-path,
+  .rhizome-leaf {
+    transition: none !important;
+    stroke-dashoffset: 0 !important;
+    opacity: 0.85 !important;
+  }
+}
+
+/* Scroll reveal utility */
+.reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
 }
