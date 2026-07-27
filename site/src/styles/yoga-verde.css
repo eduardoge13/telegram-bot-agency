@@ -14,17 +14,28 @@
     Secundario 2 (dark ground)    #183425  deep dark green
   Typography: Quelistah (logo wordmark — treated as fixed art/SVG, not a
   licensable web font) · Gelasio (body + headings, Google Fonts) · Cloud
-  Lucent (tagline — not licensable via CDN, substituted with Gelasio italic
-  small caps per the manual's own fallback guidance). Each SKU still carries
+  Lucent Regular (tagline only — self-hosted from the client's real font file,
+  see @font-face below; no bundled license file, came from a font-sharing
+  site, flagged for the client to confirm before wide commercial reuse).
+  Each SKU still carries
   a per-scent --accent custom property (see ACCENT_COLORS in
   yoga-verde-store.js), sampled from the real label photography, for the
   terracotta/verde/morado/dorado product-card system — a smaller-scale layer
   underneath the manual's site-wide two-tone identity.
 */
 
+@font-face {
+  font-family: "Cloud Lucent";
+  src: url("/yoga-verde/fonts/cloud-lucent-regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme {
   --font-headline: "Gelasio", serif;
   --font-body: "Gelasio", serif;
+  --font-tagline: "Cloud Lucent", "Gelasio", serif;
   --font-label: "Space Mono", monospace;
 
   /* Principal 1 — blush/cream, the dominant ground (manual, not kraft-yellow) */
