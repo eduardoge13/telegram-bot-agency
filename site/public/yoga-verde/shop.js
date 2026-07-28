@@ -208,11 +208,11 @@ function catalogCardMarkup(product) {
       </div>
       <div class="p-6">
         <div class="flex items-start justify-between gap-4">
-          <div>
+          <div class="min-w-0">
             <p class="text-[11px] uppercase tracking-[0.22em] text-on-surface-variant">${escapeHtml(product.typeLabel)} · ${escapeHtml(product.scent || product.originLabel)}</p>
             <h3 class="mt-2 font-headline text-4xl leading-none text-primary">${escapeHtml(product.name)}</h3>
           </div>
-          <span class="font-headline text-3xl text-[var(--accent)]">${formatMoney(product.price)}</span>
+          <span class="shrink-0 font-headline text-3xl text-[var(--accent)]">${formatMoney(product.price)}</span>
         </div>
         <div class="mt-4 flex items-center gap-3 text-sm text-on-surface-variant">
           <div class="flex items-center gap-1 text-[var(--accent)]">${starMarkup(product.rating)}</div>
@@ -245,12 +245,12 @@ function cartItemMarkup(entry) {
         <img alt="${escapeHtml(item.name)}" class="h-28 w-28 rounded-[22px] bg-surface-container-lowest object-contain p-2" src="${escapeHtml(item.image)}" />
         <div class="flex flex-1 flex-col">
           <div class="flex items-start justify-between gap-4">
-            <div>
+            <div class="min-w-0">
               <p class="text-[11px] uppercase tracking-[0.22em] text-on-surface-variant">${escapeHtml(item.badge)}</p>
               <h3 class="mt-2 font-headline text-3xl leading-none text-primary">${escapeHtml(item.name)}</h3>
               <p class="mt-2 text-sm text-on-surface-variant">${escapeHtml(item.scent || item.useLabel)} · ${escapeHtml(item.originLabel)}</p>
             </div>
-            <span class="font-headline text-3xl text-primary">${formatMoney(item.price * quantity)}</span>
+            <span class="shrink-0 font-headline text-3xl text-primary">${formatMoney(item.price * quantity)}</span>
           </div>
           <div class="mt-4 flex items-center justify-between gap-3">
             <div class="inline-flex items-center gap-4 rounded-full bg-surface-container-highest px-4 py-2">

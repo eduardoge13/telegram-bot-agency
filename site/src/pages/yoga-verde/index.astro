@@ -24,7 +24,7 @@ const money = new Intl.NumberFormat("es-MX", {
 const formatMoney = (value: number) => money.format(value);
 const stars = Array.from({ length: 5 }, (_, index) => index + 1);
 
-const bestSellers = PRODUCTS.filter((product) => product.featured).slice(0, 4);
+const bestSellers = PRODUCTS.filter((product) => product.featured).slice(0, 8);
 
 const useFilters = Array.from(
   new Map(PRODUCTS.map((product) => [product.use, { slug: product.use, label: product.useLabel }])).values(),
@@ -384,13 +384,13 @@ const storeData = {
                 </div>
                 <div class="p-6">
                   <div class="flex items-start justify-between gap-4">
-                    <div>
+                    <div class="min-w-0">
                       <p class="text-[11px] uppercase tracking-[0.22em] text-on-surface-variant">
                         {product.scent}
                       </p>
                       <h3 class="mt-2 font-headline text-4xl leading-none text-primary">{product.name}</h3>
                     </div>
-                    <span class="font-headline text-3xl text-[var(--accent)]">{formatMoney(product.price)}</span>
+                    <span class="shrink-0 font-headline text-3xl text-[var(--accent)]">{formatMoney(product.price)}</span>
                   </div>
                   <div class="mt-4 flex items-center gap-3 text-sm text-on-surface-variant">
                     <div class="flex items-center gap-1 text-[var(--accent)]">
@@ -459,8 +459,8 @@ const storeData = {
                 </div>
                 <div class="p-6">
                   <div class="flex items-center justify-between gap-4">
-                    <h3 class="font-headline text-3xl text-primary">{need.title}</h3>
-                    <span class="rounded-full bg-[var(--accent)]/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.22em] text-[var(--accent)]">
+                    <h3 class="min-w-0 font-headline text-3xl text-primary">{need.title}</h3>
+                    <span class="shrink-0 whitespace-nowrap rounded-full bg-[var(--accent)]/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.22em] text-[var(--accent)]">
                       {countsByUse[need.slug]} opciones
                     </span>
                   </div>
@@ -512,13 +512,13 @@ const storeData = {
                 </div>
                 <div class="p-6">
                   <div class="flex items-start justify-between gap-4">
-                    <div>
+                    <div class="min-w-0">
                       <p class="text-[11px] uppercase tracking-[0.22em] text-on-surface-variant">
                         {kit.useLabel}
                       </p>
                       <h3 class="mt-2 font-headline text-4xl leading-none text-primary">{kit.name}</h3>
                     </div>
-                    <span class="font-headline text-3xl text-[var(--accent)]">{formatMoney(kit.price)}</span>
+                    <span class="shrink-0 font-headline text-3xl text-[var(--accent)]">{formatMoney(kit.price)}</span>
                   </div>
                   <div class="mt-4 flex items-center gap-3 text-sm text-on-surface-variant">
                     <div class="flex items-center gap-1 text-[var(--accent)]">
@@ -730,7 +730,7 @@ const storeData = {
                     </div>
                     <div class="p-6">
                       <div class="flex items-start justify-between gap-4">
-                        <div>
+                        <div class="min-w-0">
                           <p class="text-[11px] uppercase tracking-[0.22em] text-on-surface-variant">
                             {product.typeLabel} · {product.scent}
                           </p>
@@ -738,7 +738,7 @@ const storeData = {
                             {product.name}
                           </h3>
                         </div>
-                        <span class="font-headline text-3xl text-[var(--accent)]">{formatMoney(product.price)}</span>
+                        <span class="shrink-0 font-headline text-3xl text-[var(--accent)]">{formatMoney(product.price)}</span>
                       </div>
                       <div class="mt-4 flex items-center gap-3 text-sm text-on-surface-variant">
                         <div class="flex items-center gap-1 text-[var(--accent)]">
