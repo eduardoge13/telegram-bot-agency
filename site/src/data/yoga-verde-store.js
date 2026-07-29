@@ -974,23 +974,23 @@ export const KITS = [
 export const BENEFIT_ITEMS = [
   {
     icon: "eco",
-    title: "De origen natural",
-    copy: "Almendra, coco, uva y lavanda como ingredientes principales de cada fórmula.",
+    title: "Activos botánicos",
+    copy: "Almendra, coco, uva y lavanda como activo principal de cada formulación.",
   },
   {
     icon: "package_2",
-    title: "Hecho en México",
-    copy: "Producción local en lotes pequeños, con envases de vidrio ámbar, cristal y kraft.",
+    title: "Formulado en México",
+    copy: "Vidrio ámbar y cristal que protegen los activos de la luz y el oxígeno.",
   },
   {
     icon: "local_florist",
-    title: "Fórmulas simples",
-    copy: "Lo necesario para rostro, cuerpo, cabello y labios, nada de más.",
+    title: "Rutina completa",
+    copy: "Rostro, cuerpo, cabello y labios dentro de un mismo sistema de cuidado.",
   },
   {
     icon: "local_shipping",
-    title: "Envío seguro",
-    copy: "Empaque cuidado para que frascos y tarros lleguen completos.",
+    title: "Entrega protegida",
+    copy: "Empaque rígido para que cada frasco de vidrio llegue intacto.",
   },
   {
     icon: "verified_user",

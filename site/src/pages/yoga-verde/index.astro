@@ -103,14 +103,6 @@ const storeData = {
         <header class="border-b border-white/10 bg-primary/95 backdrop-blur-xl">
           <nav class="mx-auto flex h-20 max-w-screen-2xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
             <div class="flex items-center gap-3">
-              <button
-                aria-label="Abrir menú"
-                class="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-surface-container-lowest text-primary transition hover:border-secondary/60 hover:text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/40 md:hidden"
-                data-open-menu
-                type="button"
-              >
-                <span class="material-symbols-outlined">menu</span>
-              </button>
               <a class="group inline-flex items-center rounded-2xl bg-surface-container-lowest/95 px-3 py-2 shadow-parchment ring-1 ring-black/5 transition group-hover:-translate-y-0.5 hover:-translate-y-0.5" href="#inicio">
                 <img
                   alt="Yoga Verde — Cosmética natural"
@@ -174,12 +166,12 @@ const storeData = {
 
       <main>
         <section class="relative overflow-hidden bg-surface" id="inicio">
-          <div class="relative mx-auto grid max-w-screen-2xl gap-12 px-4 py-14 sm:px-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,520px)] lg:items-center lg:px-8 lg:py-20">
+          <div class="relative mx-auto grid max-w-screen-2xl gap-8 px-4 py-8 sm:px-6 sm:py-12 lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,520px)] lg:items-center lg:gap-12 lg:px-8 lg:py-20">
             <div class="max-w-3xl">
-              <div class="mb-5 flex items-end gap-3">
+              <div class="mb-4 flex items-end gap-3">
                 <svg
                   aria-hidden="true"
-                  class="pointer-events-none h-20 w-14 shrink-0 sm:h-24 sm:w-16"
+                  class="pointer-events-none h-14 w-10 shrink-0 sm:h-24 sm:w-16"
                   data-sprig
                   viewBox="0 0 90 150"
                 >
@@ -206,9 +198,9 @@ const storeData = {
                 desktop.
               </p>
 
-              <div class="mt-8 flex flex-col gap-4 sm:flex-row">
+              <div class="mt-6 flex flex-wrap gap-3">
                 <button
-                  class="inline-flex items-center justify-center gap-2 rounded-2xl bg-secondary px-7 py-4 text-base font-semibold text-on-secondary transition hover:bg-[#c99433] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/50"
+                  class="inline-flex items-center justify-center gap-2 rounded-2xl bg-secondary px-5 py-3 text-sm font-semibold text-on-secondary sm:px-7 sm:py-4 sm:text-base transition hover:bg-[#c99433] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/50"
                   data-scroll-to="catalogo"
                   type="button"
                 >
@@ -216,7 +208,7 @@ const storeData = {
                   <span class="material-symbols-outlined text-lg">south_east</span>
                 </button>
                 <button
-                  class="inline-flex items-center justify-center gap-2 rounded-2xl border border-outline-variant/70 bg-surface-container-lowest px-7 py-4 text-base font-semibold text-primary transition hover:border-secondary/50 hover:text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35"
+                  class="inline-flex items-center justify-center gap-2 rounded-2xl border border-outline-variant/70 bg-surface-container-lowest px-5 py-3 text-sm font-semibold text-primary sm:px-7 sm:py-4 sm:text-base transition hover:border-secondary/50 hover:text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35"
                   data-scroll-to="kits"
                   type="button"
                 >
@@ -225,20 +217,20 @@ const storeData = {
                 </button>
               </div>
 
-              <div class="mt-10 flex flex-wrap gap-3">
-                <div class="rounded-2xl bg-surface-container-lowest px-5 py-4 shadow-parchment">
+              <div class="mt-7 grid grid-cols-3 gap-2 sm:flex sm:flex-wrap sm:gap-3">
+                <div class="rounded-2xl bg-surface-container-lowest px-3 py-3 shadow-parchment sm:px-5 sm:py-4">
                   <p class="text-[11px] uppercase tracking-[0.22em] text-on-surface-variant">
                     Productos
                   </p>
                   <p class="mt-2 font-headline text-2xl text-primary">{PRODUCTS.length}</p>
                 </div>
-                <div class="rounded-2xl bg-surface-container-lowest px-5 py-4 shadow-parchment">
+                <div class="rounded-2xl bg-surface-container-lowest px-3 py-3 shadow-parchment sm:px-5 sm:py-4">
                   <p class="text-[11px] uppercase tracking-[0.22em] text-on-surface-variant">
                     Kits curados
                   </p>
                   <p class="mt-2 font-headline text-2xl text-primary">{KITS.length}</p>
                 </div>
-                <div class="rounded-2xl bg-surface-container-lowest px-5 py-4 shadow-parchment">
+                <div class="rounded-2xl bg-surface-container-lowest px-3 py-3 shadow-parchment sm:px-5 sm:py-4">
                   <p class="text-[11px] uppercase tracking-[0.22em] text-on-surface-variant">
                     Envío gratis
                   </p>
@@ -307,11 +299,11 @@ const storeData = {
               </div>
               <div class="absolute -right-2 top-6 rounded-[28px] bg-tertiary-container px-5 py-4 text-on-tertiary-container shadow-line sm:-right-8">
                 <p class="text-[11px] uppercase tracking-[0.22em] text-on-tertiary-container/80">
-                  Hecho en México
+                  Formulado en México
                 </p>
-                <p class="mt-2 font-headline text-2xl text-on-tertiary-container">Lotes pequeños</p>
+                <p class="mt-2 font-headline text-2xl text-on-tertiary-container">Activos botánicos</p>
                 <p class="mt-2 max-w-[200px] text-sm leading-6 text-on-tertiary-container/90">
-                  Preparados a mano en cantidades cortas, no producción masiva.
+                  Concentraciones pensadas para que el ingrediente principal se note.
                 </p>
               </div>
             </div>
@@ -876,10 +868,10 @@ const storeData = {
                   <p class="specimen-label text-xs font-semibold uppercase tracking-[0.22em] text-secondary">
                     Nuestra filosofía
                   </p>
-                  <h2 class="mt-3 font-headline text-4xl text-primary">Fórmulas simples, de origen natural</h2>
+                  <h2 class="mt-3 font-headline text-4xl text-primary">Alta cosmética de origen botánico</h2>
                   <blockquote class="mt-5 max-w-2xl font-headline text-xl italic leading-relaxed text-tertiary">
-                    “Cada producto lleva su ingrediente principal en la etiqueta. Sin listas
-                    interminables que nadie lee.”
+                    “Cada fórmula se construye alrededor de un activo botánico, en la
+                    concentración necesaria para que haga su trabajo.”
                   </blockquote>
                   <div class="mt-8 grid gap-6 md:grid-cols-2">
                     <p class="leading-7 text-on-surface-variant">
@@ -888,8 +880,8 @@ const storeData = {
                       leche de coco.
                     </p>
                     <p class="leading-7 text-on-surface-variant">
-                      Preparados en lotes pequeños en México, con envases de vidrio y aluminio
-                      que puedes reutilizar.
+                      Envasado en vidrio ámbar y cristal, que protegen los activos de la luz y
+                      conservan la fórmula estable.
                     </p>
                   </div>
                 </div>
@@ -980,8 +972,8 @@ const storeData = {
               />
             </div>
             <p class="mt-5 max-w-sm leading-8 text-on-primary-container">
-              Cosmética natural hecha en México, en lotes pequeños: rostro, cuerpo,
-              cabello, labios y aromaterapia.
+              Cosmética natural formulada en México: rostro, cuerpo, cabello, labios
+              y aromaterapia.
             </p>
           </div>
           <div>
@@ -1011,7 +1003,7 @@ const storeData = {
                 Hecho en México
               </span>
               <span class="rounded-full border border-white/15 px-3 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-on-primary-container">
-                Lotes pequeños
+                Activos botánicos
               </span>
               <span class="rounded-full border border-white/15 px-3 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-on-primary-container">
                 Envase cuidado
@@ -1022,58 +1014,32 @@ const storeData = {
       </footer>
     </div>
 
-    <div class="pointer-events-none fixed inset-x-4 bottom-20 z-[65] translate-y-24 opacity-0 transition-all md:hidden" data-mobile-cart-cta>
-      <button
-        class="pointer-events-auto flex w-full items-center justify-between rounded-2xl bg-primary px-5 py-4 text-left text-on-primary shadow-float"
-        data-open-cart
-        type="button"
-      >
-        <div>
-          <p class="text-xs uppercase tracking-[0.22em] text-on-primary-container">Tu carrito</p>
-          <p class="mt-1 font-headline text-2xl" data-mobile-total>{formatMoney(0)}</p>
-        </div>
-        <div class="inline-flex items-center gap-2 text-sm font-semibold">
-          <span data-mobile-count>0 piezas</span>
-          <span class="material-symbols-outlined">shopping_cart</span>
-        </div>
-      </button>
-    </div>
-
-    <nav class="fixed inset-x-4 bottom-4 z-[64] rounded-[28px] border border-outline-variant/40 bg-surface-container-lowest/95 px-3 py-2 shadow-float backdrop-blur md:hidden">
-      <div class="grid grid-cols-4 gap-2">
-        <button
-          class="flex flex-col items-center justify-center gap-1 rounded-2xl px-3 py-2 text-[11px] font-semibold text-primary transition hover:bg-surface-container-low focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35"
-          data-scroll-to="inicio"
-          type="button"
-        >
-          <span class="material-symbols-outlined text-xl">home</span>
+    <nav
+      aria-label="Navegación principal"
+      class="fixed inset-x-3 bottom-3 z-[64] rounded-[26px] border border-outline-variant/40 bg-surface-container-lowest/95 px-2 py-1.5 shadow-float backdrop-blur md:hidden"
+    >
+      <div class="grid grid-cols-5 gap-1">
+        <button class="tab-link" data-nav-link="inicio" data-scroll-to="inicio" type="button">
+          <span class="material-symbols-outlined text-[20px]">home</span>
           Inicio
         </button>
-        <button
-          class="flex flex-col items-center justify-center gap-1 rounded-2xl px-3 py-2 text-[11px] font-semibold text-primary transition hover:bg-surface-container-low focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35"
-          data-scroll-to="catalogo"
-          type="button"
-        >
-          <span class="material-symbols-outlined text-xl">storefront</span>
+        <button class="tab-link" data-nav-link="catalogo" data-scroll-to="catalogo" type="button">
+          <span class="material-symbols-outlined text-[20px]">storefront</span>
           Catálogo
         </button>
-        <button
-          class="flex flex-col items-center justify-center gap-1 rounded-2xl px-3 py-2 text-[11px] font-semibold text-primary transition hover:bg-surface-container-low focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35"
-          data-focus-search
-          type="button"
-        >
-          <span class="material-symbols-outlined text-xl">search</span>
+        <button class="tab-link" data-nav-link="kits" data-scroll-to="kits" type="button">
+          <span class="material-symbols-outlined text-[20px]">inventory_2</span>
+          Kits
+        </button>
+        <button class="tab-link" data-focus-search type="button">
+          <span class="material-symbols-outlined text-[20px]">search</span>
           Buscar
         </button>
-        <button
-          class="relative flex flex-col items-center justify-center gap-1 rounded-2xl px-3 py-2 text-[11px] font-semibold text-primary transition hover:bg-surface-container-low focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35"
-          data-open-cart
-          type="button"
-        >
-          <span class="material-symbols-outlined text-xl">shopping_bag</span>
+        <button class="tab-link relative" data-open-cart type="button">
+          <span class="material-symbols-outlined text-[20px]">shopping_bag</span>
           Carrito
           <span
-            class="absolute right-3 top-2 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-secondary px-1 text-[9px] font-bold text-white"
+            class="absolute right-1.5 top-0.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-secondary px-1 text-[9px] font-bold text-white"
             data-cart-count
           >
             0
@@ -1081,72 +1047,6 @@ const storeData = {
         </button>
       </div>
     </nav>
-
-    <div class="pointer-events-none fixed inset-0 z-[78] bg-primary/25 opacity-0 transition-opacity" data-menu-overlay></div>
-    <aside
-      class="fixed left-0 top-0 z-[79] flex h-full w-[88vw] max-w-sm -translate-x-full flex-col bg-surface-container-lowest shadow-float transition-transform duration-300"
-      data-menu-drawer
-    >
-      <div class="flex items-center justify-between border-b border-outline-variant/40 px-6 py-5">
-        <div class="flex items-center gap-3">
-          <img
-            alt=""
-            aria-hidden="true"
-            class="h-11 w-11 rounded-full bg-surface-container-low object-contain p-1.5 shadow-parchment"
-            src="/yoga-verde/assets/brand/logo-monogram.png"
-          />
-          <div>
-            <p class="text-xs uppercase tracking-[0.22em] text-on-surface-variant">Yoga Verde</p>
-            <h2 class="font-headline text-4xl text-primary">Menú</h2>
-          </div>
-        </div>
-        <button
-          aria-label="Cerrar menú"
-          class="inline-flex h-11 w-11 items-center justify-center rounded-full border border-outline-variant/60 text-primary transition hover:border-secondary/40 hover:text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35"
-          data-close-menu
-          type="button"
-        >
-          <span class="material-symbols-outlined">close</span>
-        </button>
-      </div>
-      <div class="flex-1 px-6 py-6">
-        <div class="space-y-4">
-          <button class="block font-headline text-xl text-primary" data-scroll-to="inicio" type="button">
-            Inicio
-          </button>
-          <button class="block font-headline text-xl text-primary" data-scroll-to="best-sellers" type="button">
-            Best Sellers
-          </button>
-          <button class="block font-headline text-xl text-primary" data-scroll-to="catalogo" type="button">
-            Catálogo
-          </button>
-          <button class="block font-headline text-xl text-primary" data-scroll-to="kits" type="button">
-            Kits
-          </button>
-          <button class="block font-headline text-xl text-primary" data-scroll-to="testimonios" type="button">
-            Testimonios
-          </button>
-          <button class="block font-headline text-xl text-primary" data-scroll-to="contacto" type="button">
-            Contacto
-          </button>
-        </div>
-        <div class="mt-10 rounded-[28px] bg-primary p-6 text-on-primary shadow-line">
-          <p class="text-xs uppercase tracking-[0.22em] text-on-primary-container">Primera compra</p>
-          <p class="mt-2 font-headline text-3xl text-white">Empieza con un kit</p>
-          <p class="mt-3 text-sm leading-7 text-on-primary-container">
-            Un kit reúne los básicos de una rutina a mejor precio que comprarlos por separado.
-          </p>
-          <button
-            class="mt-5 inline-flex items-center gap-2 rounded-full bg-white px-4 py-3 text-sm font-semibold text-primary transition hover:bg-surface-container-high focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
-            data-scroll-to="kits"
-            type="button"
-          >
-            Ver kits
-            <span class="material-symbols-outlined text-base">arrow_forward</span>
-          </button>
-        </div>
-      </div>
-    </aside>
 
     <div class="pointer-events-none fixed inset-0 z-[82] bg-primary/25 opacity-0 transition-opacity" data-cart-overlay></div>
     <aside
@@ -1394,11 +1294,19 @@ const storeData = {
         }
 
         // Scrollspy: highlight the nav item for whichever section is in view.
+        // Both the desktop header and the mobile tab bar carry [data-nav-link],
+        // so a section can be referenced twice — dedupe before observing.
         var navLinks = document.querySelectorAll("[data-nav-link]");
         var spySections = [];
+        var seenSections = {};
         navLinks.forEach(function (link) {
-          var section = document.getElementById(link.dataset.navLink);
-          if (section) spySections.push(section);
+          var id = link.dataset.navLink;
+          if (seenSections[id]) return;
+          var section = document.getElementById(id);
+          if (section) {
+            seenSections[id] = true;
+            spySections.push(section);
+          }
         });
 
         if (spySections.length) {

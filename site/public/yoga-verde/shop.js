@@ -41,7 +41,6 @@ const state = {
   cartOpen: false,
   detailOpen: false,
   filtersOpen: false,
-  menuOpen: false,
 };
 
 const els = {
@@ -52,8 +51,6 @@ const els = {
   search: document.querySelector("[data-search-input]"),
   filtersDrawer: document.querySelector("[data-filters-drawer]"),
   filtersOverlay: document.querySelector("[data-filters-overlay]"),
-  menuDrawer: document.querySelector("[data-menu-drawer]"),
-  menuOverlay: document.querySelector("[data-menu-overlay]"),
   cartDrawer: document.querySelector("[data-cart-drawer]"),
   cartOverlay: document.querySelector("[data-cart-overlay]"),
   cartItems: document.querySelector("[data-cart-items]"),
@@ -67,9 +64,6 @@ const els = {
   shippingMessage: document.querySelector("[data-shipping-message]"),
   shippingProgress: document.querySelector("[data-shipping-progress]"),
   cartUpsell: document.querySelector("[data-cart-upsell]"),
-  mobileCta: document.querySelector("[data-mobile-cart-cta]"),
-  mobileCount: document.querySelector("[data-mobile-count]"),
-  mobileTotal: document.querySelector("[data-mobile-total]"),
   modal: document.querySelector("[data-detail-modal]"),
   modalOverlay: document.querySelector("[data-modal-overlay]"),
   detailBadge: document.querySelector("[data-detail-badge]"),
@@ -408,12 +402,6 @@ function renderCart() {
     node.textContent = String(totals.count);
   });
 
-  if (els.mobileCount) {
-    els.mobileCount.textContent = `${totals.count} ${totals.count === 1 ? "pieza" : "piezas"}`;
-  }
-  if (els.mobileTotal) {
-    els.mobileTotal.textContent = formatMoney(totals.total);
-  }
   if (els.subtotal) {
     els.subtotal.textContent = formatMoney(totals.subtotal);
   }
@@ -445,14 +433,6 @@ function renderCart() {
     }
   }
 
-  if (els.mobileCta) {
-    const hasItems = totals.count > 0;
-    els.mobileCta.classList.toggle("pointer-events-none", !hasItems);
-    els.mobileCta.classList.toggle("translate-y-24", !hasItems);
-    els.mobileCta.classList.toggle("opacity-0", !hasItems);
-    els.mobileCta.classList.toggle("translate-y-0", hasItems);
-    els.mobileCta.classList.toggle("opacity-100", hasItems);
-  }
 
   if (els.cartItems) {
     els.cartItems.innerHTML = entries.map(cartItemMarkup).join("");
@@ -472,37 +452,15 @@ function renderCart() {
 function syncBodyLock() {
   document.body.classList.toggle(
     "ui-locked",
-    state.cartOpen || state.detailOpen || state.filtersOpen || state.menuOpen,
+    state.cartOpen || state.detailOpen || state.filtersOpen,
   );
-}
-
-function openMenu() {
-  state.menuOpen = true;
-  state.filtersOpen = false;
-  els.menuDrawer?.classList.remove("-translate-x-full");
-  els.menuOverlay?.classList.remove("pointer-events-none", "opacity-0");
-  els.menuOverlay?.classList.add("opacity-100");
-  els.filtersDrawer?.classList.add("-translate-x-full");
-  els.filtersOverlay?.classList.add("pointer-events-none", "opacity-0");
-  syncBodyLock();
-}
-
-function closeMenu() {
-  state.menuOpen = false;
-  els.menuDrawer?.classList.add("-translate-x-full");
-  els.menuOverlay?.classList.add("pointer-events-none", "opacity-0");
-  els.menuOverlay?.classList.remove("opacity-100");
-  syncBodyLock();
 }
 
 function openFilters() {
   state.filtersOpen = true;
-  state.menuOpen = false;
   els.filtersDrawer?.classList.remove("-translate-x-full");
   els.filtersOverlay?.classList.remove("pointer-events-none", "opacity-0");
   els.filtersOverlay?.classList.add("opacity-100");
-  els.menuDrawer?.classList.add("-translate-x-full");
-  els.menuOverlay?.classList.add("pointer-events-none", "opacity-0");
   syncBodyLock();
 }
 
@@ -517,7 +475,6 @@ function closeFilters() {
 function openCart() {
   state.cartOpen = true;
   closeFilters();
-  closeMenu();
   els.cartDrawer?.classList.remove("translate-x-full");
   els.cartOverlay?.classList.remove("pointer-events-none", "opacity-0");
   els.cartOverlay?.classList.add("opacity-100");
@@ -766,8 +723,6 @@ document.addEventListener("click", (event) => {
   const target = event.target.closest("button, a");
   if (!target) return;
 
-  if (target.matches("[data-open-menu]")) openMenu();
-  if (target.matches("[data-close-menu]")) closeMenu();
   if (target.matches("[data-open-filters]")) openFilters();
   if (target.matches("[data-close-filters]")) closeFilters();
 
@@ -825,13 +780,11 @@ document.addEventListener("click", (event) => {
   }
 
   if (target.matches("[data-scroll-to]")) {
-    closeMenu();
     closeFilters();
     scrollToSection(target.dataset.scrollTo);
   }
 
   if (target.matches("[data-focus-search]")) {
-    closeMenu();
     closeFilters();
     focusSearch();
   }
@@ -846,7 +799,6 @@ els.search?.addEventListener("input", () => {
   renderProducts();
 });
 
-els.menuOverlay?.addEventListener("click", closeMenu);
 els.filtersOverlay?.addEventListener("click", closeFilters);
 els.cartOverlay?.addEventListener("click", closeCart);
 els.modalOverlay?.addEventListener("click", closeDetail);
@@ -866,15 +818,11 @@ document.addEventListener("keydown", (event) => {
     closeFilters();
     return;
   }
-  if (state.menuOpen) {
-    closeMenu();
-  }
 });
 
 syncFilterControls();
 renderProducts();
 renderCart();
-closeMenu();
 closeFilters();
 closeCart();
 closeDetail();
