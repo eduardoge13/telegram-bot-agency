@@ -238,28 +238,34 @@ body {
   opacity: 0.85;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .rhizome-sway {
-    animation: rhizome-sway 7s ease-in-out infinite;
-  }
-}
-
-@keyframes rhizome-sway {
-  0%,
-  100% {
-    transform: rotate(0deg);
-  }
-  50% {
-    transform: rotate(1.4deg);
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .rhizome-path,
   .rhizome-leaf {
     transition: none !important;
     stroke-dashoffset: 0 !important;
     opacity: 0.85 !important;
+  }
+}
+
+/* One-time signature stamp: the monogram "seals" the hero on load, like a
+   wax stamp pressed onto the specimen card. Fires once via growRhizome()
+   alongside the rhizome draw-in — no infinite loop, no re-trigger. */
+.brand-stamp {
+  opacity: 0;
+  transform: scale(0.6) rotate(-14deg);
+  transition: opacity 0.9s ease 0.5s, transform 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.5s;
+}
+
+.brand-stamp.is-grown {
+  opacity: 1;
+  transform: scale(1) rotate(-8deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand-stamp {
+    transition: none !important;
+    opacity: 1 !important;
+    transform: rotate(-8deg) !important;
   }
 }
 
