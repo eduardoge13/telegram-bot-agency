@@ -69,9 +69,11 @@ const storeData = {
     <meta content="website" property="og:type" />
     <meta content="https://yoga-verde.srv1175749.hstgr.cloud/" property="og:url" />
     <meta
-      content="https://yoga-verde.srv1175749.hstgr.cloud/yoga-verde/assets/products/crema-facial-chabacano.jpg"
+      content="https://yoga-verde.srv1175749.hstgr.cloud/yoga-verde/assets/brand/og-image.png"
       property="og:image"
     />
+    <meta content="1200" property="og:image:width" />
+    <meta content="630" property="og:image:height" />
     <link href="/yoga-verde/assets/brand/favicon-32.png" rel="icon" sizes="32x32" type="image/png" />
     <link href="/yoga-verde/assets/brand/favicon-180.png" rel="apple-touch-icon" />
     <link href="https://fonts.googleapis.com" rel="preconnect" />
@@ -191,45 +193,34 @@ const storeData = {
       </div>
 
       <main>
-        <section class="ink-ground relative overflow-hidden" id="inicio">
-          <svg
-            aria-hidden="true"
-            class="pointer-events-none absolute inset-0 h-full w-full opacity-90"
-            data-rhizome
-            preserveAspectRatio="xMidYMax slice"
-            viewBox="0 0 1200 700"
-          >
-            <g class="rhizome-sway">
-              <path class="rhizome-path" d="M120,700 C124,600 90,560 130,500 C160,455 210,460 230,400" style="--len:420" />
-              <path class="rhizome-path" d="M230,400 C245,350 210,320 240,270 C260,238 300,235 305,190" style="--len:340" />
-              <path class="rhizome-path" d="M230,400 C205,370 150,368 128,320 C112,285 80,278 60,240" style="--len:320" />
-              <path class="rhizome-path" d="M120,700 C160,640 210,630 235,560 C252,515 300,500 315,450" style="--len:380" />
-              <path class="rhizome-path" d="M315,450 C330,410 380,400 392,355 C400,325 435,318 450,285" style="--len:280" />
-              <path class="rhizome-path" d="M315,450 C300,430 245,435 210,470" style="--len:120" />
-              <ellipse class="rhizome-leaf" cx="305" cy="176" rx="26" ry="13" transform="rotate(-25 305 176)" />
-              <ellipse class="rhizome-leaf" cx="60" cy="228" rx="22" ry="11" transform="rotate(30 60 228)" />
-              <ellipse class="rhizome-leaf" cx="450" cy="272" rx="20" ry="10" transform="rotate(-10 450 272)" />
-            </g>
-            <g class="rhizome-sway" style="animation-delay:-3.2s" transform="translate(700 0)">
-              <path class="rhizome-path" d="M180,700 C176,610 210,575 175,510 C150,462 105,458 95,405" style="--len:400" />
-              <path class="rhizome-path" d="M95,405 C82,362 118,335 92,288 C78,262 42,258 34,220" style="--len:280" />
-              <path class="rhizome-path" d="M180,700 C205,630 165,600 195,530 C212,492 260,488 272,440" style="--len:360" />
-              <ellipse class="rhizome-leaf" cx="34" cy="206" rx="22" ry="11" transform="rotate(20 34 206)" />
-              <ellipse class="rhizome-leaf" cx="272" cy="428" rx="20" ry="10" transform="rotate(-18 272 428)" />
-            </g>
-          </svg>
-
+        <section class="relative overflow-hidden bg-surface" id="inicio">
           <div class="relative mx-auto grid max-w-screen-2xl gap-12 px-4 py-14 sm:px-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,520px)] lg:items-center lg:px-8 lg:py-20">
             <div class="max-w-3xl">
-              <span class="mb-5 inline-flex items-center gap-2 rounded-full border border-secondary/30 bg-secondary/15 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-secondary sm:text-xs">
-                <span class="material-symbols-outlined text-base">spa</span>
-                Cosmética natural hecha en México
-              </span>
-              <h1 class="font-headline text-5xl leading-[0.92] text-on-primary sm:text-6xl lg:text-[6.1rem]">
+              <div class="mb-5 flex items-end gap-3">
+                <svg
+                  aria-hidden="true"
+                  class="pointer-events-none h-20 w-14 shrink-0 sm:h-24 sm:w-16"
+                  data-sprig
+                  viewBox="0 0 90 150"
+                >
+                  <path class="sprig-path" d="M20,145 C15,120 30,110 22,85 C17,68 28,60 24,45" style="--len:220" />
+                  <path class="sprig-leaf" d="M22,100 C10,95 2,80 8,68 C14,78 20,90 22,100" style="--len:140" />
+                  <path class="sprig-leaf" d="M23,75 C35,70 42,55 36,44 C30,54 25,66 23,75" style="--len:140" />
+                  <path class="sprig-heart" d="M20,40 C18,37 14,37 14,40 C14,43 18,45 20,48 C22,45 26,43 26,40 C26,37 22,37 20,40 Z" />
+                  <path class="sprig-heart" d="M15,29 C13,26.5 10,26.5 10,29 C10,31.5 13,33 15,35.5 C17,33 20,31.5 20,29 C20,26.5 17,26.5 15,29 Z" />
+                  <path class="sprig-heart" d="M11,19 C9.5,17 7,17 7,19 C7,21 9.5,22.5 11,24.5 C12.5,22.5 15,21 15,19 C15,17 12.5,17 11,19 Z" />
+                  <path class="sprig-heart" d="M8,10 C7,8.5 5,8.5 5,10 C5,11.5 7,12.5 8,14 C9,12.5 11,11.5 11,10 C11,8.5 9,8.5 8,10 Z" />
+                </svg>
+                <span class="inline-flex items-center gap-2 rounded-full border border-secondary/30 bg-secondary/15 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-secondary sm:text-xs">
+                  <span class="material-symbols-outlined text-base">spa</span>
+                  Cosmética natural hecha en México
+                </span>
+              </div>
+              <h1 class="font-headline text-5xl leading-[0.92] text-primary sm:text-6xl lg:text-[6.1rem]">
                 Rostro, cuerpo y labios
                 <span class="block font-semibold italic text-secondary">con ingredientes reales</span>
               </h1>
-              <p class="mt-6 max-w-2xl text-lg leading-relaxed text-on-primary-container sm:text-xl">
+              <p class="mt-6 max-w-2xl text-lg leading-relaxed text-on-surface-variant sm:text-xl">
                 Desmaquillante, agua micelar, cremas, mousse corporal, bálsamo labial y velas de
                 soya, cada uno con su ingrediente y su precio claro. Compra fácil desde móvil o
                 desktop.
@@ -245,7 +236,7 @@ const storeData = {
                   <span class="material-symbols-outlined text-lg">south_east</span>
                 </button>
                 <button
-                  class="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/5 px-7 py-4 text-base font-semibold text-on-primary transition hover:border-secondary/50 hover:text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35"
+                  class="inline-flex items-center justify-center gap-2 rounded-2xl border border-outline-variant/70 bg-surface-container-lowest px-7 py-4 text-base font-semibold text-primary transition hover:border-secondary/50 hover:text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35"
                   data-scroll-to="kits"
                   type="button"
                 >
@@ -286,7 +277,7 @@ const storeData = {
                 data-stamp
                 src="/yoga-verde/assets/brand/logo-monogram.png"
               />
-              <div class="card-grain relative overflow-hidden rounded-[36px] bg-soil-glow bg-surface-container-lowest p-4 shadow-float sm:p-6">
+              <div class="card-grain relative overflow-hidden rounded-[36px] bg-surface-container-lowest p-4 shadow-float sm:p-6">
                 <span class="specimen-label absolute right-8 top-8 z-10 rounded-full bg-primary/90 px-3 py-1 text-[10px] font-bold uppercase text-on-primary">
                   Crema facial · chabacano
                 </span>
@@ -324,8 +315,6 @@ const storeData = {
               </div>
             </div>
           </div>
-
-          <div class="torn-edge torn-edge--bottom" style="--edge-color: var(--color-surface)"></div>
         </section>
 
         <section class="reveal mx-auto max-w-screen-2xl px-4 py-8 sm:px-6 lg:px-8">
@@ -430,8 +419,7 @@ const storeData = {
           </div>
         </section>
 
-        <section class="ink-ground reveal relative overflow-hidden py-16" id="ingrediente-en-foco">
-          <div class="torn-edge torn-edge--top" style="--edge-color: var(--color-surface)"></div>
+        <section class="reveal relative overflow-hidden bg-surface py-16" id="ingrediente-en-foco">
           <div class="relative mx-auto grid max-w-screen-2xl gap-10 px-4 sm:px-6 lg:grid-cols-[minmax(320px,460px)_minmax(0,1fr)] lg:items-center lg:gap-16 lg:px-8">
             <div class="relative mx-auto w-full max-w-md lg:mx-0">
               <div class="absolute -inset-6 -z-10 rounded-full bg-tertiary/20 blur-2xl"></div>
@@ -459,36 +447,36 @@ const storeData = {
               <p class="specimen-label text-xs font-semibold uppercase tracking-[0.22em] text-tertiary">
                 Ingrediente en foco
               </p>
-              <h2 class="mt-3 font-headline text-5xl leading-[0.95] text-on-primary sm:text-6xl">
+              <h2 class="mt-3 font-headline text-5xl leading-[0.95] text-primary sm:text-6xl">
                 Arcilla verde
                 <span class="block font-semibold italic text-tertiary">y té verde</span>
               </h2>
-              <p class="mt-5 max-w-xl text-lg leading-8 text-on-primary-container">
+              <p class="mt-5 max-w-xl text-lg leading-8 text-on-surface-variant">
                 Mascarilla en polvo pensada para piel mixta o con tendencia grasa: la arcilla
                 absorbe el exceso de sebo mientras el té verde aporta su antioxidante natural.
                 Rinde varias mascarillas por lata.
               </p>
 
               <ul class="mt-7 space-y-3">
-                <li class="flex items-start gap-3 text-on-primary-container">
+                <li class="flex items-start gap-3 text-on-surface-variant">
                   <span class="material-symbols-outlined mt-0.5 text-tertiary">check_circle</span>
                   <span>Arcilla verde para absorber el exceso de grasa.</span>
                 </li>
-                <li class="flex items-start gap-3 text-on-primary-container">
+                <li class="flex items-start gap-3 text-on-surface-variant">
                   <span class="material-symbols-outlined mt-0.5 text-tertiary">check_circle</span>
                   <span>Té verde como antioxidante natural.</span>
                 </li>
-                <li class="flex items-start gap-3 text-on-primary-container">
+                <li class="flex items-start gap-3 text-on-surface-variant">
                   <span class="material-symbols-outlined mt-0.5 text-tertiary">check_circle</span>
                   <span>Lata metálica de 60 g, rinde varias aplicaciones.</span>
                 </li>
               </ul>
 
-              <div class="mt-7 rounded-[24px] border border-white/15 bg-white/5 p-5">
+              <div class="mt-7 rounded-[24px] border border-outline-variant/50 bg-surface-container-lowest p-5">
                 <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-tertiary">
                   Modo de uso
                 </p>
-                <p class="mt-2 text-sm leading-7 text-on-primary-container">
+                <p class="mt-2 text-sm leading-7 text-on-surface-variant">
                   Mezcla una cucharadita con agua hasta formar pasta. Aplica sobre rostro limpio,
                   deja secar 10 minutos y enjuaga.
                 </p>
@@ -506,7 +494,7 @@ const storeData = {
                     <span class="material-symbols-outlined text-base">add_shopping_cart</span>
                   </button>
                   <button
-                    class="inline-flex items-center gap-2 rounded-2xl border border-white/25 px-6 py-3.5 text-sm font-semibold text-on-primary transition hover:border-tertiary/60 hover:text-tertiary focus-visible:outline-none"
+                    class="inline-flex items-center gap-2 rounded-2xl border border-outline-variant/70 px-6 py-3.5 text-sm font-semibold text-primary transition hover:border-tertiary/60 hover:text-tertiary focus-visible:outline-none"
                     data-open-detail="mascarilla-arcilla-te-verde"
                     type="button"
                   >
@@ -516,7 +504,6 @@ const storeData = {
               </div>
             </div>
           </div>
-          <div class="torn-edge torn-edge--bottom" style="--edge-color: var(--color-surface)"></div>
         </section>
 
         <section class="reveal mx-auto max-w-screen-2xl px-4 py-10 sm:px-6 lg:px-8">
@@ -647,16 +634,15 @@ const storeData = {
           </div>
         </section>
 
-        <section class="ink-ground relative overflow-hidden px-4 py-16 sm:px-6 lg:px-8" id="catalogo">
-          <div class="torn-edge torn-edge--top" style="--edge-color: var(--color-surface)"></div>
+        <section class="relative overflow-hidden bg-surface px-4 py-16 sm:px-6 lg:px-8" id="catalogo">
           <div class="relative mx-auto max-w-screen-2xl">
           <div class="mb-8 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div class="max-w-2xl">
               <p class="specimen-label text-xs font-semibold uppercase tracking-[0.22em] text-secondary">
                 Catálogo shop-first
               </p>
-              <h2 class="mt-3 font-headline text-5xl text-on-primary">Rostro, cuerpo, labios y aromaterapia</h2>
-              <p class="mt-4 text-lg leading-8 text-on-primary-container">
+              <h2 class="mt-3 font-headline text-5xl text-primary">Rostro, cuerpo, labios y aromaterapia</h2>
+              <p class="mt-4 text-lg leading-8 text-on-surface-variant">
                 Todo el catálogo carga con productos reales por defecto. Busca por nombre,
                 ingrediente, categoría o envase y refina desde filtros claros.
               </p>
@@ -879,7 +865,6 @@ const storeData = {
             </div>
           </div>
           </div>
-          <div class="torn-edge torn-edge--bottom" style="--edge-color: var(--color-surface)"></div>
         </section>
 
         <section class="reveal mx-auto max-w-screen-2xl px-4 py-12 sm:px-6 lg:px-8">
@@ -1322,21 +1307,23 @@ const storeData = {
         var prefersReduced =
           window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-        var rhizomeGrown = false;
-        function growRhizome() {
-          if (rhizomeGrown) return;
-          rhizomeGrown = true;
+        var sprigGrown = false;
+        function growSprig() {
+          if (sprigGrown) return;
+          sprigGrown = true;
           document
-            .querySelectorAll("[data-rhizome] .rhizome-path, [data-rhizome] .rhizome-leaf, [data-stamp]")
+            .querySelectorAll(
+              "[data-sprig] .sprig-path, [data-sprig] .sprig-leaf, [data-sprig] .sprig-heart, [data-stamp]",
+            )
             .forEach(function (node) {
               node.classList.add("is-grown");
             });
         }
 
         if (prefersReduced) {
-          growRhizome();
+          growSprig();
         } else {
-          window.setTimeout(growRhizome, 250);
+          window.setTimeout(growSprig, 250);
         }
 
         var revealTargets = document.querySelectorAll(".reveal");

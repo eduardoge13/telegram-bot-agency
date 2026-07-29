@@ -139,15 +139,10 @@ body {
   overflow: hidden;
 }
 
-.bg-soil-glow {
-  background-image:
-    radial-gradient(circle at top right, rgba(192, 97, 69, 0.2), transparent 38%),
-    radial-gradient(circle at bottom left, rgba(24, 52, 37, 0.28), transparent 34%);
-}
-
-/* Dark ground (Secundario 2, #183425): kept as punctuation on the hero +
-   catalog masthead + footer so the torn-edge seams still transition into
-   something, using the manual's exact dark contrast tone. */
+/* Dark ground (Secundario 2, #183425): the cream/crema tone (Principal 1)
+   is the dominant ground across the site; this dark tone is now reserved
+   for the footer seal only, so it reads as punctuation, not a competing
+   background. Kept as a reusable utility in case a future section wants it. */
 .ink-ground {
   background: var(--color-primary);
   background-image:
@@ -211,8 +206,11 @@ body {
   letter-spacing: 0.08em;
 }
 
-/* Signature element: hand-drawn root system that grows in once, on reveal */
-.rhizome-path {
+/* Signature element: a small hand-drawn take on the brand's real
+   spiga-de-corazones motif (see logo-monogram.png), self-draws once on
+   load next to the hero headline — restrained, single occurrence, no
+   full-section background coverage. */
+.sprig-path {
   fill: none;
   stroke: var(--color-secondary);
   stroke-width: 1.6;
@@ -223,33 +221,52 @@ body {
   transition: stroke-dashoffset 1.8s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.rhizome-path.is-grown {
+.sprig-path.is-grown {
   stroke-dashoffset: 0;
 }
 
-.rhizome-leaf {
-  fill: var(--color-tertiary);
-  opacity: 0;
-  transform-origin: bottom center;
-  transition: opacity 0.9s ease 1.2s, transform 0.9s ease 1.2s;
+.sprig-leaf {
+  fill: none;
+  stroke: var(--color-tertiary);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: var(--len, 1000);
+  stroke-dashoffset: var(--len, 1000);
+  transition: stroke-dashoffset 1.8s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.rhizome-leaf.is-grown {
-  opacity: 0.85;
+.sprig-leaf.is-grown {
+  stroke-dashoffset: 0;
+}
+
+.sprig-heart {
+  fill: var(--color-secondary);
+  opacity: 0;
+  transform-origin: center;
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.sprig-heart.is-grown {
+  opacity: 0.9;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .rhizome-path,
-  .rhizome-leaf {
+  .sprig-path,
+  .sprig-leaf {
     transition: none !important;
     stroke-dashoffset: 0 !important;
-    opacity: 0.85 !important;
+  }
+
+  .sprig-heart {
+    transition: none !important;
+    opacity: 0.9 !important;
   }
 }
 
 /* One-time signature stamp: the monogram "seals" the hero on load, like a
-   wax stamp pressed onto the specimen card. Fires once via growRhizome()
-   alongside the rhizome draw-in — no infinite loop, no re-trigger. */
+   wax stamp pressed onto the specimen card. Fires once via growSprig()
+   alongside the sprig draw-in — no infinite loop, no re-trigger. */
 .brand-stamp {
   opacity: 0;
   transform: scale(0.6) rotate(-14deg);
