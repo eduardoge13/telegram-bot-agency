@@ -974,8 +974,8 @@ export const KITS = [
 export const BENEFIT_ITEMS = [
   {
     icon: "eco",
-    title: "Ingredientes reales",
-    copy: "Almendra, coco, uva, lavanda y otros ingredientes concretos, sin listas interminables.",
+    title: "De origen natural",
+    copy: "Almendra, coco, uva y lavanda como ingredientes principales de cada fórmula.",
   },
   {
     icon: "package_2",
@@ -984,8 +984,8 @@ export const BENEFIT_ITEMS = [
   },
   {
     icon: "local_florist",
-    title: "Cosmética natural",
-    copy: "Fórmulas simples para rostro, cuerpo y labios, sin promesas exageradas.",
+    title: "Fórmulas simples",
+    copy: "Lo necesario para rostro, cuerpo, cabello y labios, nada de más.",
   },
   {
     icon: "local_shipping",
@@ -994,8 +994,8 @@ export const BENEFIT_ITEMS = [
   },
   {
     icon: "verified_user",
-    title: "Compra protegida",
-    copy: "Carrito simple, checkout demo transparente y una experiencia fácil de comprar.",
+    title: "Pago protegido",
+    copy: "Tus datos de pago se procesan cifrados y no se guardan en la tienda.",
   },
 ];
 

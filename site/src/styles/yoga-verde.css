@@ -12,11 +12,16 @@
     Principal 3 ("Verde" / accent)#6B874C  sage green
     Secundario 1                  #4F5E01  dark olive
     Secundario 2 (dark ground)    #183425  deep dark green
-  Typography: Quelistah (logo wordmark — treated as fixed art/SVG, not a
-  licensable web font) · Gelasio (body + headings, Google Fonts) · Cloud
-  Lucent Regular (tagline only — self-hosted from the client's real font file,
-  see @font-face below; no bundled license file, came from a font-sharing
-  site, flagged for the client to confirm before wide commercial reuse).
+  Typography — the client's real three-font system, all self-hosted from the
+  files in their brand Drive:
+    Quelistah    logo wordmark only (fixed art/SVG, not a licensable webfont)
+    Gelasio      headlines only (serif voice) — OFL
+    Lato         body, UI, labels, prices (light sans) — OFL
+    Cloud Lucent tagline only (no bundled license; from a font-sharing site,
+                 flagged for the client to confirm before wide commercial use)
+  Gelasio was previously doing double duty as body text too, which made every
+  block read as "headline" and flattened the hierarchy; Lato is the real
+  companion sans from the same brand package and now carries all running text.
   Each SKU still carries
   a per-scent --accent custom property (see ACCENT_COLORS in
   yoga-verde-store.js), sampled from the real label photography, for the
@@ -32,11 +37,38 @@
   font-display: swap;
 }
 
+/* Lato — the client's real companion sans (OFL, license bundled at
+   /yoga-verde/fonts/OFL.txt). Carries all running text so Gelasio can go
+   back to being a headline-only voice. */
+@font-face {
+  font-family: "Lato";
+  src: url("/yoga-verde/fonts/Lato-Light.ttf") format("truetype");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Lato";
+  src: url("/yoga-verde/fonts/Lato-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Lato";
+  src: url("/yoga-verde/fonts/Lato-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme {
   --font-headline: "Gelasio", serif;
-  --font-body: "Gelasio", serif;
+  --font-body: "Lato", system-ui, sans-serif;
   --font-tagline: "Cloud Lucent", "Gelasio", serif;
-  --font-label: "Space Mono", monospace;
+  --font-label: "Lato", system-ui, sans-serif;
 
   /* Principal 1 — blush/cream, the dominant ground (manual, not kraft-yellow) */
   --color-background: #f8e3d2;
@@ -198,6 +230,80 @@ body {
 .torn-edge--top {
   top: -1px;
   transform: scaleY(-1);
+}
+
+/* Header nav: active state is driven by a scroll observer (see index.astro),
+   not hardcoded, so the highlight follows the section actually in view. */
+.nav-link {
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: var(--color-on-surface-variant);
+  border-bottom: 2px solid transparent;
+  padding-bottom: 0.25rem;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.nav-link:hover,
+.nav-link:focus-visible {
+  color: var(--color-secondary);
+  outline: none;
+}
+
+.nav-link.is-active {
+  color: var(--color-secondary);
+  font-weight: 700;
+  border-bottom-color: var(--color-secondary);
+}
+
+/* Hero product slider — crossfade between real SKUs. Advances on click/dot
+   and on a slow timer that stops as soon as the visitor interacts, so it is
+   never motion running for its own sake. */
+.hero-slide {
+  display: none;
+}
+
+.hero-slide.is-active {
+  display: block;
+  animation: hero-slide-in 0.5s ease both;
+}
+
+@keyframes hero-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-slide.is-active {
+    animation: none;
+  }
+}
+
+.hero-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--color-outline-variant);
+  transition: background 0.2s ease, width 0.2s ease;
+}
+
+.hero-dot.is-active {
+  width: 22px;
+  background: var(--color-secondary);
+}
+
+/* Price: one consistent terracotta treatment everywhere a price appears, so
+   the number is the thing the eye lands on. */
+.price {
+  font-family: var(--font-body);
+  font-weight: 700;
+  color: var(--color-secondary);
+  letter-spacing: -0.01em;
 }
 
 /* Specimen stamp label — used for badges/prices rendered as if hand-stamped */

@@ -212,7 +212,7 @@ function catalogCardMarkup(product) {
             <p class="text-[11px] uppercase tracking-[0.22em] text-on-surface-variant">${escapeHtml(product.typeLabel)} · ${escapeHtml(product.scent || product.originLabel)}</p>
             <h3 class="mt-2 font-headline text-4xl leading-none text-primary">${escapeHtml(product.name)}</h3>
           </div>
-          <span class="shrink-0 font-headline text-3xl text-[var(--accent)]">${formatMoney(product.price)}</span>
+          <span class="price shrink-0 text-xl">${formatMoney(product.price)}</span>
         </div>
         <div class="mt-4 flex items-center gap-3 text-sm text-on-surface-variant">
           <div class="flex items-center gap-1 text-[var(--accent)]">${starMarkup(product.rating)}</div>
@@ -247,10 +247,10 @@ function cartItemMarkup(entry) {
           <div class="flex items-start justify-between gap-4">
             <div class="min-w-0">
               <p class="text-[11px] uppercase tracking-[0.22em] text-on-surface-variant">${escapeHtml(item.badge)}</p>
-              <h3 class="mt-2 font-headline text-3xl leading-none text-primary">${escapeHtml(item.name)}</h3>
+              <h3 class="mt-2 font-headline text-lg leading-tight text-primary">${escapeHtml(item.name)}</h3>
               <p class="mt-2 text-sm text-on-surface-variant">${escapeHtml(item.scent || item.useLabel)} · ${escapeHtml(item.originLabel)}</p>
             </div>
-            <span class="shrink-0 font-headline text-3xl text-primary">${formatMoney(item.price * quantity)}</span>
+            <span class="price shrink-0 text-lg">${formatMoney(item.price * quantity)}</span>
           </div>
           <div class="mt-4 flex items-center justify-between gap-3">
             <div class="inline-flex items-center gap-4 rounded-full bg-surface-container-highest px-4 py-2">
@@ -279,10 +279,10 @@ function upsellMarkup(item) {
       <img alt="${escapeHtml(item.name)}" class="h-24 w-24 rounded-[22px] bg-surface-container-lowest object-contain p-2" src="${escapeHtml(item.image)}" />
       <div class="flex-1">
         <p class="text-xs uppercase tracking-[0.22em] text-secondary">También te puede interesar</p>
-        <h3 class="mt-2 font-headline text-3xl text-primary">${escapeHtml(item.name)}</h3>
+        <h3 class="mt-2 font-headline text-xl text-primary">${escapeHtml(item.name)}</h3>
         <p class="mt-2 text-sm leading-7 text-on-surface-variant">${escapeHtml(item.short)}</p>
         <div class="mt-4 flex items-center justify-between gap-4">
-          <span class="font-headline text-3xl text-secondary">${formatMoney(item.price)}</span>
+          <span class="price text-2xl">${formatMoney(item.price)}</span>
           <button class="inline-flex items-center gap-2 rounded-2xl bg-primary px-4 py-3 text-sm font-semibold text-on-primary transition hover:bg-primary-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35" data-add-item="${escapeHtml(item.id)}" type="button">
             Añadir
           </button>
@@ -715,17 +715,51 @@ function applyNeedFilter(slug) {
   scrollToSection("catalogo");
 }
 
-function checkoutDemo() {
-  const totals = cartTotals();
-  const summary = cartEntries()
-    .map((entry) => `${entry.quantity}x ${entry.item.name}`)
-    .join(", ");
+// Stripe Checkout. The browser never sees a secret key: it POSTs the cart to
+// the site's checkout endpoint, which creates the Stripe session server-side
+// and returns its hosted URL. Until that endpoint is deployed with real keys,
+// the button reports it plainly instead of failing silently.
+const CHECKOUT_ENDPOINT = "/api/yoga-verde/checkout";
 
-  window.alert(
-    `Pedido preparado: ${summary}\n\nTotal estimado: ${formatMoney(
-      totals.total,
-    )}\n\nSiguiente paso sugerido: conectar checkout real o handoff de ventas por WhatsApp.`,
-  );
+async function startCheckout() {
+  const entries = cartEntries();
+  if (!entries.length) return;
+
+  const button = document.querySelector("[data-checkout]");
+  const originalLabel = button ? button.innerHTML : "";
+  if (button) {
+    button.disabled = true;
+    button.innerHTML = "Conectando con el pago seguro...";
+  }
+
+  try {
+    const response = await fetch(CHECKOUT_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        items: entries.map((entry) => ({
+          id: entry.item.id,
+          quantity: entry.quantity,
+        })),
+      }),
+    });
+
+    if (!response.ok) throw new Error(`Checkout respondió ${response.status}`);
+
+    const data = await response.json();
+    if (!data || !data.url) throw new Error("Checkout no devolvió una URL de pago.");
+
+    window.location.href = data.url;
+  } catch (error) {
+    console.error("[yoga-verde] checkout:", error);
+    if (button) {
+      button.disabled = false;
+      button.innerHTML = originalLabel;
+    }
+    window.alert(
+      "No pudimos abrir el pago en este momento. Vuelve a intentarlo en unos minutos o escríbenos para completar tu pedido.",
+    );
+  }
 }
 
 document.addEventListener("click", (event) => {
@@ -803,7 +837,7 @@ document.addEventListener("click", (event) => {
   }
 
   if (target.matches("[data-checkout]")) {
-    checkoutDemo();
+    startCheckout();
   }
 });
 

@@ -26,6 +26,10 @@ const stars = Array.from({ length: 5 }, (_, index) => index + 1);
 
 const bestSellers = PRODUCTS.filter((product) => product.featured).slice(0, 8);
 
+// Hero slider: a handful of real SKUs with their prices, so the first screen
+// already shows what the shop sells and what it costs.
+const heroSlides = PRODUCTS.filter((product) => product.featured).slice(0, 5);
+
 const useFilters = Array.from(
   new Map(PRODUCTS.map((product) => [product.use, { slug: product.use, label: product.useLabel }])).values(),
 );
@@ -63,7 +67,7 @@ const storeData = {
     />
     <meta content="Yoga Verde | Cosmética natural hecha en México" property="og:title" />
     <meta
-      content="Piel, cabello y bienestar con ingredientes concretos: almendra, coco, uva, lavanda y más. Catálogo real con filtros y carrito."
+      content="Cosmética natural hecha en México: cremas, desmaquillante, aceites capilares, bálsamo labial y velas de soya con almendra, coco, uva, lavanda y más."
       property="og:description"
     />
     <meta content="website" property="og:type" />
@@ -79,7 +83,7 @@ const storeData = {
     <link href="https://fonts.googleapis.com" rel="preconnect" />
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
     <link
-      href="https://fonts.googleapis.com/css2?family=Gelasio:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&family=Space+Mono:wght@400;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Gelasio:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&display=swap"
       rel="stylesheet"
     />
     <link
@@ -119,46 +123,22 @@ const storeData = {
             </div>
 
             <div class="hidden items-center gap-7 md:flex">
-              <button
-                class="text-sm font-medium text-on-primary-container transition-colors hover:text-secondary focus-visible:outline-none focus-visible:text-secondary"
-                data-scroll-to="inicio"
-                type="button"
-              >
+              <button class="nav-link" data-nav-link="inicio" data-scroll-to="inicio" type="button">
                 Inicio
               </button>
-              <button
-                class="text-sm font-medium text-on-primary-container transition-colors hover:text-secondary focus-visible:outline-none focus-visible:text-secondary"
-                data-scroll-to="best-sellers"
-                type="button"
-              >
+              <button class="nav-link" data-nav-link="best-sellers" data-scroll-to="best-sellers" type="button">
                 Best Sellers
               </button>
-              <button
-                class="border-b-2 border-secondary pb-1 font-headline text-lg font-semibold text-secondary"
-                data-scroll-to="catalogo"
-                type="button"
-              >
+              <button class="nav-link" data-nav-link="catalogo" data-scroll-to="catalogo" type="button">
                 Catálogo
               </button>
-              <button
-                class="text-sm font-medium text-on-primary-container transition-colors hover:text-secondary focus-visible:outline-none focus-visible:text-secondary"
-                data-scroll-to="kits"
-                type="button"
-              >
+              <button class="nav-link" data-nav-link="kits" data-scroll-to="kits" type="button">
                 Kits
               </button>
-              <button
-                class="text-sm font-medium text-on-primary-container transition-colors hover:text-secondary focus-visible:outline-none focus-visible:text-secondary"
-                data-scroll-to="testimonios"
-                type="button"
-              >
+              <button class="nav-link" data-nav-link="testimonios" data-scroll-to="testimonios" type="button">
                 Testimonios
               </button>
-              <button
-                class="text-sm font-medium text-on-primary-container transition-colors hover:text-secondary focus-visible:outline-none focus-visible:text-secondary"
-                data-scroll-to="contacto"
-                type="button"
-              >
+              <button class="nav-link" data-nav-link="contacto" data-scroll-to="contacto" type="button">
                 Contacto
               </button>
             </div>
@@ -216,9 +196,9 @@ const storeData = {
                   Cosmética natural hecha en México
                 </span>
               </div>
-              <h1 class="font-headline text-5xl leading-[0.92] text-primary sm:text-6xl lg:text-[6.1rem]">
+              <h1 class="font-headline text-4xl leading-[1.02] text-primary sm:text-5xl lg:text-6xl">
                 Piel, cabello y bienestar
-                <span class="block font-semibold italic text-secondary">con ingredientes reales</span>
+                <span class="block font-semibold italic text-secondary">de origen natural</span>
               </h1>
               <p class="mt-6 max-w-2xl text-lg leading-relaxed text-on-surface-variant sm:text-xl">
                 Desmaquillante, cremas, aceites capilares, bálsamo labial, velas de soya y más,
@@ -248,21 +228,21 @@ const storeData = {
               <div class="mt-10 flex flex-wrap gap-3">
                 <div class="rounded-2xl bg-surface-container-lowest px-5 py-4 shadow-parchment">
                   <p class="text-[11px] uppercase tracking-[0.22em] text-on-surface-variant">
-                    Productos reales
+                    Productos
                   </p>
-                  <p class="mt-2 font-headline text-4xl text-primary">{PRODUCTS.length}</p>
+                  <p class="mt-2 font-headline text-2xl text-primary">{PRODUCTS.length}</p>
                 </div>
                 <div class="rounded-2xl bg-surface-container-lowest px-5 py-4 shadow-parchment">
                   <p class="text-[11px] uppercase tracking-[0.22em] text-on-surface-variant">
                     Kits curados
                   </p>
-                  <p class="mt-2 font-headline text-4xl text-primary">{KITS.length}</p>
+                  <p class="mt-2 font-headline text-2xl text-primary">{KITS.length}</p>
                 </div>
                 <div class="rounded-2xl bg-surface-container-lowest px-5 py-4 shadow-parchment">
                   <p class="text-[11px] uppercase tracking-[0.22em] text-on-surface-variant">
                     Envío gratis
                   </p>
-                  <p class="mt-2 font-headline text-4xl text-primary">
+                  <p class="mt-2 font-headline text-2xl text-primary">
                     {formatMoney(FREE_SHIPPING_THRESHOLD)}
                   </p>
                 </div>
@@ -278,39 +258,60 @@ const storeData = {
                 src="/yoga-verde/assets/brand/logo-monogram.png"
               />
               <div class="card-grain relative overflow-hidden rounded-[36px] bg-surface-container-lowest p-4 shadow-float sm:p-6">
-                <span class="specimen-label absolute right-8 top-8 z-10 rounded-full bg-primary/90 px-3 py-1 text-[10px] font-bold uppercase text-on-primary">
-                  Crema facial · chabacano
-                </span>
-                <img
-                  alt="Crema facial Yoga Verde con ácido hialurónico y chabacano"
-                  class="aspect-[4/5] w-full rounded-[30px] bg-surface-container-lowest object-contain p-6"
-                  src="/yoga-verde/assets/products/crema-facial-chabacano.jpg"
-                />
-              </div>
-              <div class="absolute -left-2 bottom-6 max-w-[220px] rounded-[28px] bg-surface-container-lowest p-5 shadow-parchment sm:-left-8">
-                <p class="text-[11px] uppercase tracking-[0.22em] text-on-surface-variant">
-                  Best seller del mes
-                </p>
-                <h2 class="mt-2 font-headline text-3xl text-primary">Desmaquillante</h2>
-                <p class="mt-2 text-sm leading-6 text-on-surface-variant">
-                  Almendra dulce en spray, 50 ml, para piel sensible.
-                </p>
-                <button
-                  class="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-secondary transition hover:text-primary focus-visible:outline-none"
-                  data-add-item="desmaquillante-almendra-dulce"
-                  type="button"
-                >
-                  Añadir al carrito
-                  <span class="material-symbols-outlined text-base">add_shopping_cart</span>
-                </button>
+                <div class="relative" data-hero-slider>
+                  {heroSlides.map((product, index) => (
+                    <div
+                      class:list={["hero-slide", index === 0 && "is-active"]}
+                      data-hero-slide={index}
+                    >
+                      <span class="specimen-label absolute right-4 top-4 z-10 rounded-full bg-primary/90 px-3 py-1 text-[10px] font-bold uppercase text-on-primary">
+                        {product.typeLabel}
+                      </span>
+                      <img
+                        alt={`${product.name} Yoga Verde con ${product.scent}`}
+                        class="aspect-[4/5] w-full rounded-[30px] bg-surface-container-lowest object-contain p-6"
+                        loading={index === 0 ? "eager" : "lazy"}
+                        src={product.image}
+                      />
+                      <div class="flex items-end justify-between gap-4 px-2 pb-1 pt-4">
+                        <div class="min-w-0">
+                          <h2 class="truncate font-headline text-xl text-primary">{product.name}</h2>
+                          <p class="mt-1 truncate text-sm text-on-surface-variant">{product.scent}</p>
+                        </div>
+                        <div class="flex shrink-0 flex-col items-end gap-2">
+                          <span class="price text-2xl">{formatMoney(product.price)}</span>
+                          <button
+                            class="inline-flex items-center gap-1.5 rounded-full bg-secondary px-4 py-2 text-xs font-bold text-on-secondary transition hover:bg-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/50"
+                            data-add-item={product.id}
+                            type="button"
+                          >
+                            Añadir
+                            <span class="material-symbols-outlined text-sm">add_shopping_cart</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div class="mt-3 flex items-center justify-center gap-2">
+                  {heroSlides.map((product, index) => (
+                    <button
+                      aria-label={`Ver ${product.name}`}
+                      class:list={["hero-dot", index === 0 && "is-active"]}
+                      data-hero-dot={index}
+                      type="button"
+                    />
+                  ))}
+                </div>
               </div>
               <div class="absolute -right-2 top-6 rounded-[28px] bg-tertiary-container px-5 py-4 text-on-tertiary-container shadow-line sm:-right-8">
                 <p class="text-[11px] uppercase tracking-[0.22em] text-on-tertiary-container/80">
-                  Compra protegida
+                  Hecho en México
                 </p>
-                <p class="mt-2 font-headline text-3xl text-on-tertiary-container">Checkout demo</p>
+                <p class="mt-2 font-headline text-2xl text-on-tertiary-container">Lotes pequeños</p>
                 <p class="mt-2 max-w-[200px] text-sm leading-6 text-on-tertiary-container/90">
-                  Hoy el pedido termina en demo; el carrito ya calcula envío e impuestos reales.
+                  Preparados a mano en cantidades cortas, no producción masiva.
                 </p>
               </div>
             </div>
@@ -337,7 +338,7 @@ const storeData = {
               <p class="specimen-label text-xs font-semibold uppercase tracking-[0.22em] text-secondary">
                 Best Sellers
               </p>
-              <h2 class="mt-3 font-headline text-5xl text-primary">Lo más pedido esta temporada</h2>
+              <h2 class="mt-3 font-headline text-4xl text-primary">Lo más pedido esta temporada</h2>
               <p class="mt-4 text-lg leading-8 text-on-surface-variant">
                 Los productos que más se repiten en pedidos: limpieza facial, hidratación
                 corporal y velas de soya listos para agregar al carrito.
@@ -377,7 +378,7 @@ const storeData = {
                       </p>
                       <h3 class="mt-2 font-headline text-4xl leading-none text-primary">{product.name}</h3>
                     </div>
-                    <span class="shrink-0 font-headline text-3xl text-[var(--accent)]">{formatMoney(product.price)}</span>
+                    <span class="price shrink-0 text-xl">{formatMoney(product.price)}</span>
                   </div>
                   <div class="mt-4 flex items-center gap-3 text-sm text-on-surface-variant">
                     <div class="flex items-center gap-1 text-[var(--accent)]">
@@ -447,7 +448,7 @@ const storeData = {
               <p class="specimen-label text-xs font-semibold uppercase tracking-[0.22em] text-tertiary">
                 Ingrediente en foco
               </p>
-              <h2 class="mt-3 font-headline text-5xl leading-[0.95] text-primary sm:text-6xl">
+              <h2 class="mt-3 font-headline text-4xl leading-[1.05] text-primary">
                 Arcilla verde
                 <span class="block font-semibold italic text-tertiary">y té verde</span>
               </h2>
@@ -483,7 +484,7 @@ const storeData = {
               </div>
 
               <div class="mt-8 flex flex-wrap items-center gap-5">
-                <span class="font-headline text-4xl text-tertiary">{formatMoney(219)}</span>
+                <span class="price text-2xl">{formatMoney(219)}</span>
                 <div class="flex flex-wrap gap-3">
                   <button
                     class="inline-flex items-center gap-2 rounded-2xl bg-tertiary px-6 py-3.5 text-sm font-semibold text-on-tertiary-container transition hover:bg-tertiary-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary/50"
@@ -511,10 +512,10 @@ const storeData = {
             <p class="specimen-label text-xs font-semibold uppercase tracking-[0.22em] text-secondary">
               Comprar por familia de aroma
             </p>
-            <h2 class="mt-3 font-headline text-5xl text-primary">Cada aroma tiene su propio color</h2>
+            <h2 class="mt-3 font-headline text-4xl text-primary">Cada aroma tiene su propio color</h2>
             <p class="mt-4 text-lg leading-8 text-on-surface-variant">
-              Así están agrupados los ingredientes en las etiquetas: terracota, verde, morado y
-              dorado según el aroma de cada producto.
+              Terracota para cítricos y frutos suaves, verde para menta y bergamota, morado
+              para uva y lavanda, dorado para leche de coco.
             </p>
           </div>
 
@@ -559,7 +560,7 @@ const storeData = {
               <p class="specimen-label text-xs font-semibold uppercase tracking-[0.22em] text-secondary">
                 Kits recomendados
               </p>
-              <h2 class="mt-3 font-headline text-5xl text-primary">Comprar mejor, en menos pasos</h2>
+              <h2 class="mt-3 font-headline text-4xl text-primary">Comprar mejor, en menos pasos</h2>
               <p class="mt-4 text-lg leading-8 text-on-surface-variant">
                 Combinaciones pensadas para primera compra o regalo, con ahorro frente a comprar
                 cada pieza por separado.
@@ -592,7 +593,7 @@ const storeData = {
                       </p>
                       <h3 class="mt-2 font-headline text-4xl leading-none text-primary">{kit.name}</h3>
                     </div>
-                    <span class="shrink-0 font-headline text-3xl text-[var(--accent)]">{formatMoney(kit.price)}</span>
+                    <span class="price shrink-0 text-xl">{formatMoney(kit.price)}</span>
                   </div>
                   <div class="mt-4 flex items-center gap-3 text-sm text-on-surface-variant">
                     <div class="flex items-center gap-1 text-[var(--accent)]">
@@ -639,12 +640,12 @@ const storeData = {
           <div class="mb-8 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div class="max-w-2xl">
               <p class="specimen-label text-xs font-semibold uppercase tracking-[0.22em] text-secondary">
-                Catálogo shop-first
+                Todo el catálogo
               </p>
-              <h2 class="mt-3 font-headline text-5xl text-primary">Piel, cabello y bienestar</h2>
-              <p class="mt-4 text-lg leading-8 text-on-surface-variant">
-                Todo el catálogo carga con productos reales por defecto. Busca por nombre,
-                ingrediente, categoría o envase y refina desde filtros claros.
+              <h2 class="mt-3 font-headline text-4xl text-primary">Piel, cabello y bienestar</h2>
+              <p class="mt-4 max-w-xl leading-7 text-on-surface-variant">
+                Rostro, cuerpo, cabello, labios, higiene bucal y aromaterapia. Cada producto
+                con su ingrediente principal y su tamaño.
               </p>
             </div>
             <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -760,7 +761,7 @@ const storeData = {
                       <span data-product-count>{PRODUCTS.length}</span> piezas visibles
                     </p>
                     <p class="mt-2 text-sm leading-7 text-on-surface-variant">
-                      Catálogo vivo con filtros por familia de aroma, categoría y envase.
+                      Filtra por aroma, categoría o tamaño de envase.
                     </p>
                     <div class="mt-4 flex flex-wrap gap-2" data-active-filters></div>
                   </div>
@@ -811,7 +812,7 @@ const storeData = {
                             {product.name}
                           </h3>
                         </div>
-                        <span class="shrink-0 font-headline text-3xl text-[var(--accent)]">{formatMoney(product.price)}</span>
+                        <span class="price shrink-0 text-xl">{formatMoney(product.price)}</span>
                       </div>
                       <div class="mt-4 flex items-center gap-3 text-sm text-on-surface-variant">
                         <div class="flex items-center gap-1 text-[var(--accent)]">
@@ -875,19 +876,20 @@ const storeData = {
                   <p class="specimen-label text-xs font-semibold uppercase tracking-[0.22em] text-secondary">
                     Nuestra filosofía
                   </p>
-                  <h2 class="mt-3 font-headline text-5xl text-primary">Productos concretos, sin relleno</h2>
-                  <blockquote class="mt-5 max-w-3xl font-headline text-2xl italic leading-relaxed text-tertiary">
-                    “No vendemos promesas exageradas. Cada producto tiene su ingrediente, su envase y su precio claro.”
+                  <h2 class="mt-3 font-headline text-4xl text-primary">Fórmulas simples, de origen natural</h2>
+                  <blockquote class="mt-5 max-w-2xl font-headline text-xl italic leading-relaxed text-tertiary">
+                    “Cada producto lleva su ingrediente principal en la etiqueta. Sin listas
+                    interminables que nadie lee.”
                   </blockquote>
                   <div class="mt-8 grid gap-6 md:grid-cols-2">
-                    <p class="text-base leading-8 text-on-surface-variant">
-                      Cada línea de producto tiene su propio color de etiqueta según el ingrediente:
-                      terracota para cítricos y frutos suaves, verde para menta y bergamota, morado
-                      para uva y lavanda, dorado para leche de coco.
+                    <p class="leading-7 text-on-surface-variant">
+                      El color de cada etiqueta indica su aroma: terracota para cítricos y frutos
+                      suaves, verde para menta y bergamota, morado para uva y lavanda, dorado para
+                      leche de coco.
                     </p>
-                    <p class="text-base leading-8 text-on-surface-variant">
-                      Filtros claros, kits comprables y navegación móvil fluida para encontrar el
-                      producto correcto sin perder tiempo.
+                    <p class="leading-7 text-on-surface-variant">
+                      Preparados en lotes pequeños en México, con envases de vidrio y aluminio
+                      que puedes reutilizar.
                     </p>
                   </div>
                 </div>
@@ -905,9 +907,9 @@ const storeData = {
               <p class="text-xs font-semibold uppercase tracking-[0.22em] text-on-primary-container">
                 Newsletter
               </p>
-              <h2 class="mt-3 font-headline text-5xl text-white">Lanzamientos y descuentos</h2>
+              <h2 class="mt-3 font-headline text-4xl text-white">Lanzamientos y descuentos</h2>
               <p class="mt-5 text-base leading-8 text-on-primary-container">
-                Recibe aviso de nuevos productos y descuentos de temporada, sin correos de relleno.
+                Te avisamos cuando sale un producto nuevo o hay descuento de temporada.
               </p>
               <div class="mt-8 rounded-[28px] bg-white/10 p-4">
                 <label class="sr-only" for="newsletter-email">Correo electrónico</label>
@@ -938,7 +940,7 @@ const storeData = {
             <p class="specimen-label text-xs font-semibold uppercase tracking-[0.22em] text-secondary">
               Testimonios
             </p>
-            <h2 class="mt-3 font-headline text-5xl text-primary">Clientes que ya compraron</h2>
+            <h2 class="mt-3 font-headline text-4xl text-primary">Clientes que ya compraron</h2>
             <p class="mt-4 text-lg leading-8 text-on-surface-variant">
               Opiniones reales de compras recientes en la tienda.
             </p>
@@ -978,8 +980,8 @@ const storeData = {
               />
             </div>
             <p class="mt-5 max-w-sm leading-8 text-on-primary-container">
-              Cosmética natural hecha en México: piel, cabello y bienestar con
-              ingredientes concretos y precio claro.
+              Cosmética natural hecha en México, en lotes pequeños: rostro, cuerpo,
+              cabello, labios y aromaterapia.
             </p>
           </div>
           <div>
@@ -1009,7 +1011,7 @@ const storeData = {
                 Hecho en México
               </span>
               <span class="rounded-full border border-white/15 px-3 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-on-primary-container">
-                Ingredientes reales
+                Lotes pequeños
               </span>
               <span class="rounded-full border border-white/15 px-3 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-on-primary-container">
                 Envase cuidado
@@ -1109,22 +1111,22 @@ const storeData = {
       </div>
       <div class="flex-1 px-6 py-6">
         <div class="space-y-4">
-          <button class="block font-headline text-3xl text-primary" data-scroll-to="inicio" type="button">
+          <button class="block font-headline text-xl text-primary" data-scroll-to="inicio" type="button">
             Inicio
           </button>
-          <button class="block font-headline text-3xl text-primary" data-scroll-to="best-sellers" type="button">
+          <button class="block font-headline text-xl text-primary" data-scroll-to="best-sellers" type="button">
             Best Sellers
           </button>
-          <button class="block font-headline text-3xl text-primary" data-scroll-to="catalogo" type="button">
+          <button class="block font-headline text-xl text-primary" data-scroll-to="catalogo" type="button">
             Catálogo
           </button>
-          <button class="block font-headline text-3xl text-primary" data-scroll-to="kits" type="button">
+          <button class="block font-headline text-xl text-primary" data-scroll-to="kits" type="button">
             Kits
           </button>
-          <button class="block font-headline text-3xl text-primary" data-scroll-to="testimonios" type="button">
+          <button class="block font-headline text-xl text-primary" data-scroll-to="testimonios" type="button">
             Testimonios
           </button>
-          <button class="block font-headline text-3xl text-primary" data-scroll-to="contacto" type="button">
+          <button class="block font-headline text-xl text-primary" data-scroll-to="contacto" type="button">
             Contacto
           </button>
         </div>
@@ -1132,7 +1134,7 @@ const storeData = {
           <p class="text-xs uppercase tracking-[0.22em] text-on-primary-container">Primera compra</p>
           <p class="mt-2 font-headline text-3xl text-white">Empieza con un kit</p>
           <p class="mt-3 text-sm leading-7 text-on-primary-container">
-            Una ruta rápida para quien llega desde móvil y quiere comprar sin pensarlo demasiado.
+            Un kit reúne los básicos de una rutina a mejor precio que comprarlos por separado.
           </p>
           <button
             class="mt-5 inline-flex items-center gap-2 rounded-full bg-white px-4 py-3 text-sm font-semibold text-primary transition hover:bg-surface-container-high focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
@@ -1223,7 +1225,7 @@ const storeData = {
         <div class="mt-5 flex items-end justify-between gap-5 border-t border-outline-variant/50 pt-5">
           <div>
             <p class="text-xs uppercase tracking-[0.2em] text-on-surface-variant">Total</p>
-            <p class="font-headline text-4xl text-primary" data-total>{formatMoney(0)}</p>
+            <p class="price text-3xl" data-total>{formatMoney(0)}</p>
           </div>
           <button
             class="inline-flex items-center gap-2 rounded-2xl bg-primary px-5 py-4 font-semibold text-on-primary transition hover:bg-primary-container disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35"
@@ -1231,8 +1233,8 @@ const storeData = {
             disabled
             type="button"
           >
-            Continuar con el pedido
-            <span class="material-symbols-outlined text-lg">arrow_forward</span>
+            Pagar de forma segura
+            <span class="material-symbols-outlined text-lg">lock</span>
           </button>
         </div>
       </div>
@@ -1249,7 +1251,7 @@ const storeData = {
       <div class="flex items-start justify-between gap-4">
         <div>
           <p class="text-xs uppercase tracking-[0.22em] text-secondary" data-detail-badge>Cosmética natural</p>
-          <h2 class="mt-2 font-headline text-4xl text-primary sm:text-5xl" data-detail-title id="detail-title"></h2>
+          <h2 class="mt-2 font-headline text-2xl text-primary sm:text-3xl" data-detail-title id="detail-title"></h2>
         </div>
         <button
           aria-label="Cerrar detalle"
@@ -1346,6 +1348,93 @@ const storeData = {
           revealTargets.forEach(function (target) {
             target.classList.add("is-visible");
           });
+        }
+
+        // Hero product slider.
+        var slides = document.querySelectorAll("[data-hero-slide]");
+        var dots = document.querySelectorAll("[data-hero-dot]");
+        if (slides.length > 1) {
+          var current = 0;
+          var timer = null;
+
+          var showSlide = function (index) {
+            current = (index + slides.length) % slides.length;
+            slides.forEach(function (slide, i) {
+              slide.classList.toggle("is-active", i === current);
+            });
+            dots.forEach(function (dot, i) {
+              dot.classList.toggle("is-active", i === current);
+            });
+          };
+
+          var stopAuto = function () {
+            if (timer) {
+              window.clearInterval(timer);
+              timer = null;
+            }
+          };
+
+          dots.forEach(function (dot) {
+            dot.addEventListener("click", function () {
+              stopAuto();
+              showSlide(Number(dot.dataset.heroDot));
+            });
+          });
+
+          if (!prefersReduced) {
+            timer = window.setInterval(function () {
+              showSlide(current + 1);
+            }, 5000);
+            var slider = document.querySelector("[data-hero-slider]");
+            if (slider) {
+              slider.addEventListener("mouseenter", stopAuto);
+              slider.addEventListener("focusin", stopAuto);
+            }
+          }
+        }
+
+        // Scrollspy: highlight the nav item for whichever section is in view.
+        var navLinks = document.querySelectorAll("[data-nav-link]");
+        var spySections = [];
+        navLinks.forEach(function (link) {
+          var section = document.getElementById(link.dataset.navLink);
+          if (section) spySections.push(section);
+        });
+
+        if (spySections.length) {
+          var setActive = function (id) {
+            navLinks.forEach(function (link) {
+              link.classList.toggle("is-active", link.dataset.navLink === id);
+            });
+          };
+
+          if ("IntersectionObserver" in window) {
+            var visible = {};
+            var spy = new IntersectionObserver(
+              function (entries) {
+                entries.forEach(function (entry) {
+                  visible[entry.target.id] = entry.isIntersecting
+                    ? entry.intersectionRatio
+                    : 0;
+                });
+                // Pick the section with the most of itself on screen.
+                var best = null;
+                var bestRatio = 0;
+                spySections.forEach(function (section) {
+                  var ratio = visible[section.id] || 0;
+                  if (ratio > bestRatio) {
+                    bestRatio = ratio;
+                    best = section.id;
+                  }
+                });
+                if (best) setActive(best);
+              },
+              { threshold: [0, 0.15, 0.4, 0.7, 1], rootMargin: "-72px 0px -35% 0px" },
+            );
+            spySections.forEach(function (section) {
+              spy.observe(section);
+            });
+          }
         }
       })();
     </script>
