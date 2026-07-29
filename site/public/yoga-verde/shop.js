@@ -29,13 +29,11 @@ const MONEY = new Intl.NumberFormat("es-MX", {
 
 const useLabelMap = new Map(PRODUCTS.map((product) => [product.use, product.useLabel]));
 const typeLabelMap = new Map(PRODUCTS.map((product) => [product.type, product.typeLabel]));
-const originLabelMap = new Map(PRODUCTS.map((product) => [product.origin, product.originLabel]));
 
 const state = {
   search: "",
   useFilters: new Set(),
   typeFilters: new Set(),
-  originFilters: new Set(),
   cart: loadCart(),
   detailItemId: null,
   cartOpen: false,
@@ -75,8 +73,6 @@ const els = {
   detailPrice: document.querySelector("[data-detail-price]"),
   detailImage: document.querySelector("[data-detail-image]"),
   detailAdd: document.querySelector("[data-detail-add]"),
-  detailRatingStars: document.querySelector("[data-detail-rating-stars]"),
-  detailRatingCopy: document.querySelector("[data-detail-rating-copy]"),
 };
 
 const PILL_ACTIVE_CLASS =
@@ -130,19 +126,12 @@ function escapeHtml(value) {
     .replaceAll("'", "&#39;");
 }
 
-function starMarkup(rating) {
-  return Array.from({ length: 5 }, (_, index) =>
-    `<span aria-hidden="true">${index < Math.round(rating) ? "★" : "☆"}</span>`,
-  ).join("");
-}
-
 function productSearchHaystack(product) {
   return normalizeText([
     product.name,
     product.short,
     product.description,
     product.useLabel,
-    product.originLabel,
     product.typeLabel,
     ...(product.tags || []),
     ...(product.benefits || []),
@@ -159,10 +148,7 @@ function getFilteredProducts() {
       state.useFilters.size === 0 || state.useFilters.has(product.use);
     const matchesType =
       state.typeFilters.size === 0 || state.typeFilters.has(product.type);
-    const matchesOrigin =
-      state.originFilters.size === 0 || state.originFilters.has(product.origin);
-
-    return matchesSearch && matchesUse && matchesType && matchesOrigin;
+    return matchesSearch && matchesUse && matchesType;
   });
 }
 
@@ -197,25 +183,23 @@ function catalogCardMarkup(product) {
   return `
     <article class="group overflow-hidden rounded-[30px] bg-surface-container-lowest shadow-parchment transition-transform hover:-translate-y-1" style="--accent: ${escapeHtml(accent)}">
       <div class="relative overflow-hidden bg-surface-container-low p-4">
-        <span class="absolute left-4 top-4 z-10 rounded-full bg-surface px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-primary">${escapeHtml(product.badge)}</span>
-        <img alt="${escapeHtml(product.name)} ${escapeHtml(product.scent || "")}" class="aspect-[5/4] w-full rounded-[24px] bg-surface-container-lowest object-contain p-5 transition duration-500 group-hover:scale-105" src="${escapeHtml(product.image)}" />
+        ${product.badge ? `<span class="absolute left-4 top-4 z-10 rounded-full bg-surface px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-primary">${escapeHtml(product.badge)}</span>` : ""}
+        <img alt="${escapeHtml(product.name)} ${escapeHtml(product.scent || "")}" class="aspect-[5/4] w-full rounded-[24px] bg-surface-container-lowest object-contain p-1 transition duration-500 group-hover:scale-105" src="${escapeHtml(product.image)}" />
       </div>
       <div class="p-6">
         <div class="flex items-start justify-between gap-4">
           <div class="min-w-0">
-            <p class="text-[11px] uppercase tracking-[0.22em] text-on-surface-variant">${escapeHtml(product.typeLabel)} · ${escapeHtml(product.scent || product.originLabel)}</p>
+            <p class="text-[11px] uppercase tracking-[0.22em] text-on-surface-variant">${escapeHtml(product.typeLabel)} · ${escapeHtml(product.scent || "")}</p>
             <h3 class="mt-2 font-headline text-4xl leading-none text-primary">${escapeHtml(product.name)}</h3>
           </div>
           <span class="price shrink-0 text-xl">${formatMoney(product.price)}</span>
         </div>
         <div class="mt-4 flex items-center gap-3 text-sm text-on-surface-variant">
-          <div class="flex items-center gap-1 text-[var(--accent)]">${starMarkup(product.rating)}</div>
-          <span>${product.rating.toFixed(1)} · ${product.reviewsCount} reseñas</span>
         </div>
         <p class="mt-4 min-h-[84px] text-sm italic leading-7 text-on-surface-variant">${escapeHtml(product.short)}</p>
         <div class="mt-4 flex flex-wrap gap-2">
           <span class="accent-dot rounded-full bg-surface-container-low px-3 py-2 text-xs font-semibold text-primary">${escapeHtml(product.useLabel)}</span>
-          <span class="rounded-full bg-surface-container-low px-3 py-2 text-xs font-semibold text-on-surface-variant">${escapeHtml(product.originLabel)}</span>
+          <span class="rounded-full bg-surface-container-low px-3 py-2 text-xs font-semibold text-on-surface-variant">${escapeHtml(product.size || "")}</span>
         </div>
         <div class="mt-6 flex items-center justify-between gap-3 border-t border-outline-variant/40 pt-5">
           <button class="inline-flex items-center gap-2 text-sm font-semibold text-primary transition hover:text-secondary focus-visible:outline-none" data-open-detail="${escapeHtml(product.id)}" type="button">
@@ -236,13 +220,13 @@ function cartItemMarkup(entry) {
   return `
     <article class="overflow-hidden rounded-[28px] bg-surface-container-low p-5 shadow-parchment">
       <div class="flex gap-4">
-        <img alt="${escapeHtml(item.name)}" class="h-28 w-28 rounded-[22px] bg-surface-container-lowest object-contain p-2" src="${escapeHtml(item.image)}" />
+        <img alt="${escapeHtml(item.name)}" class="h-28 w-28 rounded-[22px] bg-surface-container-lowest object-contain p-0.5" src="${escapeHtml(item.image)}" />
         <div class="flex flex-1 flex-col">
           <div class="flex items-start justify-between gap-4">
             <div class="min-w-0">
               <p class="text-[11px] uppercase tracking-[0.22em] text-on-surface-variant">${escapeHtml(item.badge)}</p>
               <h3 class="mt-2 font-headline text-lg leading-tight text-primary">${escapeHtml(item.name)}</h3>
-              <p class="mt-2 text-sm text-on-surface-variant">${escapeHtml(item.scent || item.useLabel)} · ${escapeHtml(item.originLabel)}</p>
+              <p class="mt-2 text-sm text-on-surface-variant">${escapeHtml(item.scent || item.useLabel)}</p>
             </div>
             <span class="price shrink-0 text-lg">${formatMoney(item.price * quantity)}</span>
           </div>
@@ -270,7 +254,7 @@ function cartItemMarkup(entry) {
 function upsellMarkup(item) {
   return `
     <div class="flex items-start gap-4">
-      <img alt="${escapeHtml(item.name)}" class="h-24 w-24 rounded-[22px] bg-surface-container-lowest object-contain p-2" src="${escapeHtml(item.image)}" />
+      <img alt="${escapeHtml(item.name)}" class="h-24 w-24 rounded-[22px] bg-surface-container-lowest object-contain p-0.5" src="${escapeHtml(item.image)}" />
       <div class="flex-1">
         <p class="text-xs uppercase tracking-[0.22em] text-secondary">También te puede interesar</p>
         <h3 class="mt-2 font-headline text-xl text-primary">${escapeHtml(item.name)}</h3>
@@ -302,13 +286,6 @@ function getActiveFilterBadges() {
   }
   for (const value of state.typeFilters) {
     active.push({ group: "type", value, label: typeLabelMap.get(value) || value });
-  }
-  for (const value of state.originFilters) {
-    active.push({
-      group: "origin",
-      value,
-      label: originLabelMap.get(value) || value,
-    });
   }
 
   return active;
@@ -347,12 +324,6 @@ function syncFilterControls() {
   document.querySelectorAll("[data-filter-type]").forEach((button) => {
     const active = state.typeFilters.has(button.dataset.filterType);
     button.className = active ? PILL_ACTIVE_CLASS : PILL_INACTIVE_CLASS;
-    button.setAttribute("aria-pressed", String(active));
-  });
-
-  document.querySelectorAll("[data-filter-origin]").forEach((button) => {
-    const active = state.originFilters.has(button.dataset.filterOrigin);
-    button.className = active ? LINK_ACTIVE_CLASS : LINK_INACTIVE_CLASS;
     button.setAttribute("aria-pressed", String(active));
   });
 }
@@ -518,7 +489,6 @@ function openDetail(itemId) {
   if (els.detailTags) {
     els.detailTags.innerHTML = [
       item.useLabel,
-      item.originLabel,
       item.typeLabel,
       ...(item.tags || []).slice(0, 2),
     ]
@@ -535,12 +505,6 @@ function openDetail(itemId) {
   }
   if (els.detailInstructions) {
     els.detailInstructions.textContent = item.instructions;
-  }
-  if (els.detailRatingStars) {
-    els.detailRatingStars.innerHTML = starMarkup(item.rating);
-  }
-  if (els.detailRatingCopy) {
-    els.detailRatingCopy.textContent = `${item.rating.toFixed(1)} · ${item.reviewsCount} reseñas`;
   }
 
   els.modal?.classList.remove("pointer-events-none", "scale-95", "opacity-0");
@@ -594,7 +558,6 @@ function clearFilters() {
   state.search = "";
   state.useFilters.clear();
   state.typeFilters.clear();
-  state.originFilters.clear();
 
   if (els.search) {
     els.search.value = "";
@@ -617,21 +580,13 @@ function removeFilter(group, value) {
   if (group === "type") {
     state.typeFilters.delete(value);
   }
-  if (group === "origin") {
-    state.originFilters.delete(value);
-  }
 
   syncFilterControls();
   renderProducts();
 }
 
 function toggleFilter(group, value) {
-  const targetSet =
-    group === "use"
-      ? state.useFilters
-      : group === "type"
-        ? state.typeFilters
-        : state.originFilters;
+  const targetSet = group === "use" ? state.useFilters : state.typeFilters;
 
   if (targetSet.has(value)) {
     targetSet.delete(value);
@@ -661,7 +616,6 @@ function applyNeedFilter(slug) {
   state.search = "";
   state.useFilters = new Set([slug]);
   state.typeFilters.clear();
-  state.originFilters.clear();
 
   if (els.search) {
     els.search.value = "";
@@ -760,10 +714,6 @@ document.addEventListener("click", (event) => {
 
   if (target.matches("[data-filter-type]")) {
     toggleFilter("type", target.dataset.filterType);
-  }
-
-  if (target.matches("[data-filter-origin]")) {
-    toggleFilter("origin", target.dataset.filterOrigin);
   }
 
   if (target.matches("[data-clear-filters]")) {

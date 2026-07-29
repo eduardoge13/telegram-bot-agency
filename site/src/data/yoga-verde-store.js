@@ -18,7 +18,7 @@ export const PRODUCTS = [
   {
     id: "desmaquillante-almendra-dulce",
     kind: "product",
-    badge: "Más vendido",
+    badge: "",
     name: "Desmaquillante para ojos",
     scent: "Almendra dulce",
     price: 189,
@@ -27,8 +27,6 @@ export const PRODUCTS = [
     useLabel: "Cítricos y frutos suaves",
     type: "facial",
     typeLabel: "Cuidado facial",
-    origin: "ambar",
-    originLabel: "Vidrio ámbar",
     tags: ["almendra dulce", "desmaquillante", "50 ml", "piel sensible"],
     size: "50 mL",
     short: "Desmaquillante para ojos con aceite de almendra dulce y ricino, para piel sensible.",
@@ -41,14 +39,13 @@ export const PRODUCTS = [
     ],
     instructions:
       "Aplica unas gotas sobre la piel limpia y masajea hasta su completa absorción. Ideal para uso diario en rostro y cuerpo.",
-    rating: 4.8,
-    reviewsCount: 96,
     featured: true,
   },
   {
     id: "agua-micelar-manzanilla",
+    size: "296 mL",
     kind: "product",
-    badge: "Más vendido",
+    badge: "",
     name: "Agua micelar",
     scent: "Manzanilla",
     price: 219,
@@ -57,8 +54,6 @@ export const PRODUCTS = [
     useLabel: "Cítricos y frutos suaves",
     type: "facial",
     typeLabel: "Cuidado facial",
-    origin: "transparente",
-    originLabel: "Vidrio transparente",
     tags: ["manzanilla", "agua micelar", "296 ml", "limpieza diaria"],
     short: "Agua micelar de manzanilla para limpieza diaria del rostro.",
     description:
@@ -66,18 +61,16 @@ export const PRODUCTS = [
     benefits: [
       "Limpia y desmaquilla en un solo paso, sin enjuague.",
       "Manzanilla calmante, apta para uso diario.",
-      "Frasco de 296 ml para varias semanas de uso.",
+      "Presentación de 296 ml para varias semanas de uso.",
     ],
     instructions:
       "Satura un algodón y pasa por rostro y ojos hasta retirar maquillaje e impurezas. Úsala en la mañana y en la noche.",
-    rating: 4.9,
-    reviewsCount: 141,
     featured: true,
   },
   {
     id: "crema-facial-chabacano",
     kind: "product",
-    badge: "Nuevo",
+    badge: "",
     name: "Crema facial",
     scent: "Ácido hialurónico y chabacano",
     price: 349,
@@ -86,8 +79,6 @@ export const PRODUCTS = [
     useLabel: "Cítricos y frutos suaves",
     type: "facial",
     typeLabel: "Cuidado facial",
-    origin: "cristal",
-    originLabel: "Cristal con tapa plateada",
     tags: ["chabacano", "ácido hialurónico", "hidratación", "uso nocturno"],
     short: "Crema facial con ácido hialurónico y aceite de hueso de chabacano.",
     size: "50 g",
@@ -100,14 +91,12 @@ export const PRODUCTS = [
     ],
     instructions:
       "Aplica sobre rostro limpio y seco, de preferencia por la noche. Usa la cantidad de una moneda pequeña.",
-    rating: 4.9,
-    reviewsCount: 78,
     featured: false,
   },
   {
     id: "contorno-de-ojos-lavanda",
     kind: "product",
-    badge: "Recomendado",
+    badge: "",
     name: "Contorno de ojos",
     scent: "Lavanda",
     price: 279,
@@ -116,8 +105,6 @@ export const PRODUCTS = [
     useLabel: "Frutal morado y floral",
     type: "facial",
     typeLabel: "Cuidado facial",
-    origin: "ambar",
-    originLabel: "Vidrio ámbar",
     tags: ["lavanda", "contorno de ojos", "10 ml", "uso nocturno"],
     size: "10 mL",
     short: "Aceite de contorno de ojos con lavanda y rosa mosqueta, de uso nocturno.",
@@ -130,14 +117,13 @@ export const PRODUCTS = [
     ],
     instructions:
       "Agita el frasco antes de cada aplicación. Aplica una cantidad adecuada sobre la piel limpia en la zona de ojeras, solo por las noches. Evita el contacto directo con el ojo.",
-    rating: 4.7,
-    reviewsCount: 52,
     featured: false,
   },
   {
     id: "crema-corporal-leche-de-coco",
+    size: "230 g",
     kind: "product",
-    badge: "Más vendido",
+    badge: "",
     name: "Crema corporal",
     scent: "Leche de coco",
     price: 259,
@@ -146,8 +132,6 @@ export const PRODUCTS = [
     useLabel: "Cálido y lácteo",
     type: "corporal",
     typeLabel: "Cuidado corporal",
-    origin: "ambar",
-    originLabel: "Vidrio ámbar",
     tags: ["leche de coco", "crema corporal", "230 g", "piel seca"],
     short: "Crema corporal de leche de coco para piel seca, en tarro de 230 g.",
     description:
@@ -155,18 +139,17 @@ export const PRODUCTS = [
     benefits: [
       "Textura densa que nutre la piel seca sin sensación pesada.",
       "Aroma cálido a leche de coco.",
-      "Tarro de 230 g, rinde varias semanas de uso diario.",
+      "Presentación de 230 g, rinde varias semanas de uso diario.",
     ],
     instructions:
       "Aplica una cantidad adecuada sobre la piel limpia y masajea suavemente hasta su completa absorción. Ideal para uso diario en el cuerpo.",
-    rating: 4.8,
-    reviewsCount: 103,
     featured: true,
   },
   {
     id: "mousse-corporal-uva",
+    size: "230 g",
     kind: "product",
-    badge: "Cosecha limitada",
+    badge: "",
     name: "Mousse corporal",
     scent: "Uva",
     price: 269,
@@ -175,8 +158,6 @@ export const PRODUCTS = [
     useLabel: "Frutal morado y floral",
     type: "corporal",
     typeLabel: "Cuidado corporal",
-    origin: "ambar",
-    originLabel: "Vidrio ámbar",
     tags: ["uva", "mousse corporal", "230 g", "textura ligera"],
     short: "Mousse corporal de uva con textura ligera y absorción rápida.",
     description:
@@ -184,18 +165,17 @@ export const PRODUCTS = [
     benefits: [
       "Textura tipo mousse, se absorbe rápido y no deja residuo.",
       "Aroma frutal a uva, agradable para uso diario.",
-      "Tarro de 230 g.",
+      "Presentación de 230 g.",
     ],
     instructions:
       "Aplica sobre la piel después del baño con un masaje suave hasta que se absorba por completo.",
-    rating: 4.7,
-    reviewsCount: 64,
     featured: false,
   },
   {
     id: "balsamo-labial-coco-menta",
+    size: "50 mL",
     kind: "product",
-    badge: "Nuevo",
+    badge: "",
     name: "Bálsamo labial",
     scent: "Coco y menta",
     price: 129,
@@ -204,27 +184,24 @@ export const PRODUCTS = [
     useLabel: "Verde mentolado y cítrico",
     type: "labial",
     typeLabel: "Cuidado labial",
-    origin: "kraft",
-    originLabel: "Tubo kraft biodegradable",
-    tags: ["coco", "menta", "bálsamo labial", "tubo kraft"],
-    short: "Bálsamo labial de coco y menta en tubo kraft biodegradable.",
+    tags: ["coco", "menta", "bálsamo labial"],
+    short: "Bálsamo labial de coco y menta.",
     description:
       "Bálsamo labial con coco y menta en un tubo de cartón kraft biodegradable, para labios hidratados durante todo el día.",
     benefits: [
       "Hidrata labios resecos con una capa protectora ligera.",
       "Frescor suave de menta con dulzor de coco.",
-      "Empaque de cartón kraft biodegradable.",
+      "Tarro de cartón kraft biodegradable.",
     ],
     instructions:
       "Aplica directamente sobre los labios las veces que lo necesites durante el día.",
-    rating: 4.8,
-    reviewsCount: 88,
     featured: true,
   },
   {
     id: "vela-soya-vainilla",
+    size: "230 g",
     kind: "product",
-    badge: "Más vendido",
+    badge: "",
     name: "Vela de soya",
     scent: "Vainilla",
     price: 329,
@@ -233,8 +210,6 @@ export const PRODUCTS = [
     useLabel: "Cítricos y frutos suaves",
     type: "aromaterapia",
     typeLabel: "Aromaterapia",
-    origin: "ambar",
-    originLabel: "Vidrio ámbar",
     tags: ["vainilla", "vela de soya", "230 g", "cera vegetal"],
     short: "Vela de cera de soya con aroma a vainilla, en tarro de vidrio ámbar.",
     description:
@@ -246,14 +221,13 @@ export const PRODUCTS = [
     ],
     instructions:
       "Recorta la mecha a 5 mm antes de cada uso. Enciéndela sobre una superficie resistente al calor, lejos de corrientes de aire y materiales inflamables, sin dejarla sin supervisión. Apágala cuando quede menos de 1 cm de cera.",
-    rating: 4.9,
-    reviewsCount: 112,
     featured: true,
   },
   {
     id: "vela-soya-bergamota",
+    size: "230 g",
     kind: "product",
-    badge: "Nuevo",
+    badge: "",
     name: "Vela de soya",
     scent: "Bergamota",
     price: 329,
@@ -262,8 +236,6 @@ export const PRODUCTS = [
     useLabel: "Verde mentolado y cítrico",
     type: "aromaterapia",
     typeLabel: "Aromaterapia",
-    origin: "ambar",
-    originLabel: "Vidrio ámbar",
     tags: ["bergamota", "vela de soya", "230 g", "cera vegetal"],
     short: "Vela de cera de soya con aroma a bergamota, en tarro de vidrio ámbar.",
     description:
@@ -275,14 +247,13 @@ export const PRODUCTS = [
     ],
     instructions:
       "Recorta la mecha a 5 mm antes de cada uso. Enciéndela sobre una superficie resistente al calor, lejos de corrientes de aire y materiales inflamables, sin dejarla sin supervisión. Apágala cuando quede menos de 1 cm de cera.",
-    rating: 4.8,
-    reviewsCount: 67,
     featured: false,
   },
   {
     id: "vela-soya-coco",
+    size: "230 g",
     kind: "product",
-    badge: "Edición limitada",
+    badge: "",
     name: "Vela de soya",
     scent: "Coco",
     price: 329,
@@ -291,8 +262,6 @@ export const PRODUCTS = [
     useLabel: "Cálido y lácteo",
     type: "aromaterapia",
     typeLabel: "Aromaterapia",
-    origin: "ambar",
-    originLabel: "Vidrio ámbar",
     tags: ["coco", "vela de soya", "230 g", "cera vegetal"],
     short: "Vela de cera de soya con aroma a coco, en tarro de vidrio ámbar.",
     description:
@@ -304,12 +273,11 @@ export const PRODUCTS = [
     ],
     instructions:
       "Recorta la mecha a 5 mm antes de cada uso. Enciéndela sobre una superficie resistente al calor, lejos de corrientes de aire y materiales inflamables, sin dejarla sin supervisión. Apágala cuando quede menos de 1 cm de cera.",
-    rating: 4.8,
-    reviewsCount: 41,
     featured: false,
   },
   {
     id: "vela-mini-bergamota",
+    size: "60 g",
     kind: "product",
     badge: "Formato mini",
     name: "Mini vela de soya",
@@ -320,8 +288,6 @@ export const PRODUCTS = [
     useLabel: "Verde mentolado y cítrico",
     type: "aromaterapia",
     typeLabel: "Aromaterapia",
-    origin: "ambar",
-    originLabel: "Vidrio ámbar",
     tags: ["bergamota", "vela mini", "60 g", "cera vegetal"],
     short: "Versión mini de la vela de soya de bergamota, 60 g.",
     description:
@@ -333,12 +299,11 @@ export const PRODUCTS = [
     ],
     instructions:
       "Recorta la mecha a 5 mm antes de cada uso. Enciéndela sobre una superficie resistente al calor, lejos de corrientes de aire y materiales inflamables, sin dejarla sin supervisión. Apágala cuando quede menos de 1 cm de cera.",
-    rating: 4.7,
-    reviewsCount: 19,
     featured: false,
   },
   {
     id: "vela-mini-vainilla",
+    size: "60 g",
     kind: "product",
     badge: "Formato mini",
     name: "Mini vela de soya",
@@ -349,8 +314,6 @@ export const PRODUCTS = [
     useLabel: "Cítricos y frutos suaves",
     type: "aromaterapia",
     typeLabel: "Aromaterapia",
-    origin: "ambar",
-    originLabel: "Vidrio ámbar",
     tags: ["vainilla", "vela mini", "60 g", "cera vegetal"],
     short: "Versión mini de la vela de soya de vainilla, 60 g.",
     description:
@@ -362,12 +325,11 @@ export const PRODUCTS = [
     ],
     instructions:
       "Recorta la mecha a 5 mm antes de cada uso. Enciéndela sobre una superficie resistente al calor, lejos de corrientes de aire y materiales inflamables, sin dejarla sin supervisión. Apágala cuando quede menos de 1 cm de cera.",
-    rating: 4.8,
-    reviewsCount: 23,
     featured: false,
   },
   {
     id: "vela-mini-coco",
+    size: "60 g",
     kind: "product",
     badge: "Formato mini",
     name: "Mini vela de soya",
@@ -378,8 +340,6 @@ export const PRODUCTS = [
     useLabel: "Cálido y lácteo",
     type: "aromaterapia",
     typeLabel: "Aromaterapia",
-    origin: "ambar",
-    originLabel: "Vidrio ámbar",
     tags: ["coco", "vela mini", "60 g", "cera vegetal"],
     short: "Versión mini de la vela de soya de coco, 60 g.",
     description:
@@ -391,14 +351,13 @@ export const PRODUCTS = [
     ],
     instructions:
       "Recorta la mecha a 5 mm antes de cada uso. Enciéndela sobre una superficie resistente al calor, lejos de corrientes de aire y materiales inflamables, sin dejarla sin supervisión. Apágala cuando quede menos de 1 cm de cera.",
-    rating: 4.7,
-    reviewsCount: 15,
     featured: false,
   },
   {
     id: "balsamo-labial-coco-menta-jamaica",
+    size: "70 g",
     kind: "product",
-    badge: "Nuevo",
+    badge: "",
     name: "Bálsamo labial",
     scent: "Coco, menta y jamaica",
     price: 139,
@@ -407,8 +366,6 @@ export const PRODUCTS = [
     useLabel: "Frutal morado y floral",
     type: "labial",
     typeLabel: "Cuidado labial",
-    origin: "kraft",
-    originLabel: "Tubo kraft biodegradable",
     tags: ["coco", "menta", "jamaica", "bálsamo labial", "70 g"],
     short: "Bálsamo labial de coco, menta y jamaica, con extracto de flor de jamaica.",
     description:
@@ -416,18 +373,17 @@ export const PRODUCTS = [
     benefits: [
       "Hidrata labios resecos con una capa protectora ligera.",
       "Extracto de flor de jamaica junto al coco y la menta.",
-      "Presentación de 70 g en tubo kraft biodegradable.",
+      "Presentación de 70 g.",
     ],
     instructions:
       "Aplica directamente sobre los labios las veces que lo necesites durante el día.",
-    rating: 4.7,
-    reviewsCount: 34,
     featured: false,
   },
   {
     id: "aceite-cabello-seco-coco-argan",
+    size: "50 mL",
     kind: "product",
-    badge: "Nuevo",
+    badge: "",
     name: "Aceite nutritivo cabello seco",
     scent: "Coco y argán",
     price: 249,
@@ -436,8 +392,6 @@ export const PRODUCTS = [
     useLabel: "Cálido y lácteo",
     type: "cabello",
     typeLabel: "Cuidado del cabello",
-    origin: "ambar",
-    originLabel: "Vidrio ámbar",
     tags: ["coco", "argán", "aceite capilar", "cabello seco", "50 ml"],
     short: "Aceite nutritivo con coco y argán para cabello seco, 50 ml.",
     description:
@@ -445,18 +399,17 @@ export const PRODUCTS = [
     benefits: [
       "Coco y argán para cabello seco o dañado por el calor.",
       "Vitamina E como antioxidante para la fibra capilar.",
-      "Frasco de 50 ml con gotero, rinde varias aplicaciones.",
+      "Presentación de 50 ml con gotero, rinde varias aplicaciones.",
     ],
     instructions:
       "Aplica unas gotas sobre cabello húmedo o seco, con énfasis en puntas. No requiere enjuague.",
-    rating: 4.8,
-    reviewsCount: 29,
     featured: true,
   },
   {
     id: "aceite-cabello-graso-uva",
+    size: "50 mL",
     kind: "product",
-    badge: "Recomendado",
+    badge: "",
     name: "Aceite nutritivo cabello graso",
     scent: "Pepita de uva",
     price: 249,
@@ -465,8 +418,6 @@ export const PRODUCTS = [
     useLabel: "Frutal morado y floral",
     type: "cabello",
     typeLabel: "Cuidado del cabello",
-    origin: "ambar",
-    originLabel: "Vidrio ámbar",
     tags: ["pepita de uva", "aceite capilar", "cabello graso", "50 ml"],
     short: "Aceite nutritivo con pepita de uva para cabello graso, 50 ml.",
     description:
@@ -474,18 +425,17 @@ export const PRODUCTS = [
     benefits: [
       "Aceite de pepita de uva y jojoba, de textura ligera, para cuero cabelludo con tendencia grasa.",
       "Vitamina E como antioxidante para la fibra capilar.",
-      "Frasco de 50 ml con gotero, rinde varias aplicaciones.",
+      "Presentación de 50 ml con gotero, rinde varias aplicaciones.",
     ],
     instructions:
       "Aplica de 2 a 4 gotas sobre el cabello limpio, seco o húmedo, concentrándote en medios y puntas. No enjuagar.",
-    rating: 4.6,
-    reviewsCount: 22,
     featured: false,
   },
   {
     id: "cera-cabello-ceja",
+    size: "70 g",
     kind: "product",
-    badge: "Nuevo",
+    badge: "",
     name: "Cera para cabello y ceja",
     scent: "Cera de abeja y romero",
     price: 179,
@@ -494,8 +444,6 @@ export const PRODUCTS = [
     useLabel: "Cítricos y frutos suaves",
     type: "cabello",
     typeLabel: "Cuidado del cabello",
-    origin: "lata",
-    originLabel: "Lata metálica",
     tags: ["cera de abeja", "romero", "cabello", "ceja", "70 g"],
     short: "Cera de abeja y romero para controlar frizz en cabello y dar forma a la ceja.",
     description:
@@ -503,18 +451,17 @@ export const PRODUCTS = [
     benefits: [
       "Cera de abeja y romero para fijar sin dejar residuo pesado.",
       "Un solo producto para dar forma al cabello y a la ceja.",
-      "Lata metálica de 70 g, fácil de llevar.",
+      "Presentación de 70 g, fácil de llevar.",
     ],
     instructions:
       "Calienta una pequeña cantidad entre los dedos y aplica sobre cabello seco o húmedo, o sobre la ceja para darle forma.",
-    rating: 4.7,
-    reviewsCount: 18,
     featured: false,
   },
   {
     id: "crema-manos-mango",
+    size: "150 g",
     kind: "product",
-    badge: "Favorita de clientas",
+    badge: "",
     name: "Crema hidratante para manos",
     scent: "Mango",
     price: 179,
@@ -523,8 +470,6 @@ export const PRODUCTS = [
     useLabel: "Cítricos y frutos suaves",
     type: "corporal",
     typeLabel: "Cuidado corporal",
-    origin: "lata",
-    originLabel: "Lata metálica",
     tags: ["mango", "crema de manos", "150 g"],
     short: "Crema hidratante de manos con mango, en lata de 150 g.",
     description:
@@ -532,18 +477,17 @@ export const PRODUCTS = [
     benefits: [
       "Manteca de mango para manos resecas o agrietadas.",
       "Absorción rápida, no deja sensación grasosa.",
-      "Lata metálica de 150 g, cómoda para bolso o escritorio.",
+      "Presentación de 150 g, cómoda para bolso o escritorio.",
     ],
     instructions:
       "Aplica una pequeña cantidad sobre las manos y masajea hasta absorber por completo. Usa tantas veces al día como lo necesites.",
-    rating: 4.8,
-    reviewsCount: 37,
     featured: false,
   },
   {
     id: "manteca-mango-coco",
+    size: "230 g",
     kind: "product",
-    badge: "Nuevo",
+    badge: "",
     name: "Manteca corporal",
     scent: "Mango y coco",
     price: 259,
@@ -552,8 +496,6 @@ export const PRODUCTS = [
     useLabel: "Cálido y lácteo",
     type: "corporal",
     typeLabel: "Cuidado corporal",
-    origin: "ambar",
-    originLabel: "Vidrio ámbar",
     tags: ["mango", "coco", "manteca corporal", "230 g"],
     short: "Manteca corporal densa de mango y coco para piel muy seca, 230 g.",
     description:
@@ -565,14 +507,13 @@ export const PRODUCTS = [
     ],
     instructions:
       "Aplica una pequeña cantidad sobre la piel y masajea hasta su completa absorción. Ideal para usar una vez a la semana en zonas secas como codos, rodillas y talones.",
-    rating: 4.8,
-    reviewsCount: 26,
     featured: false,
   },
   {
     id: "desodorante-bergamota-arbol-te",
+    size: "100 mL",
     kind: "product",
-    badge: "Recomendado",
+    badge: "",
     name: "Desodorante",
     scent: "Bergamota y árbol de té",
     price: 199,
@@ -581,8 +522,6 @@ export const PRODUCTS = [
     useLabel: "Verde mentolado y cítrico",
     type: "corporal",
     typeLabel: "Cuidado corporal",
-    origin: "ambar",
-    originLabel: "Vidrio ámbar",
     tags: ["bergamota", "árbol de té", "desodorante", "100 ml"],
     short: "Desodorante natural de bergamota y árbol de té, 100 ml.",
     description:
@@ -590,18 +529,17 @@ export const PRODUCTS = [
     benefits: [
       "Árbol de té con propiedades naturales purificantes.",
       "Aroma fresco a bergamota, no empalagoso.",
-      "Frasco de 100 ml en vidrio ámbar.",
+      "Presentación de 100 ml.",
     ],
     instructions:
       "Aplica sobre axilas limpias y secas. Deja secar antes de vestirte.",
-    rating: 4.6,
-    reviewsCount: 33,
     featured: false,
   },
   {
     id: "desodorante-lavanda-toronja",
+    size: "100 mL",
     kind: "product",
-    badge: "Nuevo",
+    badge: "",
     name: "Desodorante",
     scent: "Lavanda y toronja",
     price: 199,
@@ -610,8 +548,6 @@ export const PRODUCTS = [
     useLabel: "Frutal morado y floral",
     type: "corporal",
     typeLabel: "Cuidado corporal",
-    origin: "ambar",
-    originLabel: "Vidrio ámbar",
     tags: ["lavanda", "toronja", "desodorante", "100 ml"],
     short: "Desodorante natural de lavanda y toronja, 100 ml.",
     description:
@@ -619,18 +555,17 @@ export const PRODUCTS = [
     benefits: [
       "Lavanda con efecto calmante para piel sensible de axila.",
       "Toque cítrico de toronja, aroma no empalagoso.",
-      "Frasco de 100 ml en vidrio ámbar.",
+      "Presentación de 100 ml.",
     ],
     instructions:
       "Aplica sobre axilas limpias y secas. Deja secar antes de vestirte.",
-    rating: 4.7,
-    reviewsCount: 28,
     featured: false,
   },
   {
     id: "crema-facial-neroli",
+    size: "50 g",
     kind: "product",
-    badge: "Edición limitada",
+    badge: "",
     name: "Crema facial de noche",
     scent: "Neroli y concha nácar",
     price: 349,
@@ -639,8 +574,6 @@ export const PRODUCTS = [
     useLabel: "Verde mentolado y cítrico",
     type: "facial",
     typeLabel: "Cuidado facial",
-    origin: "cristal",
-    originLabel: "Cristal con tapa plateada",
     tags: ["neroli", "concha nácar", "vitamina c", "antimanchas", "uso nocturno"],
     short: "Crema facial de noche con neroli, concha nácar y vitamina C, para manchas.",
     description:
@@ -648,18 +581,17 @@ export const PRODUCTS = [
     benefits: [
       "Complejo con neroli, concha nácar y vitamina C.",
       "Formulada para uso exclusivo por las noches.",
-      "Frasco de 50 ml con tapa plateada.",
+      "Presentación de 50 ml con tapa plateada.",
     ],
     instructions:
       "Aplica sobre rostro limpio y seco antes de dormir. Usa la cantidad de una moneda pequeña.",
-    rating: 4.9,
-    reviewsCount: 21,
     featured: false,
   },
   {
     id: "mascarilla-arcilla-roja-lavanda",
+    size: "60 g",
     kind: "product",
-    badge: "Nuevo",
+    badge: "",
     name: "Mascarilla facial",
     scent: "Arcilla roja y lavanda",
     price: 219,
@@ -668,8 +600,6 @@ export const PRODUCTS = [
     useLabel: "Frutal morado y floral",
     type: "facial",
     typeLabel: "Cuidado facial",
-    origin: "lata",
-    originLabel: "Lata metálica",
     tags: ["arcilla roja", "lavanda", "mascarilla", "60 g"],
     short: "Mascarilla de arcilla roja y lavanda para piel sensible, 60 g.",
     description:
@@ -677,18 +607,17 @@ export const PRODUCTS = [
     benefits: [
       "Arcilla roja, más suave que la arcilla verde tradicional.",
       "Lavanda con efecto calmante para piel reactiva.",
-      "Lata metálica de 60 g, rinde varias mascarillas.",
+      "Presentación de 60 g, rinde varias mascarillas.",
     ],
     instructions:
       "Aplica una capa uniforme sobre el rostro limpio, evitando el área de los ojos. Deja actuar de 10 a 15 minutos y enjuaga con agua tibia. Úsala una vez por semana.",
-    rating: 4.7,
-    reviewsCount: 24,
     featured: false,
   },
   {
     id: "mascarilla-arcilla-te-verde",
+    size: "60 g",
     kind: "product",
-    badge: "Favorita de clientas",
+    badge: "",
     name: "Mascarilla facial",
     scent: "Arcilla verde y té verde",
     price: 219,
@@ -697,8 +626,6 @@ export const PRODUCTS = [
     useLabel: "Verde mentolado y cítrico",
     type: "facial",
     typeLabel: "Cuidado facial",
-    origin: "lata",
-    originLabel: "Lata metálica",
     tags: ["arcilla verde", "té verde", "mascarilla", "60 g"],
     short: "Mascarilla de arcilla verde y té verde para piel mixta o grasa, 60 g.",
     description:
@@ -706,18 +633,17 @@ export const PRODUCTS = [
     benefits: [
       "Arcilla verde para absorber el exceso de grasa.",
       "Té verde como antioxidante natural.",
-      "Lata metálica de 60 g, rinde varias mascarillas.",
+      "Presentación de 60 g, rinde varias mascarillas.",
     ],
     instructions:
       "Aplica una capa uniforme sobre el rostro limpio, evitando el área de los ojos. Deja actuar de 10 a 15 minutos y enjuaga con agua tibia. Úsala una vez por semana.",
-    rating: 4.8,
-    reviewsCount: 31,
     featured: true,
   },
   {
     id: "enjuague-bucal-hierbabuena",
+    size: "473 mL",
     kind: "product",
-    badge: "Recomendado",
+    badge: "",
     name: "Enjuague bucal",
     scent: "Hierbabuena",
     price: 189,
@@ -726,27 +652,24 @@ export const PRODUCTS = [
     useLabel: "Verde mentolado y cítrico",
     type: "bucal",
     typeLabel: "Cuidado bucal",
-    origin: "transparente",
-    originLabel: "Vidrio transparente",
     tags: ["hierbabuena", "enjuague bucal", "473 ml"],
     short: "Enjuague bucal de hierbabuena, frasco de 473 ml.",
     description:
       "Enjuague bucal con hierbabuena, formulado como parte de la línea de cuidado bucal de Yoga Verde.",
     benefits: [
       "Hierbabuena para frescura duradera en boca y aliento.",
-      "Frasco de 473 ml, rinde varias semanas de uso.",
+      "Presentación de 473 ml, rinde varias semanas de uso.",
       "Complementa el cepillado diario.",
     ],
     instructions:
       "Agita bien el frasco antes de cada uso. Toma un sorbo de aproximadamente 10 mL, enjuaga la boca de 30 segundos a 1 minuto y escupe. No es necesario enjuagar con agua después. No ingerir.",
-    rating: 4.6,
-    reviewsCount: 20,
     featured: true,
   },
   {
     id: "pasta-dientes-carbon-menta",
+    size: "100 mL",
     kind: "product",
-    badge: "Recomendado",
+    badge: "",
     name: "Pasta de dientes",
     scent: "Carbón activado y menta",
     price: 159,
@@ -755,8 +678,6 @@ export const PRODUCTS = [
     useLabel: "Verde mentolado y cítrico",
     type: "bucal",
     typeLabel: "Cuidado bucal",
-    origin: "tubo",
-    originLabel: "Frasco",
     tags: ["carbón activado", "menta", "pasta de dientes", "100 ml"],
     short: "Pasta de dientes de carbón activado y menta, tubo de 100 ml.",
     description:
@@ -768,12 +689,11 @@ export const PRODUCTS = [
     ],
     instructions:
       "Toma una pequeña cantidad con una espátula o cuchara limpia y aplícala sobre el cepillo seco o húmedo. Cepilla en movimientos circulares durante 2 minutos y enjuaga con agua.",
-    rating: 4.5,
-    reviewsCount: 27,
     featured: false,
   },
   {
     id: "perfume-canino-lavanda-sandalo",
+    size: "100 mL",
     kind: "product",
     badge: "Para tu mascota",
     name: "Perfume para canino",
@@ -784,8 +704,6 @@ export const PRODUCTS = [
     useLabel: "Frutal morado y floral",
     type: "mascota",
     typeLabel: "Para tu mascota",
-    origin: "ambar",
-    originLabel: "Vidrio ámbar",
     tags: ["lavanda", "sándalo", "perfume canino", "mascota", "100 ml"],
     short: "Perfume para perros con lavanda y sándalo, formulado para uso externo.",
     description:
@@ -793,12 +711,10 @@ export const PRODUCTS = [
     benefits: [
       "Fórmula pensada específicamente para el pelaje canino.",
       "Aroma suave a lavanda y sándalo, sin ser invasivo para el olfato del perro.",
-      "Frasco de 100 ml en vidrio ámbar.",
+      "Presentación de 100 ml.",
     ],
     instructions:
       "Rocía sobre el pelaje seco o húmedo, manteniendo una distancia de 15 a 20 cm. No enjuagar.",
-    rating: 4.6,
-    reviewsCount: 12,
     featured: false,
   },
 ];
@@ -806,6 +722,7 @@ export const PRODUCTS = [
 export const KITS = [
   {
     id: "kit-ritual-facial",
+    items: ["agua-micelar-manzanilla", "crema-facial-chabacano", "contorno-de-ojos-lavanda"],
     kind: "kit",
     badge: "Kit",
     name: "Kit Ritual Facial",
@@ -815,8 +732,6 @@ export const KITS = [
     useLabel: "Cítricos y frutos suaves",
     type: "kit",
     typeLabel: "Kit facial",
-    origin: "kit",
-    originLabel: "Kit Yoga Verde",
     tags: ["kit", "rutina facial", "3 piezas"],
     short: "Agua micelar, crema facial y contorno de ojos para una rutina completa.",
     description:
@@ -828,12 +743,11 @@ export const KITS = [
     ],
     instructions:
       "Usa el agua micelar por la mañana y por la noche, y la crema facial después de limpiar. El contorno de ojos se aplica solo por las noches, como último paso.",
-    rating: 4.9,
-    reviewsCount: 47,
     featured: true,
   },
   {
     id: "kit-cuerpo-nutrido",
+    items: ["crema-corporal-leche-de-coco", "mousse-corporal-uva"],
     kind: "kit",
     badge: "Kit",
     name: "Kit Cuerpo Nutrido",
@@ -843,8 +757,6 @@ export const KITS = [
     useLabel: "Cálido y lácteo",
     type: "kit",
     typeLabel: "Kit corporal",
-    origin: "kit",
-    originLabel: "Kit Yoga Verde",
     tags: ["kit", "cuidado corporal", "2 piezas"],
     short: "Crema corporal de leche de coco y mousse corporal de uva.",
     description:
@@ -856,12 +768,11 @@ export const KITS = [
     ],
     instructions:
       "Alterna ambas texturas según tu piel: la crema para zonas muy secas y el mousse para el resto del cuerpo.",
-    rating: 4.8,
-    reviewsCount: 39,
     featured: true,
   },
   {
     id: "kit-duo-velas",
+    items: ["vela-soya-vainilla", "vela-soya-bergamota"],
     kind: "kit",
     badge: "Kit",
     name: "Dúo de Velas de Soya",
@@ -871,10 +782,8 @@ export const KITS = [
     useLabel: "Verde mentolado y cítrico",
     type: "kit",
     typeLabel: "Kit aromaterapia",
-    origin: "kit",
-    originLabel: "Kit Yoga Verde",
     tags: ["kit", "velas de soya", "2 piezas"],
-    short: "Vela de vainilla y vela de bergamota, cera de soya en vidrio ámbar.",
+    short: "Vela de vainilla y vela de bergamota, cera de soya.",
     description:
       "Las dos velas de soya de Yoga Verde en un solo pedido: vainilla para las noches y bergamota para el día. Ideal para regalar.",
     benefits: [
@@ -884,12 +793,11 @@ export const KITS = [
     ],
     instructions:
       "Recorta la mecha a 5 mm antes de cada uso y enciende cada vela sobre una superficie resistente al calor, lejos de corrientes de aire. Apágala cuando quede menos de 1 cm de cera.",
-    rating: 4.9,
-    reviewsCount: 31,
     featured: false,
   },
   {
     id: "kit-esencial-diario",
+    items: ["desmaquillante-almendra-dulce", "balsamo-labial-coco-menta"],
     kind: "kit",
     badge: "Kit",
     name: "Kit Esencial Diario",
@@ -899,12 +807,10 @@ export const KITS = [
     useLabel: "Cítricos y frutos suaves",
     type: "kit",
     typeLabel: "Kit esencial",
-    origin: "kit",
-    originLabel: "Kit Yoga Verde",
     tags: ["kit", "rutina diaria", "2 piezas"],
     short: "Desmaquillante de almendra dulce y bálsamo labial de coco y menta.",
     description:
-      "Dos básicos para todos los días: un desmaquillante para ojos de almendra dulce y un bálsamo labial de coco y menta en tubo kraft.",
+      "Dos básicos para todos los días: un desmaquillante para ojos de almendra dulce y un bálsamo labial de coco y menta.",
     benefits: [
       "Incluye desmaquillante de almendra dulce y bálsamo labial de coco y menta.",
       "Pensado como primera compra o regalo pequeño.",
@@ -912,12 +818,11 @@ export const KITS = [
     ],
     instructions:
       "Usa el desmaquillante al final del día y el bálsamo labial las veces que lo necesites.",
-    rating: 4.7,
-    reviewsCount: 28,
     featured: false,
   },
   {
     id: "kit-cabello-nutrido",
+    items: ["aceite-cabello-seco-coco-argan", "cera-cabello-ceja"],
     kind: "kit",
     badge: "Kit",
     name: "Kit Cabello Nutrido",
@@ -927,8 +832,6 @@ export const KITS = [
     useLabel: "Cálido y lácteo",
     type: "kit",
     typeLabel: "Kit cabello",
-    origin: "kit",
-    originLabel: "Kit Yoga Verde",
     tags: ["kit", "cuidado del cabello", "2 piezas"],
     short: "Aceite nutritivo de coco y argán y cera para cabello y ceja.",
     description:
@@ -940,12 +843,11 @@ export const KITS = [
     ],
     instructions:
       "Usa el aceite sobre puntas después de lavar y la cera sobre cabello seco o ceja para dar forma durante el día.",
-    rating: 4.7,
-    reviewsCount: 16,
     featured: false,
   },
   {
     id: "kit-sonrisa-natural",
+    items: ["pasta-dientes-carbon-menta", "enjuague-bucal-hierbabuena"],
     kind: "kit",
     badge: "Kit",
     name: "Kit Sonrisa Natural",
@@ -955,8 +857,6 @@ export const KITS = [
     useLabel: "Verde mentolado y cítrico",
     type: "kit",
     typeLabel: "Kit bucal",
-    origin: "kit",
-    originLabel: "Kit Yoga Verde",
     tags: ["kit", "cuidado bucal", "2 piezas"],
     short: "Pasta de dientes de carbón activado y menta, y enjuague bucal de hierbabuena.",
     description:
@@ -968,8 +868,6 @@ export const KITS = [
     ],
     instructions:
       "Cepilla con la pasta dos veces al día. Después, toma un sorbo de aproximadamente 10 mL del enjuague, mantenlo de 30 segundos a 1 minuto y escupe.",
-    rating: 4.6,
-    reviewsCount: 11,
     featured: false,
   },
 ];
@@ -1034,23 +932,3 @@ export const SHOP_NEEDS = [
   },
 ];
 
-export const TESTIMONIALS = [
-  {
-    quote:
-      "El agua micelar de manzanilla es justo lo que buscaba: limpia bien y no deja la piel jalada. Pedí también el bálsamo labial y llegó todo bien empacado.",
-    name: "María P.",
-    location: "Monterrey",
-  },
-  {
-    quote:
-      "Compré el Kit Ritual Facial completo. Se nota que cada producto es real, con su envase y su aroma propio, no solo fotos bonitas.",
-    name: "Sofía R.",
-    location: "Querétaro",
-  },
-  {
-    quote:
-      "Las velas de soya duran bastante y el aroma no es empalagoso. La tienda ahora es mucho más fácil de recorrer desde el celular.",
-    name: "Daniela C.",
-    location: "CDMX",
-  },
-];
