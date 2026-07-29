@@ -19,7 +19,7 @@ export const PRODUCTS = [
     id: "desmaquillante-almendra-dulce",
     kind: "product",
     badge: "Más vendido",
-    name: "Desmaquillante",
+    name: "Desmaquillante para ojos",
     scent: "Almendra dulce",
     price: 189,
     image: "/yoga-verde/assets/products/desmaquillante-almendra-dulce.jpg",
@@ -30,16 +30,17 @@ export const PRODUCTS = [
     origin: "ambar",
     originLabel: "Vidrio ámbar",
     tags: ["almendra dulce", "desmaquillante", "50 ml", "piel sensible"],
-    short: "Desmaquillante en spray con aceite de almendra dulce para piel sensible.",
+    size: "50 mL",
+    short: "Desmaquillante para ojos con aceite de almendra dulce y ricino, para piel sensible.",
     description:
       "Un desmaquillante ligero con aceite de almendra dulce, pensado para retirar maquillaje e impurezas sin resecar la piel del rostro.",
     benefits: [
       "Retira maquillaje y suciedad del día sin dejar sensación grasosa.",
       "Aceite de almendra dulce para piel sensible o reactiva.",
-      "Presentación en spray de 50 ml, fácil de dosificar.",
+      "Presentación de 50 mL; se aplican unas gotas, sin algodón.",
     ],
     instructions:
-      "Aplica dos o tres disparos sobre un algodón y limpia el rostro con movimientos suaves. Retira con agua tibia si lo prefieres.",
+      "Aplica unas gotas sobre la piel limpia y masajea hasta su completa absorción. Ideal para uso diario en rostro y cuerpo.",
     rating: 4.8,
     reviewsCount: 96,
     featured: true,
@@ -88,12 +89,13 @@ export const PRODUCTS = [
     origin: "cristal",
     originLabel: "Cristal con tapa plateada",
     tags: ["chabacano", "ácido hialurónico", "hidratación", "uso nocturno"],
-    short: "Crema facial con ácido hialurónico y chabacano para hidratar a fondo.",
+    short: "Crema facial con ácido hialurónico y aceite de hueso de chabacano.",
+    size: "50 g",
     description:
-      "Una crema facial con ácido hialurónico y extracto de chabacano, formulada para hidratar y dejar la piel visiblemente más suave.",
+      "Una crema facial con ácido hialurónico y aceite de hueso de chabacano, formulada para hidratar y dejar la piel visiblemente más suave.",
     benefits: [
       "Ácido hialurónico para hidratación profunda.",
-      "Extracto de chabacano con textura ligera, no grasosa.",
+      "Aceite de hueso de chabacano, de textura ligera y no grasosa.",
       "Ideal para uso diario o como parte de tu rutina nocturna.",
     ],
     instructions:
@@ -116,17 +118,18 @@ export const PRODUCTS = [
     typeLabel: "Cuidado facial",
     origin: "ambar",
     originLabel: "Vidrio ámbar",
-    tags: ["lavanda", "contorno de ojos", "10 ml", "roll-on"],
-    short: "Contorno de ojos roll-on con lavanda para el área más delicada del rostro.",
+    tags: ["lavanda", "contorno de ojos", "10 ml", "uso nocturno"],
+    size: "10 mL",
+    short: "Aceite de contorno de ojos con lavanda y rosa mosqueta, de uso nocturno.",
     description:
-      "Un contorno de ojos en formato roll-on con lavanda, pensado para aplicar con facilidad sobre la zona más delicada del rostro.",
+      "Una mezcla de aceites de almendra dulce, rosa mosqueta y jojoba con lavanda, para la zona de ojeras.",
     benefits: [
-      "Aplicador roll-on para dosificar sin desperdiciar producto.",
+      "Mezcla de aceites de almendra dulce, rosa mosqueta y jojoba con lavanda.",
       "Lavanda con efecto calmante para ojeras y piel cansada.",
       "Formato de 10 ml, cómodo para viajar.",
     ],
     instructions:
-      "Aplica pequeños toques alrededor del contorno de ojos por la mañana y por la noche. Evita el contacto directo con el ojo.",
+      "Agita el frasco antes de cada aplicación. Aplica una cantidad adecuada sobre la piel limpia en la zona de ojeras, solo por las noches. Evita el contacto directo con el ojo.",
     rating: 4.7,
     reviewsCount: 52,
     featured: false,
@@ -155,7 +158,7 @@ export const PRODUCTS = [
       "Tarro de 230 g, rinde varias semanas de uso diario.",
     ],
     instructions:
-      "Aplica sobre la piel húmeda después del baño y masajea hasta absorber por completo.",
+      "Aplica una cantidad adecuada sobre la piel limpia y masajea suavemente hasta su completa absorción. Ideal para uso diario en el cuerpo.",
     rating: 4.8,
     reviewsCount: 103,
     featured: true,
@@ -242,7 +245,7 @@ export const PRODUCTS = [
       "Tarro de vidrio ámbar reutilizable de 230 g.",
     ],
     instructions:
-      "Enciende la vela sobre una superficie plana y resistente al calor. No la dejes encendida más de 4 horas seguidas.",
+      "Recorta la mecha a 5 mm antes de cada uso. Enciéndela sobre una superficie resistente al calor, lejos de corrientes de aire y materiales inflamables, sin dejarla sin supervisión. Apágala cuando quede menos de 1 cm de cera.",
     rating: 4.9,
     reviewsCount: 112,
     featured: true,
@@ -264,14 +267,14 @@ export const PRODUCTS = [
     tags: ["bergamota", "vela de soya", "230 g", "cera vegetal"],
     short: "Vela de cera de soya con aroma a bergamota, en tarro de vidrio ámbar.",
     description:
-      "Vela de cera de soya con aroma fresco a bergamota y azahar, pensada para espacios de trabajo o de descanso.",
+      "Vela de cera de soya con aroma fresco a bergamota, pensada para espacios de trabajo o de descanso.",
     benefits: [
       "Cera de soya vegetal de combustión limpia.",
       "Aroma fresco a bergamota, menos dulce que la vainilla.",
       "Tarro de vidrio ámbar reutilizable de 230 g.",
     ],
     instructions:
-      "Enciende la vela sobre una superficie plana y resistente al calor. No la dejes encendida más de 4 horas seguidas.",
+      "Recorta la mecha a 5 mm antes de cada uso. Enciéndela sobre una superficie resistente al calor, lejos de corrientes de aire y materiales inflamables, sin dejarla sin supervisión. Apágala cuando quede menos de 1 cm de cera.",
     rating: 4.8,
     reviewsCount: 67,
     featured: false,
@@ -300,7 +303,7 @@ export const PRODUCTS = [
       "Tarro de vidrio ámbar reutilizable de 230 g.",
     ],
     instructions:
-      "Enciende la vela sobre una superficie plana y resistente al calor. No la dejes encendida más de 4 horas seguidas.",
+      "Recorta la mecha a 5 mm antes de cada uso. Enciéndela sobre una superficie resistente al calor, lejos de corrientes de aire y materiales inflamables, sin dejarla sin supervisión. Apágala cuando quede menos de 1 cm de cera.",
     rating: 4.8,
     reviewsCount: 41,
     featured: false,
@@ -329,7 +332,7 @@ export const PRODUCTS = [
       "Mismo aroma fresco a bergamota que la vela de 230 g.",
     ],
     instructions:
-      "Enciende la vela sobre una superficie plana y resistente al calor. No la dejes encendida más de 2 horas seguidas por su tamaño.",
+      "Recorta la mecha a 5 mm antes de cada uso. Enciéndela sobre una superficie resistente al calor, lejos de corrientes de aire y materiales inflamables, sin dejarla sin supervisión. Apágala cuando quede menos de 1 cm de cera.",
     rating: 4.7,
     reviewsCount: 19,
     featured: false,
@@ -358,7 +361,7 @@ export const PRODUCTS = [
       "Mismo aroma cálido a vainilla que la vela de 230 g.",
     ],
     instructions:
-      "Enciende la vela sobre una superficie plana y resistente al calor. No la dejes encendida más de 2 horas seguidas por su tamaño.",
+      "Recorta la mecha a 5 mm antes de cada uso. Enciéndela sobre una superficie resistente al calor, lejos de corrientes de aire y materiales inflamables, sin dejarla sin supervisión. Apágala cuando quede menos de 1 cm de cera.",
     rating: 4.8,
     reviewsCount: 23,
     featured: false,
@@ -387,7 +390,7 @@ export const PRODUCTS = [
       "Mismo aroma cálido a coco que la vela de 230 g.",
     ],
     instructions:
-      "Enciende la vela sobre una superficie plana y resistente al calor. No la dejes encendida más de 2 horas seguidas por su tamaño.",
+      "Recorta la mecha a 5 mm antes de cada uso. Enciéndela sobre una superficie resistente al calor, lejos de corrientes de aire y materiales inflamables, sin dejarla sin supervisión. Apágala cuando quede menos de 1 cm de cera.",
     rating: 4.7,
     reviewsCount: 15,
     featured: false,
@@ -469,12 +472,12 @@ export const PRODUCTS = [
     description:
       "Aceite capilar más ligero, con pepita de uva y vitamina E, pensado para cuero cabelludo con tendencia grasa.",
     benefits: [
-      "Pepita de uva de textura ligera, no apelmaza raíz ni cuero cabelludo.",
+      "Aceite de pepita de uva y jojoba, de textura ligera, para cuero cabelludo con tendencia grasa.",
       "Vitamina E como antioxidante para la fibra capilar.",
       "Frasco de 50 ml con gotero, rinde varias aplicaciones.",
     ],
     instructions:
-      "Aplica unas gotas sobre puntas y medios, evitando la raíz. No requiere enjuague.",
+      "Aplica de 2 a 4 gotas sobre el cabello limpio, seco o húmedo, concentrándote en medios y puntas. No enjuagar.",
     rating: 4.6,
     reviewsCount: 22,
     featured: false,
@@ -499,7 +502,7 @@ export const PRODUCTS = [
       "Cera sólida de abeja y romero en lata de 70 g, para controlar el frizz del cabello o dar forma a la ceja.",
     benefits: [
       "Cera de abeja y romero para fijar sin dejar residuo pesado.",
-      "Un solo producto para cabello corto y ceja.",
+      "Un solo producto para dar forma al cabello y a la ceja.",
       "Lata metálica de 70 g, fácil de llevar.",
     ],
     instructions:
@@ -561,7 +564,7 @@ export const PRODUCTS = [
       "Tarro de vidrio ámbar reutilizable de 230 g.",
     ],
     instructions:
-      "Aplica sobre la piel húmeda después del baño y masajea hasta absorber. Ideal para codos, rodillas y talones.",
+      "Aplica una pequeña cantidad sobre la piel y masajea hasta su completa absorción. Ideal para usar una vez a la semana en zonas secas como codos, rodillas y talones.",
     rating: 4.8,
     reviewsCount: 26,
     featured: false,
@@ -583,7 +586,7 @@ export const PRODUCTS = [
     tags: ["bergamota", "árbol de té", "desodorante", "100 ml"],
     short: "Desodorante natural de bergamota y árbol de té, 100 ml.",
     description:
-      "Desodorante en spray con bergamota y árbol de té, sin aluminio, pensado para uso diario.",
+      "Desodorante natural con bergamota y árbol de té, formulado con alumbre de potasio, glicerina y vitamina E, para uso diario.",
     benefits: [
       "Árbol de té con propiedades naturales purificantes.",
       "Aroma fresco a bergamota, no empalagoso.",
@@ -612,7 +615,7 @@ export const PRODUCTS = [
     tags: ["lavanda", "toronja", "desodorante", "100 ml"],
     short: "Desodorante natural de lavanda y toronja, 100 ml.",
     description:
-      "Desodorante en spray con lavanda y toronja, sin aluminio, con un aroma floral y cítrico más suave.",
+      "Desodorante natural con lavanda y toronja, formulado con alumbre de potasio, glicerina y vitamina E, con un aroma floral y cítrico más suave.",
     benefits: [
       "Lavanda con efecto calmante para piel sensible de axila.",
       "Toque cítrico de toronja, aroma no empalagoso.",
@@ -670,14 +673,14 @@ export const PRODUCTS = [
     tags: ["arcilla roja", "lavanda", "mascarilla", "60 g"],
     short: "Mascarilla de arcilla roja y lavanda para piel sensible, 60 g.",
     description:
-      "Mascarilla en polvo de arcilla roja y lavanda, pensada para piel sensible o con tendencia a enrojecerse.",
+      "Mascarilla lista para usar de arcilla roja y lavanda, pensada para piel sensible o con tendencia a enrojecerse.",
     benefits: [
       "Arcilla roja, más suave que la arcilla verde tradicional.",
       "Lavanda con efecto calmante para piel reactiva.",
       "Lata metálica de 60 g, rinde varias mascarillas.",
     ],
     instructions:
-      "Mezcla una cucharadita con agua hasta formar pasta. Aplica sobre rostro limpio, deja secar 10 minutos y enjuaga.",
+      "Aplica una capa uniforme sobre el rostro limpio, evitando el área de los ojos. Deja actuar de 10 a 15 minutos y enjuaga con agua tibia. Úsala una vez por semana.",
     rating: 4.7,
     reviewsCount: 24,
     featured: false,
@@ -699,14 +702,14 @@ export const PRODUCTS = [
     tags: ["arcilla verde", "té verde", "mascarilla", "60 g"],
     short: "Mascarilla de arcilla verde y té verde para piel mixta o grasa, 60 g.",
     description:
-      "Mascarilla en polvo de arcilla verde y té verde, pensada para piel mixta o con tendencia grasa.",
+      "Mascarilla lista para usar de arcilla verde y té verde, pensada para piel mixta o con tendencia grasa.",
     benefits: [
       "Arcilla verde para absorber el exceso de grasa.",
       "Té verde como antioxidante natural.",
       "Lata metálica de 60 g, rinde varias mascarillas.",
     ],
     instructions:
-      "Mezcla una cucharadita con agua hasta formar pasta. Aplica sobre rostro limpio, deja secar 10 minutos y enjuaga.",
+      "Aplica una capa uniforme sobre el rostro limpio, evitando el área de los ojos. Deja actuar de 10 a 15 minutos y enjuaga con agua tibia. Úsala una vez por semana.",
     rating: 4.8,
     reviewsCount: 31,
     featured: true,
@@ -735,7 +738,7 @@ export const PRODUCTS = [
       "Complementa el cepillado diario.",
     ],
     instructions:
-      "Enjuaga la boca con 15 ml durante 30 segundos después de cepillarte. No ingerir.",
+      "Agita bien el frasco antes de cada uso. Toma un sorbo de aproximadamente 10 mL, enjuaga la boca de 30 segundos a 1 minuto y escupe. No es necesario enjuagar con agua después. No ingerir.",
     rating: 4.6,
     reviewsCount: 20,
     featured: true,
@@ -753,7 +756,7 @@ export const PRODUCTS = [
     type: "bucal",
     typeLabel: "Cuidado bucal",
     origin: "tubo",
-    originLabel: "Tubo biodegradable",
+    originLabel: "Frasco",
     tags: ["carbón activado", "menta", "pasta de dientes", "100 ml"],
     short: "Pasta de dientes de carbón activado y menta, tubo de 100 ml.",
     description:
@@ -761,10 +764,10 @@ export const PRODUCTS = [
     benefits: [
       "Carbón activado para ayudar a remover manchas superficiales.",
       "Menta natural para aliento fresco.",
-      "Tubo biodegradable de 100 ml.",
+      "Presentación de 100 mL.",
     ],
     instructions:
-      "Usa una cantidad del tamaño de un chícharo dos veces al día, mañana y noche.",
+      "Toma una pequeña cantidad con una espátula o cuchara limpia y aplícala sobre el cepillo seco o húmedo. Cepilla en movimientos circulares durante 2 minutos y enjuaga con agua.",
     rating: 4.5,
     reviewsCount: 27,
     featured: false,
@@ -824,7 +827,7 @@ export const KITS = [
       "Precio de kit con ahorro frente a comprar cada pieza por separado.",
     ],
     instructions:
-      "Usa el agua micelar por la mañana y por la noche, la crema facial después de limpiar y el contorno de ojos como último paso.",
+      "Usa el agua micelar por la mañana y por la noche, y la crema facial después de limpiar. El contorno de ojos se aplica solo por las noches, como último paso.",
     rating: 4.9,
     reviewsCount: 47,
     featured: true,
@@ -880,7 +883,7 @@ export const KITS = [
       "Formato de regalo con dos aromas complementarios.",
     ],
     instructions:
-      "Enciende cada vela sobre una superficie plana y resistente al calor, sin dejarla encendida más de 4 horas seguidas.",
+      "Recorta la mecha a 5 mm antes de cada uso y enciende cada vela sobre una superficie resistente al calor, lejos de corrientes de aire. Apágala cuando quede menos de 1 cm de cera.",
     rating: 4.9,
     reviewsCount: 31,
     featured: false,
@@ -901,7 +904,7 @@ export const KITS = [
     tags: ["kit", "rutina diaria", "2 piezas"],
     short: "Desmaquillante de almendra dulce y bálsamo labial de coco y menta.",
     description:
-      "Dos básicos para todos los días: un desmaquillante suave de almendra dulce y un bálsamo labial de coco y menta en tubo kraft.",
+      "Dos básicos para todos los días: un desmaquillante para ojos de almendra dulce y un bálsamo labial de coco y menta en tubo kraft.",
     benefits: [
       "Incluye desmaquillante de almendra dulce y bálsamo labial de coco y menta.",
       "Pensado como primera compra o regalo pequeño.",
@@ -964,7 +967,7 @@ export const KITS = [
       "Precio de kit con ahorro frente a comprar cada pieza por separado.",
     ],
     instructions:
-      "Cepilla con la pasta dos veces al día y enjuaga con 15 ml del enjuague después de cada cepillado.",
+      "Cepilla con la pasta dos veces al día. Después, toma un sorbo de aproximadamente 10 mL del enjuague, mantenlo de 30 segundos a 1 minuto y escupe.",
     rating: 4.6,
     reviewsCount: 11,
     featured: false,
@@ -972,20 +975,21 @@ export const KITS = [
 ];
 
 export const BENEFIT_ITEMS = [
+  // Los tres primeros son las certificaciones impresas en las etiquetas reales.
   {
     icon: "eco",
-    title: "Activos botánicos",
-    copy: "Almendra, coco, uva y lavanda como activo principal de cada formulación.",
+    title: "Producto vegano",
+    copy: "Sin ingredientes de origen animal, cruelty free y libre de parabenos.",
   },
   {
-    icon: "package_2",
-    title: "Formulado en México",
-    copy: "Vidrio ámbar y cristal que protegen los activos de la luz y el oxígeno.",
+    icon: "science",
+    title: "Sin sulfatos",
+    copy: "Cada etiqueta declara la fórmula libre de sulfatos y parabenos.",
   },
   {
     icon: "local_florist",
-    title: "Rutina completa",
-    copy: "Rostro, cuerpo, cabello y labios dentro de un mismo sistema de cuidado.",
+    title: "Hecho en México",
+    copy: "Formulado y envasado en Puebla, con ingredientes de origen natural.",
   },
   {
     icon: "local_shipping",
