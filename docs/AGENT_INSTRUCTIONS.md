@@ -1,5 +1,14 @@
 # 🤖 Agent Instructions - Telegram Client Data Bot
 
+> **Este repositorio contiene más de un despliegue.** Este documento cubre el
+> **bot de Telegram** (Cloud Run). Si vas a tocar el sitio web bajo `site/`
+> (blueskytravelmx.com y la tienda Yoga Verde), su despliegue es distinto y
+> tiene trampas propias: lee **[docs/SITE_DEPLOYMENT.md](SITE_DEPLOYMENT.md)**
+> antes de desplegar.
+>
+> Resumen para el sitio: usa `site/scripts/deploy.sh` y **nunca** `rsync` ni
+> `scp -r` (fallan en silencio y han destruido el código en el servidor).
+
 ## Project Overview
 
 This is a **production Telegram bot** deployed on Google Cloud Run that provides instant client data lookups from Google Sheets for business teams. The bot is actively used by authorized users to search client information in real-time.
