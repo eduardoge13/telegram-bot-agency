@@ -66,6 +66,7 @@ const els = {
   cartUpsell: document.querySelector("[data-cart-upsell]"),
   modal: document.querySelector("[data-detail-modal]"),
   modalOverlay: document.querySelector("[data-modal-overlay]"),
+  pageContent: document.querySelector("[data-page-content]"),
   detailBadge: document.querySelector("[data-detail-badge]"),
   detailTitle: document.querySelector("[data-detail-title]"),
   detailDescription: document.querySelector("[data-detail-description]"),
@@ -484,6 +485,17 @@ function closeCart() {
   syncBodyLock();
 }
 
+function detailFocusableElements() {
+  if (!els.modal) return [];
+
+  return [...els.modal.querySelectorAll(
+    'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+  )].filter((element) => {
+    const styles = window.getComputedStyle(element);
+    return styles.visibility !== "hidden" && styles.display !== "none";
+  });
+}
+
 function openDetail(itemId) {
   const item = ITEM_INDEX.get(itemId);
   if (!item) return;
@@ -528,6 +540,9 @@ function openDetail(itemId) {
 
   els.modal?.classList.add("is-open");
   els.modalOverlay?.classList.add("is-open");
+  els.modal?.setAttribute("aria-hidden", "false");
+  els.pageContent?.setAttribute("aria-hidden", "true");
+  if (els.pageContent) els.pageContent.inert = true;
   document.body.classList.add("detail-open");
   syncBodyLock();
 
@@ -542,6 +557,9 @@ function closeDetail() {
   state.detailOpen = false;
   els.modal?.classList.remove("is-open");
   els.modalOverlay?.classList.remove("is-open");
+  els.modal?.setAttribute("aria-hidden", "true");
+  els.pageContent?.removeAttribute("aria-hidden");
+  if (els.pageContent) els.pageContent.inert = false;
   document.body.classList.remove("detail-open");
   syncBodyLock();
 
@@ -784,6 +802,26 @@ els.cartOverlay?.addEventListener("click", closeCart);
 els.modalOverlay?.addEventListener("click", closeDetail);
 
 document.addEventListener("keydown", (event) => {
+  if (state.detailOpen && event.key === "Tab") {
+    const focusable = detailFocusableElements();
+    if (focusable.length === 0) {
+      event.preventDefault();
+      els.modal?.focus({ preventScroll: true });
+      return;
+    }
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && (document.activeElement === first || document.activeElement === els.modal)) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && (document.activeElement === last || document.activeElement === els.modal)) {
+      event.preventDefault();
+      first.focus();
+    }
+    return;
+  }
+
   if (event.key !== "Escape") return;
 
   if (state.detailOpen) {

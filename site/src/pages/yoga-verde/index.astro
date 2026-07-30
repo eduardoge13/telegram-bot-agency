@@ -116,7 +116,7 @@ const storeData = {
   <body class="bg-surface text-on-surface selection:bg-secondary/20 selection:text-primary">
     <script id="yoga-verde-data" is:inline set:html={JSON.stringify(storeData)} type="application/json"></script>
 
-    <div class="min-h-screen bg-surface pb-28 md:pb-0">
+    <div class="min-h-screen bg-surface pb-28 md:pb-0" data-page-content>
       <div class="sticky top-0 z-[70]">
         <div class="bg-primary px-4 py-2 text-center text-[11px] font-semibold uppercase tracking-[0.22em] text-on-primary-container sm:text-xs">
           {ANNOUNCEMENT}
@@ -1072,6 +1072,7 @@ const storeData = {
     <div
       aria-labelledby="detail-title"
       aria-modal="true"
+      aria-hidden="true"
       class="detail-panel"
       data-detail-modal
       role="dialog"
@@ -1093,7 +1094,7 @@ const storeData = {
         <div class="mx-auto w-full max-w-[22rem] md:max-w-none">
           <img
             alt=""
-            class="mx-auto block aspect-[4/3] w-full rounded-[22px] bg-surface-container-lowest object-contain"
+            class="product-media mx-auto block aspect-[4/3] w-full rounded-[22px] bg-surface-container-lowest"
             data-detail-image
             src=""
           />

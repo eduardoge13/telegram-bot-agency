@@ -321,9 +321,16 @@ img {
    iteración anterior pueda volver a descentrarlo. */
 .product-media {
   display: block;
-  object-fit: contain;
-  object-position: center;
+  /* Los JPG reales traen margen blanco fotográfico. El marco recorta ese
+     margen de forma controlada, mantiene el producto centrado visualmente y
+     evita que cada tarjeta parezca vacía. */
+  object-fit: cover;
+  object-position: 50% 62%;
   margin-inline: auto;
+}
+
+.detail-panel .product-media {
+  object-position: 50% 100%;
 }
 
 /* Los overlays fijos (drawers, modal) no deben sumar ancho al documento

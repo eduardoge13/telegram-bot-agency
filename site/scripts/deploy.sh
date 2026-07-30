@@ -2,11 +2,8 @@
 #
 # Despliegue canónico del sitio (blueskytravelmx.com + yoga-verde).
 #
-# Esta es la ÚNICA ruta de despliegue soportada. No uses `rsync` ni `scp -r`:
-# ambos fallaron de forma silenciosa en este proyecto — reportaban éxito con
-# el árbol a medio copiar, dejando `src/` vacío y borrando `scripts/run-astro.mjs`,
-# lo que rompía el build en el servidor. Un solo tarball con checksum verificado
-# es atómico y comprobable.
+# Esta es la ÚNICA ruta de despliegue soportada. Un solo tarball con checksum
+# verificado se extrae a staging y se publica con tar, de forma comprobable.
 #
 # Uso:
 #   ./scripts/deploy.sh            # build local + despliegue
@@ -96,9 +93,10 @@ ssh_do "rm -rf $REMOTE_STAGE && mkdir -p $REMOTE_STAGE && tar -xzf $REMOTE_TAR -
 #    existe un subdirectorio `site/` huérfano que NO es el que sirve Docker.
 # ---------------------------------------------------------------------------
 say "Publicando en $REMOTE_DIR"
-ssh_do "sudo rsync -a --delete --exclude=site/ $REMOTE_STAGE/ $REMOTE_DIR/ \
-  && sudo chown -R deploy:deploy $REMOTE_DIR/scripts $REMOTE_DIR/src $REMOTE_DIR/public $REMOTE_DIR/deploy \
-  && rm -rf $REMOTE_STAGE $REMOTE_TAR"
+ssh_do "set -euo pipefail
+  sudo tar -C $REMOTE_STAGE -cf - . | sudo tar -C $REMOTE_DIR -xf -
+  sudo chown -R deploy:deploy $REMOTE_DIR/scripts $REMOTE_DIR/src $REMOTE_DIR/public $REMOTE_DIR/deploy
+  rm -rf $REMOTE_STAGE $REMOTE_TAR"
 
 say "docker compose build --no-cache"
 ssh_do "cd $REMOTE_DIR && sudo docker compose build --no-cache" 2>&1 | tail -3
