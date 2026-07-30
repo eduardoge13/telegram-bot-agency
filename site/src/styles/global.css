@@ -1,4 +1,16 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&family=Poppins:wght@500;600;700;800&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-brand-navy: #0a2a4a;
+  --color-brand-navy-deep: #061a30;
+  --color-brand-blue: #1466b8;
+  --color-brand-sky: #38a2e0;
+  --color-brand-coral: #ff6b4a;
+  --color-brand-coral-deep: #e5502f;
+  --font-display: 'Poppins', 'Manrope', sans-serif;
+  --font-body: 'Manrope', sans-serif;
+}
 
 :root {
   --bg: #07111a;

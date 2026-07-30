@@ -101,6 +101,33 @@ This is a **production Telegram bot** deployed on Google Cloud Run that provides
   - Prod: `prod_setup/prod_config.env` + `prod_setup/telegram_prod_token.txt`
 - **Never**: Hardcode sensitive values in this script
 
+## Yoga Verde Site Deployment Rule (Mandatory)
+
+Yoga Verde is the static storefront under `site/src/pages/yoga-verde/` and is
+served by the shared `bluesky-site` container on the VPS. When deploying this
+site, always package the `site/` directory as a single `.tar.gz` tarball,
+transfer that archive, extract it on the VPS, and rebuild/recreate the Docker
+Compose service.
+
+- Never use `rsync` for Yoga Verde deployments.
+- Never use recursive directory copies such as `scp -r`.
+- `scp` is permitted only for the single tarball artifact.
+- Exclude `.git`, `node_modules`, `.astro`, `dist`, `.env` files, tokens,
+  credentials, service-account JSON, private keys, and other secrets.
+- Stage/extract the archive under `/docker/blueskytravel-site` and run
+  `docker compose build` followed by `docker compose up -d` there.
+- Verify `docker compose ps` and
+  `https://yoga-verde.srv1175749.hstgr.cloud/` after deployment.
+- Read `docs/VPS_SERVICE_INVENTORY.md` and
+  `docs/VPS_CLIENT_ONE_PAGER_2026-06-15.md` before changing VPS state.
+- Do not deploy merely because a code change exists; deploy only when the
+  user explicitly requests it or the active workflow requires it.
+
+The current product/design brief for the storefront pass is kept in
+`docs/YOGA_VERDE_OPUS5_MOBILE_PREMIUM_PROMPT.md`.
+`docs/YOGA_VERDE_OPUS_PLAN_PROMPT.md` is an older historical brief; use the
+Opus 5 prompt for the active iteration.
+
 ## Response Format Specification
 
 All successful client lookups must return this **exact format**:
