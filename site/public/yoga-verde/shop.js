@@ -30,6 +30,8 @@ const MONEY = new Intl.NumberFormat("es-MX", {
 const useLabelMap = new Map(PRODUCTS.map((product) => [product.use, product.useLabel]));
 const typeLabelMap = new Map(PRODUCTS.map((product) => [product.type, product.typeLabel]));
 
+let lastDetailTrigger = null;
+
 const state = {
   search: "",
   useFilters: new Set(),
@@ -44,7 +46,7 @@ const state = {
 const els = {
   grid: document.querySelector("[data-products-grid]"),
   empty: document.querySelector("[data-empty-state]"),
-  count: document.querySelector("[data-product-count]"),
+  counts: document.querySelectorAll("[data-product-count], [data-product-count-filtered]"),
   activeFilters: document.querySelector("[data-active-filters]"),
   search: document.querySelector("[data-search-input]"),
   filtersDrawer: document.querySelector("[data-filters-drawer]"),
@@ -70,6 +72,10 @@ const els = {
   detailTags: document.querySelector("[data-detail-tags]"),
   detailBenefits: document.querySelector("[data-detail-benefits]"),
   detailInstructions: document.querySelector("[data-detail-instructions]"),
+  detailScent: document.querySelector("[data-detail-scent]"),
+  detailBody: document.querySelector(".detail-body"),
+  detailBenefitsBlock: document.querySelector("[data-detail-benefits-block]"),
+  detailInstructionsBlock: document.querySelector("[data-detail-instructions-block]"),
   detailPrice: document.querySelector("[data-detail-price]"),
   detailImage: document.querySelector("[data-detail-image]"),
   detailAdd: document.querySelector("[data-detail-add]"),
@@ -174,6 +180,28 @@ function cartTotals() {
   return { subtotal, shipping, tax, total, count };
 }
 
+// Un solo lugar decide si un valor es pintable. Evita que un campo vacío se
+// convierta en "undefined", en un separador suelto (" · Cuidado facial") o en
+// una pill en blanco.
+function clean(value) {
+  if (value === undefined || value === null) return "";
+  const text = String(value).trim();
+  return text === "undefined" || text === "null" ? "" : text;
+}
+
+// Muestra el elemento solo si su contenido existe; si no, lo oculta entero
+// para no dejar un encabezado sin cuerpo.
+function setText(el, value) {
+  if (!el) return "";
+  const text = clean(value);
+  el.textContent = text;
+  return text;
+}
+
+function toggleBlock(el, hasContent) {
+  if (el) el.hidden = !hasContent;
+}
+
 function detailTagMarkup(label) {
   return `<span class="rounded-full bg-surface-container-low px-4 py-2 text-sm font-medium text-on-surface-variant">${escapeHtml(label)}</span>`;
 }
@@ -184,7 +212,7 @@ function catalogCardMarkup(product) {
     <article class="group overflow-hidden rounded-[30px] bg-surface-container-lowest shadow-parchment transition-transform hover:-translate-y-1" style="--accent: ${escapeHtml(accent)}">
       <div class="relative overflow-hidden bg-surface-container-low p-4">
         ${product.badge ? `<span class="absolute left-4 top-4 z-10 rounded-full bg-surface px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-primary">${escapeHtml(product.badge)}</span>` : ""}
-        <img alt="${escapeHtml(product.name)} ${escapeHtml(product.scent || "")}" class="aspect-[4/3] w-full rounded-[24px] bg-surface-container-lowest object-contain p-1 transition duration-500 group-hover:scale-105" src="${escapeHtml(product.image)}" />
+        <img alt="${escapeHtml(product.name)} ${escapeHtml(product.scent || "")}" class="aspect-[4/3] product-media w-full rounded-[24px] bg-surface-container-lowest p-1 transition duration-500 group-hover:scale-105" src="${escapeHtml(product.image)}" />
       </div>
       <div class="p-5 sm:p-6">
         <p class="text-[11px] uppercase tracking-[0.22em] text-on-surface-variant">${escapeHtml(product.typeLabel)}</p>
@@ -325,8 +353,10 @@ function syncFilterControls() {
 function renderProducts() {
   const filtered = getFilteredProducts();
 
-  if (els.count) {
-    els.count.textContent = String(filtered.length);
+  if (els.counts) {
+    els.counts.forEach((el) => {
+      el.textContent = String(filtered.length);
+    });
   }
 
   if (els.grid) {
@@ -460,60 +490,66 @@ function openDetail(itemId) {
 
   state.detailItemId = itemId;
   state.detailOpen = true;
+  // Se recuerda quién abrió para devolverle el foco al cerrar.
+  lastDetailTrigger = document.activeElement;
 
-  if (els.modal) {
-    els.modal.style.setProperty("--accent", accentOf(item));
-  }
-  if (els.detailBadge) {
-    els.detailBadge.textContent = `${item.badge} · ${item.typeLabel}`;
-  }
-  if (els.detailTitle) {
-    els.detailTitle.textContent = item.scent ? `${item.name} · ${item.scent}` : item.name;
-  }
-  if (els.detailDescription) {
-    els.detailDescription.textContent = item.description;
-  }
+  if (els.modal) els.modal.style.setProperty("--accent", accentOf(item));
+
+  // El badge se arma solo con las partes que existen: así no queda " · algo".
+  setText(els.detailBadge, [clean(item.badge), clean(item.typeLabel)].filter(Boolean).join(" · "));
+  setText(els.detailTitle, item.name);
+  setText(els.detailScent, item.scent);
+  setText(els.detailPrice, formatMoney(item.price));
+  setText(els.detailDescription, item.description);
+
   if (els.detailImage) {
-    els.detailImage.src = item.image;
-    els.detailImage.alt = item.name;
+    els.detailImage.src = clean(item.image);
+    els.detailImage.alt = clean(item.name);
   }
-  if (els.detailPrice) {
-    els.detailPrice.textContent = formatMoney(item.price);
-  }
+
   if (els.detailTags) {
-    els.detailTags.innerHTML = [
-      item.useLabel,
-      item.typeLabel,
-      ...(item.tags || []).slice(0, 2),
-    ]
-      .map(detailTagMarkup)
-      .join("");
+    const tags = [clean(item.useLabel), clean(item.size)].filter(Boolean);
+    els.detailTags.innerHTML = tags.map(detailTagMarkup).join("");
+    els.detailTags.hidden = tags.length === 0;
   }
+
   if (els.detailBenefits) {
-    els.detailBenefits.innerHTML = (item.benefits || [])
+    const benefits = (item.benefits || []).map(clean).filter(Boolean);
+    els.detailBenefits.innerHTML = benefits
       .map(
         (benefit) =>
-          `<li class="flex gap-3"><span class="mt-2 h-2.5 w-2.5 rounded-full bg-[var(--accent)]"></span><span>${escapeHtml(benefit)}</span></li>`,
+          `<li class="flex gap-3"><span class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--accent)]"></span><span>${escapeHtml(benefit)}</span></li>`,
       )
       .join("");
-  }
-  if (els.detailInstructions) {
-    els.detailInstructions.textContent = item.instructions;
+    toggleBlock(els.detailBenefitsBlock, benefits.length > 0);
   }
 
-  els.modal?.classList.remove("pointer-events-none", "scale-95", "opacity-0");
-  els.modalOverlay?.classList.remove("pointer-events-none", "opacity-0");
-  els.modalOverlay?.classList.add("opacity-100");
+  toggleBlock(els.detailInstructionsBlock, setText(els.detailInstructions, item.instructions) !== "");
+
+  els.modal?.classList.add("is-open");
+  els.modalOverlay?.classList.add("is-open");
+  document.body.classList.add("detail-open");
   syncBodyLock();
+
+  // El panel arranca arriba y recibe el foco, para que lector de pantalla y
+  // teclado entren al diálogo en vez de quedarse en la página de fondo.
+  if (els.detailBody) els.detailBody.scrollTop = 0;
+  els.modal?.focus({ preventScroll: true });
 }
 
 function closeDetail() {
   state.detailItemId = null;
   state.detailOpen = false;
-  els.modal?.classList.add("pointer-events-none", "scale-95", "opacity-0");
-  els.modalOverlay?.classList.add("pointer-events-none", "opacity-0");
-  els.modalOverlay?.classList.remove("opacity-100");
+  els.modal?.classList.remove("is-open");
+  els.modalOverlay?.classList.remove("is-open");
+  document.body.classList.remove("detail-open");
   syncBodyLock();
+
+  // Devolver el foco a "Ver detalle" para no perder el lugar en la página.
+  if (lastDetailTrigger && document.contains(lastDetailTrigger)) {
+    lastDetailTrigger.focus({ preventScroll: true });
+  }
+  lastDetailTrigger = null;
 }
 
 function addToCart(itemId, quantity = 1, openDrawer = true) {

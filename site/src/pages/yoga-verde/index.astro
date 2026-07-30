@@ -2,7 +2,6 @@
 import {
   ACCENT_COLORS,
   ANNOUNCEMENT,
-  BENEFIT_ITEMS,
   FREE_SHIPPING_THRESHOLD,
   KITS,
   PRODUCTS,
@@ -125,10 +124,10 @@ const storeData = {
         <header class="border-b border-white/10 bg-primary/95 backdrop-blur-xl">
           <nav class="mx-auto flex h-20 max-w-screen-2xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
             <div class="flex items-center gap-3">
-              <a class="group inline-flex items-center rounded-2xl bg-surface-container-lowest/95 px-3 py-2 shadow-parchment ring-1 ring-black/5 transition group-hover:-translate-y-0.5 hover:-translate-y-0.5" href="#inicio">
+              <a class="inline-flex items-center rounded-2xl bg-surface-container-lowest px-3.5 py-2.5 shadow-parchment transition hover:-translate-y-0.5" href="#inicio">
                 <img
                   alt="Yoga Verde — Cosmética natural"
-                  class="h-11 w-auto sm:h-12"
+                  class="h-14 w-auto sm:h-16"
                   height="1400"
                   src="/yoga-verde/assets/brand/logo-yoga-verde.svg"
                   width="1400"
@@ -246,19 +245,6 @@ const storeData = {
           </div>
         </section>
 
-        <section class="reveal mx-auto max-w-screen-2xl px-4 py-8 sm:px-6 lg:px-8">
-          <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-            {BENEFIT_ITEMS.map((benefit) => (
-              <article class="rounded-[28px] bg-surface-container-lowest p-5 shadow-parchment">
-                <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/8 text-primary">
-                  <span class="material-symbols-outlined">{benefit.icon}</span>
-                </div>
-                <h2 class="mt-4 font-headline text-2xl text-primary">{benefit.title}</h2>
-                <p class="mt-2 text-sm leading-7 text-on-surface-variant">{benefit.copy}</p>
-              </article>
-            ))}
-          </div>
-        </section>
 
         <section class="reveal mx-auto max-w-screen-2xl px-4 py-10 sm:px-6 lg:px-8" id="best-sellers">
           <div class="mb-5 flex flex-wrap items-end justify-between gap-x-6 gap-y-2 sm:mb-6">
@@ -294,7 +280,7 @@ const storeData = {
                   )}
                   <img
                     alt={`${product.name} ${product.scent}`}
-                    class="aspect-[4/3] w-full rounded-[24px] bg-surface-container-lowest object-contain p-1 transition duration-500 group-hover:scale-105"
+                    class="aspect-[4/3] product-media w-full rounded-[24px] bg-surface-container-lowest p-1 transition duration-500 group-hover:scale-105"
                     src={product.image}
                   />
                 </div>
@@ -346,14 +332,10 @@ const storeData = {
         <section class="relative overflow-hidden bg-surface px-4 py-16 sm:px-6 lg:px-8" id="catalogo">
           <div class="relative mx-auto max-w-screen-2xl">
           <div class="mb-8 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-            <div class="max-w-2xl">
-              <p class="specimen-label text-xs font-semibold uppercase tracking-[0.22em] text-secondary">
-                Todo el catálogo
-              </p>
-              <h2 class="mt-3 font-headline text-4xl text-primary">Piel, cabello y bienestar</h2>
-              <p class="mt-4 max-w-xl leading-7 text-on-surface-variant">
-                Rostro, cuerpo, cabello, labios, higiene bucal y aromaterapia. Cada producto
-                con su ingrediente principal y su tamaño.
+            <div class="min-w-0">
+              <h2 class="font-headline text-2xl text-primary sm:text-3xl">Catálogo completo</h2>
+              <p class="mt-1 text-sm text-on-surface-variant">
+                <span data-product-count>{PRODUCTS.length}</span> productos
               </p>
             </div>
             <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -452,7 +434,7 @@ const storeData = {
                 <div class="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
                   <div>
                     <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-on-surface-variant">
-                      <span data-product-count>{PRODUCTS.length}</span> piezas visibles
+                      <span data-product-count-filtered>{PRODUCTS.length}</span> piezas visibles
                     </p>
                     <p class="mt-2 text-sm leading-7 text-on-surface-variant">
                       Filtra por aroma, categoría o tamaño de envase.
@@ -492,7 +474,7 @@ const storeData = {
                       </span>
                       <img
                         alt={`${product.name} ${product.scent}`}
-                        class="aspect-[4/3] w-full rounded-[24px] bg-surface-container-lowest object-contain p-1 transition duration-500 group-hover:scale-105"
+                        class="aspect-[4/3] product-media w-full rounded-[24px] bg-surface-container-lowest p-1 transition duration-500 group-hover:scale-105"
                         src={product.image}
                       />
                     </div>
@@ -587,7 +569,7 @@ const storeData = {
                       <img
                         alt={`${piece.name} ${piece.scent}`}
                         class:list={[
-                          "h-full w-full rounded-[16px] object-contain",
+                          "product-media h-full w-full rounded-[16px]",
                           kitItems(kit).length === 3 && index === 0 && "col-span-2",
                         ]}
                         loading="lazy"
@@ -669,7 +651,7 @@ const storeData = {
                 <div class="overflow-hidden rounded-[28px] bg-surface-container-low p-3">
                   <img
                     alt="Crema corporal de leche de coco Yoga Verde"
-                    class="aspect-square w-full rounded-[22px] bg-surface-container-lowest object-contain p-1"
+                    class="aspect-square product-media w-full rounded-[22px] bg-surface-container-lowest p-1"
                     src="/yoga-verde/assets/products/crema-corporal-leche-de-coco.jpg"
                   />
                 </div>
@@ -743,9 +725,6 @@ const storeData = {
           </div>
           <div>
             <h3 class="font-headline text-2xl">Cosmética natural</h3>
-            <p class="mt-4 text-on-primary-container">
-              Contiene ingredientes naturales, formulado sin sulfatos ni parabenos.
-            </p>
             {/* Certificaciones impresas en las etiquetas reales del cliente. */}
             <div class="mt-5 flex flex-wrap gap-2">
               <span class="rounded-full border border-white/15 px-3 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-on-primary-container">
@@ -771,7 +750,7 @@ const storeData = {
 
     <nav
       aria-label="Navegación principal"
-      class="fixed inset-x-3 bottom-3 z-[64] rounded-[26px] border border-outline-variant/40 bg-surface-container-lowest/95 px-2 py-1.5 shadow-float backdrop-blur md:hidden"
+      class="tab-bar fixed inset-x-3 bottom-3 z-[64] rounded-[26px] border border-outline-variant/40 bg-surface-container-lowest/95 px-2 py-1.5 shadow-float backdrop-blur md:hidden"
     >
       <div class="grid grid-cols-5 gap-1">
         {tabBarItems.map((item) => (
@@ -795,6 +774,9 @@ const storeData = {
           </span>
         </button>
       </div>
+    </nav>
+
+    <div class="pointer-events-none fixed inset-0 z-[82] bg-primary/35 opacity-0 transition-opacity" data-cart-overlay></div>
     <aside
       class="fixed right-0 top-0 z-[83] flex h-full w-full max-w-[460px] translate-x-full flex-col bg-surface-container-lowest shadow-[0_24px_80px_rgba(23,48,32,0.22)] transition-transform duration-300"
       data-cart-drawer
@@ -886,67 +868,7 @@ const storeData = {
       </div>
     </aside>
 
-    <div class="pointer-events-none fixed inset-0 z-[88] bg-primary/35 opacity-0 transition-opacity" data-modal-overlay></div>
-    <div
-      aria-labelledby="detail-title"
-      aria-modal="true"
-      class="pointer-events-none fixed left-1/2 top-1/2 z-[89] w-[min(94vw,760px)] -translate-x-1/2 -translate-y-1/2 scale-95 rounded-[32px] bg-surface-container-lowest p-6 opacity-0 shadow-float transition-all sm:p-8"
-      data-detail-modal
-      role="dialog"
-    >
-      <div class="flex items-start justify-between gap-4">
-        <div>
-          <p class="text-xs uppercase tracking-[0.22em] text-secondary" data-detail-badge>Cosmética natural</p>
-          <h2 class="mt-2 font-headline text-2xl text-primary sm:text-3xl" data-detail-title id="detail-title"></h2>
-        </div>
-        <button
-          aria-label="Cerrar detalle"
-          class="inline-flex h-11 w-11 items-center justify-center rounded-full border border-outline-variant/50 text-primary transition hover:border-secondary/40 hover:text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35"
-          data-close-detail
-          type="button"
-        >
-          <span class="material-symbols-outlined">close</span>
-        </button>
-      </div>
 
-      <div class="mt-8 grid gap-8 md:grid-cols-[240px_minmax(0,1fr)] md:items-start">
-        <div class="overflow-hidden rounded-[26px] bg-surface-container-lowest p-4">
-          <img alt="" class="aspect-square w-full rounded-[20px] object-contain" data-detail-image src="" />
-        </div>
-        <div>
-          <div class="flex flex-wrap items-center gap-3 text-sm text-on-surface-variant">
-          </div>
-          <p class="mt-5 text-base leading-8 text-on-surface-variant" data-detail-description></p>
-          <div class="mt-6 flex flex-wrap gap-2" data-detail-tags></div>
-
-          <div class="mt-6 grid gap-5 rounded-[28px] bg-surface-container-low p-5">
-            <div>
-              <p class="text-xs uppercase tracking-[0.22em] text-on-surface-variant">Beneficios</p>
-              <ul class="mt-3 space-y-3 text-sm leading-7 text-on-surface-variant" data-detail-benefits></ul>
-            </div>
-            <div>
-              <p class="text-xs uppercase tracking-[0.22em] text-on-surface-variant">Cómo integrarlo</p>
-              <p class="mt-3 text-sm leading-7 text-on-surface-variant" data-detail-instructions></p>
-            </div>
-          </div>
-
-          <div class="mt-8 flex items-center justify-between gap-4 border-t border-outline-variant/40 pt-6">
-            <div>
-              <p class="text-xs uppercase tracking-[0.22em] text-on-surface-variant">Precio</p>
-              <p class="font-headline text-4xl text-primary" data-detail-price></p>
-            </div>
-            <button
-              class="inline-flex items-center gap-2 rounded-2xl bg-primary px-5 py-4 font-semibold text-on-primary transition hover:bg-primary-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35"
-              data-detail-add
-              type="button"
-            >
-              Añadir al carrito
-              <span class="material-symbols-outlined text-lg">add_shopping_cart</span>
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
 
     <script is:inline>
       (function () {
@@ -1141,6 +1063,75 @@ const storeData = {
         }
       })();
     </script>
+    <!-- Detalle de producto.
+         Antes era un div centrado con -translate-y-1/2 sin max-height ni scroll
+         propio: en 400x692 medía 376x1277, así que ~585px quedaban fuera de la
+         pantalla y, con el body bloqueado, no había forma de alcanzarlos.
+         Ahora es una hoja a pantalla completa con su propio scroll. -->
+    <div class="detail-overlay" data-modal-overlay></div>
+    <div
+      aria-labelledby="detail-title"
+      aria-modal="true"
+      class="detail-panel"
+      data-detail-modal
+      role="dialog"
+      tabindex="-1"
+    >
+      <div class="detail-bar">
+        <p class="min-w-0 truncate text-xs uppercase tracking-[0.22em] text-on-surface-variant" data-detail-badge></p>
+        <button
+          aria-label="Cerrar detalle"
+          class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-outline-variant/50 bg-surface-container-lowest text-primary transition hover:border-secondary/40 hover:text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/40"
+          data-close-detail
+          type="button"
+        >
+          <span aria-hidden="true" class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <div class="detail-body">
+        <div class="mx-auto w-full max-w-[22rem] md:max-w-none">
+          <img
+            alt=""
+            class="mx-auto block aspect-[4/3] w-full rounded-[22px] bg-surface-container-lowest object-contain"
+            data-detail-image
+            src=""
+          />
+        </div>
+
+        <div class="mt-5 md:mt-0">
+          <h2 class="product-name font-headline text-2xl leading-tight text-primary" data-detail-title id="detail-title"></h2>
+          <p class="mt-1 text-sm text-on-surface-variant" data-detail-scent></p>
+          <p class="price mt-3 text-2xl" data-detail-price></p>
+
+          <p class="mt-4 leading-7 text-on-surface-variant" data-detail-description></p>
+
+          <div class="mt-5 flex flex-wrap gap-2" data-detail-tags></div>
+
+          <section class="mt-6" data-detail-benefits-block>
+            <h3 class="text-xs font-semibold uppercase tracking-[0.22em] text-on-surface-variant">Beneficios</h3>
+            <ul class="mt-3 space-y-2.5 text-sm leading-6 text-on-surface-variant" data-detail-benefits></ul>
+          </section>
+
+          <section class="mt-6" data-detail-instructions-block>
+            <h3 class="text-xs font-semibold uppercase tracking-[0.22em] text-on-surface-variant">Cómo usarlo</h3>
+            <p class="mt-3 text-sm leading-6 text-on-surface-variant" data-detail-instructions></p>
+          </section>
+        </div>
+      </div>
+
+      <div class="detail-cta">
+        <button
+          class="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-primary px-5 font-semibold text-on-primary transition hover:bg-primary-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35"
+          data-detail-add
+          type="button"
+        >
+          Añadir al carrito
+          <span aria-hidden="true" class="material-symbols-outlined text-lg">add_shopping_cart</span>
+        </button>
+      </div>
+    </div>
+
     <script defer is:inline src="/yoga-verde/shop.js"></script>
   </body>
 </html>
