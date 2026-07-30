@@ -66,10 +66,10 @@ fi
 echo "  $(du -h "$TARBALL" | cut -f1)  $(tar -tzf "$TARBALL" | wc -l | tr -d ' ') entradas"
 
 # ---------------------------------------------------------------------------
-# 3. Transferencia de UN archivo, verificada por checksum.
+# 3. Transferencia del tarball por un stream SSH, verificada por checksum.
 # ---------------------------------------------------------------------------
 say "Transfiriendo"
-scp -P "$VPS_PORT" "$TARBALL" "$VPS_HOST:$REMOTE_TAR"
+ssh_do "rm -f $REMOTE_TAR && umask 077 && dd of=$REMOTE_TAR bs=1M status=none" < "$TARBALL"
 
 LOCAL_SUM="$(md5 -q "$TARBALL" 2>/dev/null || md5sum "$TARBALL" | cut -d' ' -f1)"
 REMOTE_SUM="$(ssh_do "md5sum $REMOTE_TAR | cut -d' ' -f1")"
