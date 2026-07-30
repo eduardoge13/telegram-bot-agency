@@ -52,6 +52,9 @@ tar --exclude='node_modules' \
     --exclude='*credentials*' \
     --exclude='*service-account*' \
     --exclude='*token*' \
+    --exclude='public/yoga-verde/assets/real-labels-pdf' \
+    --exclude='public/yoga-verde/assets/brand/*.pdf' \
+    --exclude='src/assets/fonts' \
     -czf "$TARBALL" .
 
 # Red de seguridad: si algo sensible se coló, se aborta antes de transferir.
