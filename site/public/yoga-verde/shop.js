@@ -82,14 +82,8 @@ const els = {
   detailAdd: document.querySelector("[data-detail-add]"),
 };
 
-const PILL_ACTIVE_CLASS =
-  "rounded-full bg-tertiary-container px-4 py-2 text-sm font-medium text-on-tertiary-container transition hover:bg-tertiary hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35";
-const PILL_INACTIVE_CLASS =
-  "rounded-full bg-surface-container-highest px-4 py-2 text-sm font-medium text-on-surface-variant transition hover:bg-tertiary-container hover:text-on-tertiary-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35";
-const LINK_ACTIVE_CLASS =
-  "block text-left text-sm text-secondary underline decoration-secondary/30 underline-offset-4 focus-visible:outline-none";
-const LINK_INACTIVE_CLASS =
-  "block text-left text-sm text-on-surface-variant transition hover:text-secondary focus-visible:outline-none focus-visible:text-secondary";
+const PILL_ACTIVE_CLASS = "filter-option is-active";
+const PILL_INACTIVE_CLASS = "filter-option";
 
 function loadCart() {
   try {
@@ -204,34 +198,36 @@ function toggleBlock(el, hasContent) {
 }
 
 function detailTagMarkup(label) {
-  return `<span class="rounded-full bg-surface-container-low px-4 py-2 text-sm font-medium text-on-surface-variant">${escapeHtml(label)}</span>`;
+  return `<span class="detail-tag">${escapeHtml(label)}</span>`;
 }
 
 function catalogCardMarkup(product) {
   const accent = accentOf(product);
   return `
-    <article class="group overflow-hidden rounded-[30px] bg-surface-container-lowest shadow-parchment transition-transform hover:-translate-y-1" style="--accent: ${escapeHtml(accent)}">
-      <div class="relative overflow-hidden bg-surface-container-low p-4">
-        ${product.badge ? `<span class="absolute left-4 top-4 z-10 rounded-full bg-surface px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-primary">${escapeHtml(product.badge)}</span>` : ""}
-        <img alt="${escapeHtml(product.name)} ${escapeHtml(product.scent || "")}" class="aspect-[4/3] product-media w-full rounded-[24px] bg-surface-container-lowest p-1 transition duration-500 group-hover:scale-105" src="${escapeHtml(product.image)}" />
+    <article class="product-card group" style="--accent: ${escapeHtml(accent)}">
+      <div class="product-image-frame relative">
+        ${product.badge ? `<span class="product-badge absolute left-4 top-4 z-10">${escapeHtml(product.badge)}</span>` : ""}
+        <img alt="${escapeHtml(product.name)} ${escapeHtml(product.scent || "")}" class="product-media aspect-square w-full transition duration-500 group-hover:scale-[1.02]" src="${escapeHtml(product.image)}" />
       </div>
-      <div class="p-5 sm:p-6">
-        <p class="text-[11px] uppercase tracking-[0.22em] text-on-surface-variant">${escapeHtml(product.typeLabel)}</p>
-        <h3 class="product-name mt-1.5 font-headline text-xl leading-snug text-primary">${escapeHtml(product.name)}</h3>
-        <p class="mt-0.5 text-sm text-on-surface-variant">${escapeHtml(product.scent || "")}</p>
-        <p class="mt-3 text-sm leading-6 text-on-surface-variant">${escapeHtml(product.short)}</p>
-        <div class="mt-4 flex flex-wrap gap-2">
-          <span class="accent-dot rounded-full bg-surface-container-low px-3 py-1.5 text-xs font-semibold text-primary">${escapeHtml(product.useLabel)}</span>
-          ${product.size ? `<span class="rounded-full bg-surface-container-low px-3 py-1.5 text-xs font-semibold text-on-surface-variant">${escapeHtml(product.size)}</span>` : ""}
-        </div>
-        <div class="mt-5 flex flex-wrap items-center justify-between gap-x-4 gap-y-3 border-t border-outline-variant/40 pt-4">
-          <span class="price text-xl">${formatMoney(product.price)}</span>
-          <div class="flex min-w-0 flex-wrap items-center gap-x-4 gap-y-2">
-            <button class="inline-flex min-h-11 shrink-0 items-center gap-1.5 text-sm font-semibold text-primary transition hover:text-secondary focus-visible:outline-none" data-open-detail="${escapeHtml(product.id)}" type="button">Ver detalle</button>
-            <button aria-label="Añadir ${escapeHtml(product.name)} al carrito" class="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-2xl bg-primary px-4 text-sm font-semibold text-on-primary transition hover:bg-primary-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35" data-add-item="${escapeHtml(product.id)}" type="button">
-              Añadir
-            </button>
+      <div class="product-card__body">
+        <div class="flex items-start justify-between gap-4">
+          <div class="min-w-0">
+            <p class="product-eyebrow">${escapeHtml(product.typeLabel)}</p>
+            <h3 class="product-name product-card__title">${escapeHtml(product.name)}</h3>
+            <p class="product-card__scent">${escapeHtml(product.scent || "")}</p>
           </div>
+          <span class="price shrink-0 text-lg">${formatMoney(product.price)}</span>
+        </div>
+        <p class="product-card__description">${escapeHtml(product.short)}</p>
+        <div class="product-card__meta">
+          <span>${escapeHtml(product.useLabel)}</span>
+          ${product.size ? `<span>${escapeHtml(product.size)}</span>` : ""}
+        </div>
+        <div class="product-card__actions">
+          <button class="text-link" data-open-detail="${escapeHtml(product.id)}" type="button">Ver detalle</button>
+          <button aria-label="Añadir ${escapeHtml(product.name)} al carrito" class="primary-action" data-add-item="${escapeHtml(product.id)}" type="button">
+            Añadir
+          </button>
         </div>
       </div>
     </article>
@@ -241,9 +237,9 @@ function catalogCardMarkup(product) {
 function cartItemMarkup(entry) {
   const { item, quantity } = entry;
   return `
-    <article class="overflow-hidden rounded-[28px] bg-surface-container-low p-5 shadow-parchment">
+    <article class="border border-outline-variant/50 bg-surface-container-low p-5">
       <div class="flex gap-4">
-        <img alt="${escapeHtml(item.name)}" class="h-28 w-28 rounded-[22px] bg-surface-container-lowest object-contain p-0.5" src="${escapeHtml(item.image)}" />
+        <img alt="${escapeHtml(item.name)}" class="h-28 w-28 bg-surface-container-lowest object-contain p-0.5" src="${escapeHtml(item.image)}" />
         <div class="flex flex-1 flex-col">
           <div class="flex items-start justify-between gap-4">
             <div class="min-w-0">
@@ -254,7 +250,7 @@ function cartItemMarkup(entry) {
             <span class="price shrink-0 text-lg">${formatMoney(item.price * quantity)}</span>
           </div>
           <div class="mt-4 flex items-center justify-between gap-3">
-            <div class="inline-flex items-center gap-4 rounded-full bg-surface-container-highest px-4 py-2">
+            <div class="inline-flex items-center gap-4 border border-outline-variant/50 bg-surface-container-highest px-4 py-2">
               <button aria-label="Disminuir cantidad de ${escapeHtml(item.name)}" class="text-primary transition hover:text-secondary" data-qty="${escapeHtml(item.id)}" data-delta="-1" type="button">
                 <span class="material-symbols-outlined text-base">remove</span>
               </button>
@@ -297,7 +293,7 @@ function getActiveFilterBadges() {
   const active = [];
 
   if (state.search.trim()) {
-    active.push({
+      active.push({
       group: "search",
       value: "",
       label: `Búsqueda: ${state.search.trim()}`,
@@ -321,14 +317,14 @@ function renderActiveFilters() {
 
   if (!active.length) {
     els.activeFilters.innerHTML =
-      '<span class="rounded-full bg-surface-container-lowest px-3 py-2 text-xs font-semibold text-on-surface-variant">Sin filtros activos</span>';
+        '<span class="filter-status">Sin filtros activos</span>';
     return;
   }
 
   els.activeFilters.innerHTML = active
     .map(
       (filter) => `
-        <button class="inline-flex items-center gap-2 rounded-full bg-surface-container-lowest px-3 py-2 text-xs font-semibold text-primary shadow-parchment transition hover:text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35" data-remove-filter="${escapeHtml(filter.group)}:${escapeHtml(filter.value)}" type="button">
+        <button class="filter-status is-active inline-flex items-center gap-2" data-remove-filter="${escapeHtml(filter.group)}:${escapeHtml(filter.value)}" type="button">
           ${escapeHtml(filter.label)}
           <span class="material-symbols-outlined text-sm">close</span>
         </button>
@@ -779,6 +775,7 @@ document.addEventListener("click", (event) => {
 
   if (target.matches("[data-scroll-to]")) {
     closeFilters();
+    target.closest("[data-mobile-menu]")?.removeAttribute("open");
     scrollToSection(target.dataset.scrollTo);
   }
 
