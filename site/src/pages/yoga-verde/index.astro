@@ -116,10 +116,6 @@ const storeData = {
     <link href="https://fonts.googleapis.com" rel="preconnect" />
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
     <link
-      href="https://fonts.googleapis.com/css2?family=Gelasio:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&display=swap"
-      rel="stylesheet"
-    />
-    <link
       href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
       rel="stylesheet"
     />
@@ -161,13 +157,16 @@ const storeData = {
             </div>
 
             <a class="site-logo absolute left-1/2 top-1/2 inline-flex -translate-x-1/2 -translate-y-1/2 items-center justify-center" href="#inicio">
-              <img
-                alt="Yoga Verde — Cosmética natural"
-                class="h-20 w-20 object-contain sm:h-[5.5rem] sm:w-[5.5rem]"
-                height="1400"
-                src="/yoga-verde/assets/brand/logo-yoga-verde.svg"
-                width="1400"
-              />
+              <picture>
+                <source media="(max-width: 767px)" srcset="/yoga-verde/assets/brand/logo-monogram.png" />
+                <img
+                  alt="Yoga Verde — Cosmética natural"
+                  class="h-20 w-20 object-contain sm:h-[5.5rem] sm:w-[5.5rem]"
+                  height="1400"
+                  src="/yoga-verde/assets/brand/logo-yoga-verde.svg"
+                  width="1400"
+                />
+              </picture>
             </a>
 
             <div class="flex flex-1 items-center justify-end gap-2 sm:gap-3">
@@ -233,7 +232,7 @@ const storeData = {
                           <h2 class="product-name hero-product-name">{product.name}</h2>
                           <p class="hero-benefit">{product.short}</p>
                         </div>
-                        <button class="hero-link" data-open-detail={product.id} type="button">
+                        <button aria-controls="detail-title" aria-haspopup="dialog" class="hero-link" data-open-detail={product.id} type="button">
                           Ver producto
                           <span aria-hidden="true" class="material-symbols-outlined text-base">arrow_forward</span>
                         </button>
@@ -313,7 +312,7 @@ const storeData = {
                     {product.size && <span>{product.size}</span>}
                   </div>
                   <div class="product-card__actions">
-                    <button class="text-link" data-open-detail={product.id} type="button">Ver detalle</button>
+                    <button aria-controls="detail-title" aria-haspopup="dialog" class="text-link" data-open-detail={product.id} type="button">Ver detalle</button>
                     <button
                       aria-label={`Añadir ${product.name} al carrito`}
                       class="primary-action"
@@ -470,7 +469,7 @@ const storeData = {
                         {product.size && <span>{product.size}</span>}
                       </div>
                       <div class="product-card__actions">
-                        <button class="text-link" data-open-detail={product.id} type="button">Ver detalle</button>
+                        <button aria-controls="detail-title" aria-haspopup="dialog" class="text-link" data-open-detail={product.id} type="button">Ver detalle</button>
                         <button
                           aria-label={`Añadir ${product.name} al carrito`}
                           class="primary-action"
@@ -561,6 +560,8 @@ const storeData = {
                   </div>
                   <div class="product-card__actions">
                     <button
+                      aria-controls="detail-title"
+                      aria-haspopup="dialog"
                       class="text-link inline-flex items-center gap-2"
                       data-open-detail={kit.id}
                       type="button"
@@ -660,7 +661,7 @@ const storeData = {
                 alt="Yoga Verde — Cosmética natural"
                 class="h-14 w-auto sm:h-16"
                 height="1400"
-                src="/yoga-verde/assets/brand/logo-yoga-verde.svg"
+                src="/yoga-verde/assets/brand/logo-yoga-verde-cream.svg"
                 width="1400"
               />
             </div>

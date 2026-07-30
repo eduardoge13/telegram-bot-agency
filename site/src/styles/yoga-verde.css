@@ -4,9 +4,8 @@
 
 /*
   Design direction: "Yoga Verde, cosmética natural" — a restrained editorial
-  storefront inspired by premium skincare commerce. The official terracotta,
-  sage and deep green remain available, but warm white and soft cream now carry
-  most of the page so the real product photography has visual priority.
+  storefront grounded in the official identity manual. The five approved brand
+  colors are the only UI accents; product photography carries the variation.
   Typography — the client's real three-font system, all self-hosted from the
   files in their brand Drive:
     Quelistah    logo wordmark only (fixed art/SVG, not a licensable webfont)
@@ -17,12 +16,33 @@
   Gelasio was previously doing double duty as body text too, which made every
   block read as "headline" and flattened the hierarchy; Lato is the real
   companion sans from the same brand package and now carries all running text.
-  Each SKU still carries
-  a per-scent --accent custom property (see ACCENT_COLORS in
-  yoga-verde-store.js), sampled from the real label photography, for the
-  terracotta/verde/morado/dorado product-card system — a smaller-scale layer
-  underneath the manual's site-wide two-tone identity.
+  Each SKU may still carry an --accent custom property for product detail
+  markers, but it is mapped back to the approved terracotta and sage colors.
 */
+
+@font-face {
+  font-family: "Gelasio";
+  src: url("../assets/fonts/yoga-verde-real/Gelasio/static/Gelasio-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Gelasio";
+  src: url("../assets/fonts/yoga-verde-real/Gelasio/static/Gelasio-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Gelasio";
+  src: url("../assets/fonts/yoga-verde-real/Gelasio/static/Gelasio-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
 
 @font-face {
   font-family: "Cloud Lucent";
@@ -65,22 +85,28 @@
   --font-tagline: "Cloud Lucent", "Gelasio", serif;
   --font-label: "Lato", system-ui, sans-serif;
 
-  /* Principal 1 — blush/cream, the dominant ground (manual, not kraft-yellow) */
-  --color-background: #f7f5f0;
-  --color-surface: #f7f5f0;
-  --color-surface-container-lowest: #fcfbf8;
-  --color-surface-container-low: #eee9e1;
-  --color-surface-container: #e5ded4;
-  --color-surface-container-high: #d8d0c5;
-  --color-surface-container-highest: #cbc1b5;
-  --color-surface-variant: #e5ded4;
+  /* Paleta oficial del manual de identidad Yoga Verde. */
+  --color-brand-cream: #f8e3d2;
+  --color-brand-terracotta: #c06145;
+  --color-brand-sage: #6b874c;
+  --color-brand-olive: #4f5e01;
+  --color-brand-forest: #183425;
+
+  --color-background: #f8e3d2;
+  --color-surface: #f8e3d2;
+  --color-surface-container-lowest: #fffaf6;
+  --color-surface-container-low: #fbece2;
+  --color-surface-container: #f4d8ca;
+  --color-surface-container-high: #e8c0b0;
+  --color-surface-container-highest: #d5a08e;
+  --color-surface-variant: #fbece2;
 
   /* Secundario 2 — deep dark green, the alternate/contrast ground */
   --color-primary: #183425;
-  --color-primary-container: #24402d;
+  --color-primary-container: #183425;
 
   /* Principal 2 — terracotta, the primary accent */
-  --color-secondary: #ad6b56;
+  --color-secondary: #c06145;
 
   /* Principal 3 — sage green, used together with terracotta (not a single
      invented amber accent) */
@@ -93,17 +119,15 @@
      ACCENT_COLORS in yoga-verde-store.js */
   --color-accent-terracota: #c06145;
   --color-accent-verde: #6b874c;
-  --color-accent-morado: #5c3a72;
-  --color-accent-dorado: #8a6a3d;
 
-  --color-outline: #8a8178;
-  --color-outline-variant: #d6cfc5;
+  --color-outline: #6b874c;
+  --color-outline-variant: #d9b8a9;
 
-  --color-on-surface: #252823;
-  --color-on-surface-variant: #6f706a;
-  --color-on-primary: #f7f5f0;
-  --color-on-primary-container: #d9ded4;
-  --color-on-secondary: #fff8f3;
+  --color-on-surface: #183425;
+  --color-on-surface-variant: #36503f;
+  --color-on-primary: #f8e3d2;
+  --color-on-primary-container: #f8e3d2;
+  --color-on-secondary: #f8e3d2;
 
   --shadow-parchment: 0 8px 24px rgba(37, 40, 35, 0.06);
   --shadow-float: 0 24px 60px rgba(24, 52, 37, 0.16);
@@ -523,11 +547,23 @@ img {
 .product-card__actions {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
+  justify-content: flex-start;
+  gap: 1.25rem;
   margin-top: 1rem;
   border-top: 1px solid var(--color-outline-variant);
   padding-top: 0.85rem;
+}
+
+.product-card__actions .text-link {
+  min-width: 0;
+  padding-right: 1.25rem;
+  border-right: 1px solid var(--color-outline-variant);
+  justify-content: flex-start;
+}
+
+.product-card__actions .primary-action {
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .primary-action,

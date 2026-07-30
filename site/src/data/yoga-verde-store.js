@@ -6,12 +6,13 @@ export const SHIPPING_FLAT = 129;
 export const TAX_RATE = 0.16;
 
 // Familia de aroma: cada tono de tinta en las etiquetas reales corresponde a
-// un grupo de ingredientes. Esto alimenta --accent en las tarjetas.
+// un grupo de ingredientes. En la interfaz se limita a los colores oficiales
+// del manual; los tonos de las etiquetas viven únicamente en la fotografía.
 export const ACCENT_COLORS = {
-  terracota: "#c1602f",
-  verde: "#26452e",
-  morado: "#5c3a72",
-  dorado: "#8a6a3d",
+  terracota: "#C06145",
+  verde: "#6B874C",
+  morado: "#C06145",
+  dorado: "#6B874C",
 };
 
 export const PRODUCTS = [
@@ -931,4 +932,3 @@ export const SHOP_NEEDS = [
     image: "/yoga-verde/assets/products/crema-corporal-leche-de-coco.jpg",
   },
 ];
-

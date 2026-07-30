@@ -13,7 +13,7 @@ const ITEM_INDEX = new Map(ALL_ITEMS.map((item) => [item.id, item]));
 const ACCENT_COLORS = store.accentColors && typeof store.accentColors === "object" ? store.accentColors : {};
 
 function accentOf(item) {
-  return (item && ACCENT_COLORS[item.use]) || ACCENT_COLORS.terracota || "#c1602f";
+  return (item && ACCENT_COLORS[item.use]) || ACCENT_COLORS.terracota || "#C06145";
 }
 
 const FREE_SHIPPING_THRESHOLD = Number(store.freeShippingThreshold) || 999;
@@ -224,7 +224,7 @@ function catalogCardMarkup(product) {
           ${product.size ? `<span>${escapeHtml(product.size)}</span>` : ""}
         </div>
         <div class="product-card__actions">
-          <button class="text-link" data-open-detail="${escapeHtml(product.id)}" type="button">Ver detalle</button>
+          <button aria-controls="detail-title" aria-haspopup="dialog" class="text-link" data-open-detail="${escapeHtml(product.id)}" type="button">Ver detalle</button>
           <button aria-label="Añadir ${escapeHtml(product.name)} al carrito" class="primary-action" data-add-item="${escapeHtml(product.id)}" type="button">
             Añadir
           </button>
@@ -718,7 +718,7 @@ async function startCheckout() {
 }
 
 document.addEventListener("click", (event) => {
-  const target = event.target.closest("button, a");
+  const target = event.target instanceof Element ? event.target.closest("button, a") : null;
   if (!target) return;
 
   if (target.matches("[data-open-filters]")) openFilters();
@@ -732,7 +732,8 @@ document.addEventListener("click", (event) => {
   }
 
   if (target.matches("[data-open-detail]")) {
-    openDetail(target.dataset.openDetail);
+    event.preventDefault();
+    openDetail(target.getAttribute("data-open-detail"));
   }
 
   if (target.matches("[data-close-detail]")) {
