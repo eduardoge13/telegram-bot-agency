@@ -184,31 +184,25 @@ function catalogCardMarkup(product) {
     <article class="group overflow-hidden rounded-[30px] bg-surface-container-lowest shadow-parchment transition-transform hover:-translate-y-1" style="--accent: ${escapeHtml(accent)}">
       <div class="relative overflow-hidden bg-surface-container-low p-4">
         ${product.badge ? `<span class="absolute left-4 top-4 z-10 rounded-full bg-surface px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-primary">${escapeHtml(product.badge)}</span>` : ""}
-        <img alt="${escapeHtml(product.name)} ${escapeHtml(product.scent || "")}" class="aspect-[5/4] w-full rounded-[24px] bg-surface-container-lowest object-contain p-1 transition duration-500 group-hover:scale-105" src="${escapeHtml(product.image)}" />
+        <img alt="${escapeHtml(product.name)} ${escapeHtml(product.scent || "")}" class="aspect-[4/3] w-full rounded-[24px] bg-surface-container-lowest object-contain p-1 transition duration-500 group-hover:scale-105" src="${escapeHtml(product.image)}" />
       </div>
-      <div class="p-6">
-        <div class="flex items-start justify-between gap-4">
-          <div class="min-w-0">
-            <p class="text-[11px] uppercase tracking-[0.22em] text-on-surface-variant">${escapeHtml(product.typeLabel)} · ${escapeHtml(product.scent || "")}</p>
-            <h3 class="mt-2 font-headline text-4xl leading-none text-primary">${escapeHtml(product.name)}</h3>
-          </div>
-          <span class="price shrink-0 text-xl">${formatMoney(product.price)}</span>
-        </div>
-        <div class="mt-4 flex items-center gap-3 text-sm text-on-surface-variant">
-        </div>
-        <p class="mt-4 min-h-[84px] text-sm italic leading-7 text-on-surface-variant">${escapeHtml(product.short)}</p>
+      <div class="p-5 sm:p-6">
+        <p class="text-[11px] uppercase tracking-[0.22em] text-on-surface-variant">${escapeHtml(product.typeLabel)}</p>
+        <h3 class="product-name mt-1.5 font-headline text-xl leading-snug text-primary">${escapeHtml(product.name)}</h3>
+        <p class="mt-0.5 text-sm text-on-surface-variant">${escapeHtml(product.scent || "")}</p>
+        <p class="mt-3 text-sm leading-6 text-on-surface-variant">${escapeHtml(product.short)}</p>
         <div class="mt-4 flex flex-wrap gap-2">
-          <span class="accent-dot rounded-full bg-surface-container-low px-3 py-2 text-xs font-semibold text-primary">${escapeHtml(product.useLabel)}</span>
-          <span class="rounded-full bg-surface-container-low px-3 py-2 text-xs font-semibold text-on-surface-variant">${escapeHtml(product.size || "")}</span>
+          <span class="accent-dot rounded-full bg-surface-container-low px-3 py-1.5 text-xs font-semibold text-primary">${escapeHtml(product.useLabel)}</span>
+          ${product.size ? `<span class="rounded-full bg-surface-container-low px-3 py-1.5 text-xs font-semibold text-on-surface-variant">${escapeHtml(product.size)}</span>` : ""}
         </div>
-        <div class="mt-6 flex items-center justify-between gap-3 border-t border-outline-variant/40 pt-5">
-          <button class="inline-flex items-center gap-2 text-sm font-semibold text-primary transition hover:text-secondary focus-visible:outline-none" data-open-detail="${escapeHtml(product.id)}" type="button">
-            <span class="material-symbols-outlined text-base">auto_stories</span>
-            Ver detalle
-          </button>
-          <button aria-label="Añadir ${escapeHtml(product.name)} al carrito" class="inline-flex items-center gap-2 rounded-2xl bg-primary px-4 py-3 text-sm font-semibold text-on-primary transition hover:bg-primary-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35" data-add-item="${escapeHtml(product.id)}" type="button">
-            Añadir al carrito
-          </button>
+        <div class="mt-5 flex flex-wrap items-center justify-between gap-x-4 gap-y-3 border-t border-outline-variant/40 pt-4">
+          <span class="price text-xl">${formatMoney(product.price)}</span>
+          <div class="flex min-w-0 flex-wrap items-center gap-x-4 gap-y-2">
+            <button class="inline-flex min-h-11 shrink-0 items-center gap-1.5 text-sm font-semibold text-primary transition hover:text-secondary focus-visible:outline-none" data-open-detail="${escapeHtml(product.id)}" type="button">Ver detalle</button>
+            <button aria-label="Añadir ${escapeHtml(product.name)} al carrito" class="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-2xl bg-primary px-4 text-sm font-semibold text-on-primary transition hover:bg-primary-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35" data-add-item="${escapeHtml(product.id)}" type="button">
+              Añadir
+            </button>
+          </div>
         </div>
       </div>
     </article>
@@ -225,7 +219,7 @@ function cartItemMarkup(entry) {
           <div class="flex items-start justify-between gap-4">
             <div class="min-w-0">
               <p class="text-[11px] uppercase tracking-[0.22em] text-on-surface-variant">${escapeHtml(item.badge)}</p>
-              <h3 class="mt-2 font-headline text-lg leading-tight text-primary">${escapeHtml(item.name)}</h3>
+              <h3 class="product-name mt-1 font-headline text-base leading-snug text-primary">${escapeHtml(item.name)}</h3>
               <p class="mt-2 text-sm text-on-surface-variant">${escapeHtml(item.scent || item.useLabel)}</p>
             </div>
             <span class="price shrink-0 text-lg">${formatMoney(item.price * quantity)}</span>
@@ -257,7 +251,7 @@ function upsellMarkup(item) {
       <img alt="${escapeHtml(item.name)}" class="h-24 w-24 rounded-[22px] bg-surface-container-lowest object-contain p-0.5" src="${escapeHtml(item.image)}" />
       <div class="flex-1">
         <p class="text-xs uppercase tracking-[0.22em] text-secondary">También te puede interesar</p>
-        <h3 class="mt-2 font-headline text-xl text-primary">${escapeHtml(item.name)}</h3>
+        <h3 class="product-name mt-1.5 font-headline text-xl leading-snug text-primary">${escapeHtml(item.name)}</h3>
         <p class="mt-2 text-sm leading-7 text-on-surface-variant">${escapeHtml(item.short)}</p>
         <div class="mt-4 flex items-center justify-between gap-4">
           <span class="price text-2xl">${formatMoney(item.price)}</span>

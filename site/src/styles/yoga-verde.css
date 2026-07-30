@@ -283,16 +283,44 @@ body {
   background: color-mix(in srgb, var(--color-secondary) 12%, transparent);
 }
 
-/* Section anchors must clear the sticky announcement bar + header, otherwise
-   scrollIntoView lands past the heading and the visitor loses their place. */
+/* Los anclajes deben librar la barra de anuncio + el header sticky; si no,
+   scrollIntoView aterriza pasado el título y el visitante pierde referencia.
+   --header-h lo escribe el scrollspy con la altura medida real (ver
+   index.astro); el valor de reserva cubre el primer paint y el caso sin JS. */
 [id="inicio"],
 [id="best-sellers"],
 [id="catalogo"],
 [id="kits"],
-[id="testimonios"],
-[id="contacto"],
-[id="ingrediente-en-foco"] {
-  scroll-margin-top: 7.5rem;
+[id="contacto"] {
+  scroll-margin-top: calc(var(--header-h, 7rem) + 0.75rem);
+}
+
+/* ---------------------------------------------------------------------------
+   Contención de ancho.
+
+   Causa raíz del overflow con nombres largos ("Desmaquillante para ojos"): el
+   nombre se pintaba con un tamaño fijo grande dentro de una fila flex. `min-w-0`
+   deja encoger la CAJA, pero una palabra sola no se parte, así que la palabra
+   desbordaba igual. Aquí se ataca en la palabra, no en el contenedor, y se evita
+   depender de `overflow-x: hidden`, que solo esconde el síntoma.
+   --------------------------------------------------------------------------- */
+.product-name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  hyphens: auto;
+}
+
+/* Ninguna imagen puede exceder su contenedor, venga de SSR o de shop.js. */
+img {
+  max-width: 100%;
+}
+
+/* Los overlays fijos (drawers, modal) no deben sumar ancho al documento
+   cuando están fuera de pantalla. */
+[data-cart-drawer],
+[data-filters-drawer],
+[data-detail-modal] {
+  max-width: 100vw;
 }
 
 /* Hero product slider — crossfade between real SKUs. Advances on click/dot
