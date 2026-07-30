@@ -1,0 +1,612 @@
+@import "tailwindcss";
+@source "../pages/yoga-verde/index.astro";
+@source "../../public/yoga-verde/shop.js";
+
+/*
+  Design direction: "Yoga Verde, cosmética natural" — realigned to the
+  client's official brand manual (Manual de identidad Yoga Verde), which
+  supersedes both the invented dark botanical-ink theme and the earlier
+  photo-sampled guesses. Exact manual values:
+    Principal 1 (background)      #F8E3D2  blush/cream — THE dominant ground
+    Principal 2 (logo / accent)   #C06145  terracotta
+    Principal 3 ("Verde" / accent)#6B874C  sage green
+    Secundario 1                  #4F5E01  dark olive
+    Secundario 2 (dark ground)    #183425  deep dark green
+  Typography — the client's real three-font system, all self-hosted from the
+  files in their brand Drive:
+    Quelistah    logo wordmark only (fixed art/SVG, not a licensable webfont)
+    Gelasio      headlines only (serif voice) — OFL
+    Lato         body, UI, labels, prices (light sans) — OFL
+    Cloud Lucent tagline only (no bundled license; from a font-sharing site,
+                 flagged for the client to confirm before wide commercial use)
+  Gelasio was previously doing double duty as body text too, which made every
+  block read as "headline" and flattened the hierarchy; Lato is the real
+  companion sans from the same brand package and now carries all running text.
+  Each SKU still carries
+  a per-scent --accent custom property (see ACCENT_COLORS in
+  yoga-verde-store.js), sampled from the real label photography, for the
+  terracotta/verde/morado/dorado product-card system — a smaller-scale layer
+  underneath the manual's site-wide two-tone identity.
+*/
+
+@font-face {
+  font-family: "Cloud Lucent";
+  src: url("/yoga-verde/fonts/cloud-lucent-regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Lato — the client's real companion sans (OFL, license bundled at
+   /yoga-verde/fonts/OFL.txt). Carries all running text so Gelasio can go
+   back to being a headline-only voice. */
+@font-face {
+  font-family: "Lato";
+  src: url("/yoga-verde/fonts/Lato-Light.ttf") format("truetype");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Lato";
+  src: url("/yoga-verde/fonts/Lato-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Lato";
+  src: url("/yoga-verde/fonts/Lato-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@theme {
+  --font-headline: "Gelasio", serif;
+  --font-body: "Lato", system-ui, sans-serif;
+  --font-tagline: "Cloud Lucent", "Gelasio", serif;
+  --font-label: "Lato", system-ui, sans-serif;
+
+  /* Principal 1 — blush/cream, the dominant ground (manual, not kraft-yellow) */
+  --color-background: #f8e3d2;
+  --color-surface: #f8e3d2;
+  --color-surface-container-lowest: #fef8f2;
+  --color-surface-container-low: #f3d9c4;
+  --color-surface-container: #eacbaf;
+  --color-surface-container-high: #dfb795;
+  --color-surface-container-highest: #d2a27c;
+  --color-surface-variant: #dfb795;
+
+  /* Secundario 2 — deep dark green, the alternate/contrast ground */
+  --color-primary: #183425;
+  --color-primary-container: #24402d;
+
+  /* Principal 2 — terracotta, the primary accent */
+  --color-secondary: #c06145;
+
+  /* Principal 3 — sage green, used together with terracotta (not a single
+     invented amber accent) */
+  --color-tertiary: #6b874c;
+  /* Secundario 1 — dark olive, doubles as the sage tertiary's dark container */
+  --color-tertiary-container: #4f5e01;
+  --color-on-tertiary-container: #f8e3d2;
+
+  /* Per-scent accent family — sampled from the real label photography, see
+     ACCENT_COLORS in yoga-verde-store.js */
+  --color-accent-terracota: #c06145;
+  --color-accent-verde: #6b874c;
+  --color-accent-morado: #5c3a72;
+  --color-accent-dorado: #8a6a3d;
+
+  --color-outline: #a9836b;
+  --color-outline-variant: #ddbfa4;
+
+  --color-on-surface: #2a1f1a;
+  --color-on-surface-variant: #6b564a;
+  --color-on-primary: #f8e3d2;
+  --color-on-primary-container: #d8e0d2;
+  --color-on-secondary: #fff8f3;
+
+  --shadow-parchment: 0 20px 50px rgba(70, 40, 20, 0.12);
+  --shadow-float: 0 34px 90px rgba(24, 52, 37, 0.28);
+  --shadow-line: 0 14px 34px rgba(24, 52, 37, 0.2);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--color-surface);
+  color: var(--color-on-surface);
+}
+
+.material-symbols-outlined {
+  font-variation-settings: "FILL" 0, "wght" 300, "GRAD" 0, "opsz" 24;
+}
+
+/* Fine grain dot texture — paper speckle, tinted toward the blush ground */
+.paper-grid::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(circle at 1px 1px, rgba(94, 60, 40, 0.14) 1px, transparent 0);
+  background-size: 18px 18px;
+  opacity: 0.5;
+}
+
+.card-grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.08;
+  background-image:
+    linear-gradient(transparent 0%, rgba(94, 60, 40, 0.12) 100%),
+    radial-gradient(circle at 1px 1px, rgba(94, 60, 40, 0.18) 1px, transparent 0);
+  background-size: auto, 20px 20px;
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.ui-locked {
+  overflow: hidden;
+}
+
+/* Dark ground (Secundario 2, #183425): the cream/crema tone (Principal 1)
+   is the dominant ground across the site; this dark tone is now reserved
+   for the footer seal only, so it reads as punctuation, not a competing
+   background. Kept as a reusable utility in case a future section wants it. */
+.ink-ground {
+  background: var(--color-primary);
+  background-image:
+    radial-gradient(circle at 12% 18%, rgba(192, 97, 69, 0.16), transparent 40%),
+    radial-gradient(circle at 88% 82%, rgba(107, 135, 76, 0.35), transparent 44%);
+}
+
+.ink-ground::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(circle at 1px 1px, rgba(248, 227, 210, 0.06) 1px, transparent 0);
+  background-size: 16px 16px;
+}
+
+/* Per-scent accent plumbing: cards set --accent inline (see index.astro and
+   shop.js) from ACCENT_COLORS; anything wanting the scent color instead of
+   the single global secondary should reference var(--accent, ...). */
+.accent-ring {
+  box-shadow: inset 0 0 0 1.5px var(--accent, var(--color-secondary));
+}
+
+.accent-dot::before {
+  content: "";
+  display: inline-block;
+  width: 0.55em;
+  height: 0.55em;
+  border-radius: 999px;
+  background: var(--accent, var(--color-secondary));
+  margin-right: 0.5em;
+}
+
+/* Torn-paper zigzag seam between an ink section and a paper section */
+.torn-edge {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 18px;
+  pointer-events: none;
+  background-image:
+    linear-gradient(135deg, var(--edge-color, var(--color-surface)) 50%, transparent 50%),
+    linear-gradient(45deg, var(--edge-color, var(--color-surface)) 50%, transparent 50%);
+  background-size: 26px 26px;
+  background-position: 0 0, 13px 0;
+  background-repeat: repeat-x;
+}
+
+.torn-edge--bottom {
+  bottom: -1px;
+}
+
+.torn-edge--top {
+  top: -1px;
+  transform: scaleY(-1);
+}
+
+/* Header nav: active state is driven by a scroll observer (see index.astro),
+   not hardcoded, so the highlight follows the section actually in view. */
+.nav-link {
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: var(--color-on-surface-variant);
+  border-bottom: 2px solid transparent;
+  padding-bottom: 0.25rem;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.nav-link:hover,
+.nav-link:focus-visible {
+  color: var(--color-secondary);
+  outline: none;
+}
+
+.nav-link.is-active {
+  color: var(--color-secondary);
+  font-weight: 700;
+  border-bottom-color: var(--color-secondary);
+}
+
+/* Mobile bottom tab bar — the only navigation on small screens (the left
+   drawer was removed). Shares the scrollspy's .is-active state with the
+   desktop nav via [data-nav-link]. */
+.tab-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.125rem;
+  border-radius: 1rem;
+  padding: 0.5rem 0.25rem;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--color-on-surface-variant);
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+.tab-link:focus-visible {
+  outline: 2px solid var(--color-secondary);
+  outline-offset: 2px;
+}
+
+.tab-link.is-active {
+  color: var(--color-secondary);
+  background: color-mix(in srgb, var(--color-secondary) 12%, transparent);
+}
+
+/* Los anclajes deben librar la barra de anuncio + el header sticky; si no,
+   scrollIntoView aterriza pasado el título y el visitante pierde referencia.
+   --header-h lo escribe el scrollspy con la altura medida real (ver
+   index.astro); el valor de reserva cubre el primer paint y el caso sin JS. */
+[id="inicio"],
+[id="best-sellers"],
+[id="catalogo"],
+[id="kits"],
+[id="contacto"] {
+  scroll-margin-top: calc(var(--header-h, 7rem) + 0.75rem);
+}
+
+/* ---------------------------------------------------------------------------
+   Contención de ancho.
+
+   Causa raíz del overflow con nombres largos ("Desmaquillante para ojos"): el
+   nombre se pintaba con un tamaño fijo grande dentro de una fila flex. `min-w-0`
+   deja encoger la CAJA, pero una palabra sola no se parte, así que la palabra
+   desbordaba igual. Aquí se ataca en la palabra, no en el contenedor, y se evita
+   depender de `overflow-x: hidden`, que solo esconde el síntoma.
+   --------------------------------------------------------------------------- */
+.product-name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  hyphens: auto;
+}
+
+/* Ninguna imagen puede exceder su contenedor, venga de SSR o de shop.js. */
+img {
+  max-width: 100%;
+}
+
+/* Regla única de encuadre de producto: el asset se contiene y se centra
+   geométricamente dentro de su marco, en tarjetas, carriles, kits y detalle.
+   Se aplica en una sola clase para que ningún padding o ancho heredado de una
+   iteración anterior pueda volver a descentrarlo. */
+.product-media {
+  display: block;
+  /* Los JPG reales traen margen blanco fotográfico. El marco recorta ese
+     margen de forma controlada, mantiene el producto centrado visualmente y
+     evita que cada tarjeta parezca vacía. */
+  object-fit: cover;
+  object-position: 50% 62%;
+  margin-inline: auto;
+}
+
+.detail-panel .product-media {
+  object-position: 50% 100%;
+}
+
+/* Los overlays fijos (drawers, modal) no deben sumar ancho al documento
+   cuando están fuera de pantalla. */
+[data-cart-drawer],
+[data-filters-drawer],
+[data-detail-modal] {
+  max-width: 100vw;
+}
+
+/* ---------------------------------------------------------------------------
+   Detalle de producto.
+
+   El panel es una hoja a pantalla completa en móvil y un diálogo centrado en
+   escritorio. Lo esencial: la ALTURA está acotada y el scroll vive DENTRO del
+   panel. Antes el panel crecía sin límite fuera de la pantalla mientras el body
+   estaba bloqueado, así que el contenido inferior era inalcanzable.
+   --------------------------------------------------------------------------- */
+.detail-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 88;
+  background: rgba(24, 52, 37, 0.45);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.detail-overlay.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.detail-panel {
+  position: fixed;
+  z-index: 89;
+  inset: auto 0 0 0;
+  display: flex;
+  flex-direction: column;
+  /* 100dvh sigue la barra del navegador móvil; svh evita el salto al aparecer. */
+  max-height: min(92dvh, 92svh);
+  background: var(--color-surface-container-lowest);
+  border-radius: 28px 28px 0 0;
+  box-shadow: var(--shadow-float);
+  transform: translateY(100%);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s ease;
+}
+
+.detail-panel.is-open {
+  transform: none;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Barra de cierre: fija arriba del panel, siempre alcanzable aunque el
+   contenido se desplace. */
+.detail-bar {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.875rem 1.25rem;
+  border-bottom: 1px solid var(--color-outline-variant);
+}
+
+/* El único elemento con scroll. overscroll-contain evita que el gesto se
+   propague a la página de fondo. */
+.detail-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: 1.25rem;
+}
+
+/* La CTA queda anclada abajo, fuera del área que hace scroll, para que nunca
+   dependa de que el usuario adivine que hay más contenido. */
+.detail-cta {
+  flex: 0 0 auto;
+  padding: 0.875rem 1.25rem calc(0.875rem + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--color-outline-variant);
+  background: var(--color-surface-container-lowest);
+}
+
+@media (min-width: 768px) {
+  .detail-panel {
+    inset: 50% auto auto 50%;
+    width: min(92vw, 860px);
+    max-height: min(88dvh, 88svh);
+    border-radius: 28px;
+    transform: translate(-50%, -46%);
+  }
+
+  .detail-panel.is-open {
+    transform: translate(-50%, -50%);
+  }
+
+  .detail-body {
+    display: grid;
+    grid-template-columns: minmax(0, 320px) minmax(0, 1fr);
+    gap: 2rem;
+    align-items: start;
+    padding: 1.75rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .detail-overlay,
+  .detail-panel {
+    transition: none;
+  }
+}
+
+/* Con el detalle abierto la barra inferior estorba: taparía la CTA. */
+body.detail-open .tab-bar {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Hero product slider — crossfade between real SKUs. Advances on click/dot
+   and on a slow timer that stops as soon as the visitor interacts, so it is
+   never motion running for its own sake. */
+.hero-slide {
+  display: none;
+}
+
+.hero-slide.is-active {
+  display: block;
+  animation: hero-slide-in 0.5s ease both;
+}
+
+@keyframes hero-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-slide.is-active {
+    animation: none;
+  }
+}
+
+.hero-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--color-outline-variant);
+  transition: background 0.2s ease, width 0.2s ease;
+}
+
+.hero-dot.is-active {
+  width: 22px;
+  background: var(--color-secondary);
+}
+
+/* Price: one consistent terracotta treatment everywhere a price appears, so
+   the number is the thing the eye lands on. */
+.price {
+  font-family: var(--font-body);
+  font-weight: 700;
+  color: var(--color-secondary);
+  letter-spacing: -0.01em;
+}
+
+/* Specimen stamp label — used for badges/prices rendered as if hand-stamped */
+.specimen-label {
+  font-family: var(--font-label);
+  letter-spacing: 0.08em;
+}
+
+/* Signature element: a small hand-drawn take on the brand's real
+   spiga-de-corazones motif (see logo-monogram.png), self-draws once on
+   load next to the hero headline — restrained, single occurrence, no
+   full-section background coverage. */
+.sprig-path {
+  fill: none;
+  stroke: var(--color-secondary);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: var(--len, 1000);
+  stroke-dashoffset: var(--len, 1000);
+  transition: stroke-dashoffset 1.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.sprig-path.is-grown {
+  stroke-dashoffset: 0;
+}
+
+.sprig-leaf {
+  fill: none;
+  stroke: var(--color-tertiary);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: var(--len, 1000);
+  stroke-dashoffset: var(--len, 1000);
+  transition: stroke-dashoffset 1.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.sprig-leaf.is-grown {
+  stroke-dashoffset: 0;
+}
+
+.sprig-heart {
+  fill: var(--color-secondary);
+  opacity: 0;
+  transform-origin: center;
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.sprig-heart.is-grown {
+  opacity: 0.9;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sprig-path,
+  .sprig-leaf {
+    transition: none !important;
+    stroke-dashoffset: 0 !important;
+  }
+
+  .sprig-heart {
+    transition: none !important;
+    opacity: 0.9 !important;
+  }
+}
+
+/* One-time signature stamp: the monogram "seals" the hero on load, like a
+   wax stamp pressed onto the specimen card. Fires once via growSprig()
+   alongside the sprig draw-in — no infinite loop, no re-trigger. */
+.brand-stamp {
+  opacity: 0;
+  transform: scale(0.6) rotate(-14deg);
+  transition: opacity 0.9s ease 0.5s, transform 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.5s;
+}
+
+.brand-stamp.is-grown {
+  opacity: 1;
+  transform: scale(1) rotate(-8deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand-stamp {
+    transition: none !important;
+    opacity: 1 !important;
+    transform: rotate(-8deg) !important;
+  }
+}
+
+/* Scroll reveal utility */
+.reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}

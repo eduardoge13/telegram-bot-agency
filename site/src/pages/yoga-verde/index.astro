@@ -1,0 +1,1138 @@
+---
+import {
+  ACCENT_COLORS,
+  ANNOUNCEMENT,
+  FREE_SHIPPING_THRESHOLD,
+  KITS,
+  PRODUCTS,
+  SHIPPING_FLAT,
+  TAX_RATE,
+} from "../../data/yoga-verde-store";
+
+const accentOf = (item: { use?: string }) => ACCENT_COLORS[item.use as keyof typeof ACCENT_COLORS] || ACCENT_COLORS.terracota;
+import "../../styles/yoga-verde.css";
+
+const money = new Intl.NumberFormat("es-MX", {
+  style: "currency",
+  currency: "MXN",
+  maximumFractionDigits: 0,
+});
+
+const formatMoney = (value: number) => money.format(value);
+
+const bestSellers = PRODUCTS.filter((product) => product.featured).slice(0, 8);
+
+// Solo estos SKUs tienen fotografía real del envase; el resto de los assets son
+// la etiqueta plana renderizada, que en un banner se leería como arte, no como
+// producto. El hero se compone únicamente con los primeros.
+const REAL_PHOTO_IDS = [
+  "desmaquillante-almendra-dulce",
+  "crema-facial-chabacano",
+  "agua-micelar-manzanilla",
+  "crema-corporal-leche-de-coco",
+  "mousse-corporal-uva",
+  "vela-soya-vainilla",
+  "contorno-de-ojos-lavanda",
+  "balsamo-labial-coco-menta",
+  "vela-soya-bergamota",
+];
+
+const heroSlides = REAL_PHOTO_IDS.map((id) =>
+  PRODUCTS.find((product) => product.id === id),
+).filter(Boolean).slice(0, 5) as typeof PRODUCTS;
+
+// Las piezas reales que componen cada kit (ver `items` en yoga-verde-store.js),
+// para poder mostrarlas todas en la tarjeta en vez de una sola foto.
+const productById = new Map(PRODUCTS.map((product) => [product.id, product]));
+const kitItems = (kit: { items?: string[] }) =>
+  (kit.items || []).map((id) => productById.get(id)).filter(Boolean) as typeof PRODUCTS;
+
+// Fuente de verdad única de la navegación. El orden aquí ES el orden comercial
+// de la página, y lo consumen el header, la barra inferior móvil, el footer y
+// el scrollspy, de modo que no puedan desincronizarse entre sí.
+const NAV_ITEMS = [
+  { id: "inicio", label: "Inicio", icon: "home", inTabBar: true },
+  { id: "best-sellers", label: "Selección", icon: "auto_awesome", inTabBar: false },
+  { id: "catalogo", label: "Catálogo", icon: "storefront", inTabBar: true },
+  { id: "kits", label: "Kits", icon: "inventory_2", inTabBar: true },
+  { id: "contacto", label: "Contacto", icon: "mail", inTabBar: false },
+];
+const tabBarItems = NAV_ITEMS.filter((item) => item.inTabBar);
+
+const useFilters = Array.from(
+  new Map(PRODUCTS.map((product) => [product.use, { slug: product.use, label: product.useLabel }])).values(),
+);
+const typeFilters = Array.from(
+  new Map(PRODUCTS.map((product) => [product.type, { slug: product.type, label: product.typeLabel }])).values(),
+);
+
+const storeData = {
+  announcement: ANNOUNCEMENT,
+  freeShippingThreshold: FREE_SHIPPING_THRESHOLD,
+  shippingFlat: SHIPPING_FLAT,
+  taxRate: TAX_RATE,
+  products: PRODUCTS,
+  kits: KITS,
+  accentColors: ACCENT_COLORS,
+};
+---
+
+<html class="light" lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Yoga Verde | Cosmética natural hecha en México</title>
+    <meta
+      content="Yoga Verde es cosmética natural hecha en México: desmaquillante, agua micelar, crema facial, crema corporal, mousse, bálsamo labial y velas de soya. Compra fácil desde móvil o desktop."
+      name="description"
+    />
+    <meta content="Yoga Verde | Cosmética natural hecha en México" property="og:title" />
+    <meta
+      content="Cosmética natural hecha en México: cremas, desmaquillante, aceites capilares, bálsamo labial y velas de soya con almendra, coco, uva, lavanda y más."
+      property="og:description"
+    />
+    <meta content="website" property="og:type" />
+    <meta content="https://yoga-verde.srv1175749.hstgr.cloud/" property="og:url" />
+    <meta
+      content="https://yoga-verde.srv1175749.hstgr.cloud/yoga-verde/assets/brand/og-image.png"
+      property="og:image"
+    />
+    <meta content="1200" property="og:image:width" />
+    <meta content="630" property="og:image:height" />
+    <link href="/yoga-verde/assets/brand/favicon-32.png" rel="icon" sizes="32x32" type="image/png" />
+    <link href="/yoga-verde/assets/brand/favicon-180.png" rel="apple-touch-icon" />
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Gelasio:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
+    <link href="https://yoga-verde.srv1175749.hstgr.cloud/" rel="canonical" />
+  </head>
+  <body class="bg-surface text-on-surface selection:bg-secondary/20 selection:text-primary">
+    <script id="yoga-verde-data" is:inline set:html={JSON.stringify(storeData)} type="application/json"></script>
+
+    <div class="min-h-screen bg-surface pb-28 md:pb-0" data-page-content>
+      <div class="sticky top-0 z-[70]">
+        <div class="bg-primary px-4 py-2 text-center text-[11px] font-semibold uppercase tracking-[0.22em] text-on-primary-container sm:text-xs">
+          {ANNOUNCEMENT}
+        </div>
+        <header class="border-b border-white/10 bg-primary/95 backdrop-blur-xl">
+          <nav class="mx-auto flex h-20 max-w-screen-2xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center gap-3">
+              <a class="inline-flex items-center rounded-2xl bg-surface-container-lowest px-3.5 py-2.5 shadow-parchment transition hover:-translate-y-0.5" href="#inicio">
+                <img
+                  alt="Yoga Verde — Cosmética natural"
+                  class="h-14 w-auto sm:h-16"
+                  height="1400"
+                  src="/yoga-verde/assets/brand/logo-yoga-verde.svg"
+                  width="1400"
+                />
+              </a>
+            </div>
+
+            <div class="hidden items-center gap-7 md:flex">
+              {NAV_ITEMS.map((item) => (
+                <button class="nav-link" data-nav-link={item.id} data-scroll-to={item.id} type="button">
+                  {item.label}
+                </button>
+              ))}
+            </div>
+
+            <div class="flex items-center gap-3">
+              <button
+                aria-label="Buscar en el catálogo"
+                class="hidden items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-sm text-on-primary-container transition hover:border-secondary/60 hover:text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35 lg:inline-flex"
+                data-focus-search
+                type="button"
+              >
+                <span class="material-symbols-outlined text-base">search</span>
+                Buscar productos
+              </button>
+              <button
+                aria-label="Abrir carrito"
+                class="group relative inline-flex h-12 w-12 items-center justify-center rounded-full border border-outline-variant/50 bg-surface-container-lowest text-primary transition hover:-translate-y-0.5 hover:border-secondary/50 hover:text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35"
+                data-open-cart
+                type="button"
+              >
+                <span class="material-symbols-outlined">shopping_cart</span>
+                <span
+                  class="absolute -right-1 -top-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-secondary px-1 text-[10px] font-bold text-white"
+                  data-cart-count
+                >
+                  0
+                </span>
+              </button>
+            </div>
+          </nav>
+        </header>
+      </div>
+
+      <main>
+        <!-- Hero mobile-first: marca, un slogan de una línea y producto real de
+             inmediato. Sin párrafo institucional, sin estadísticas y sin CTA
+             genérico: la primera decisión que ofrecemos es sobre un producto. -->
+        <section class="bg-surface" id="inicio">
+          <div class="mx-auto w-full max-w-screen-2xl px-4 pb-6 pt-7 sm:px-6 sm:pb-8 sm:pt-10 lg:grid lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-center lg:gap-16 lg:px-8 lg:py-16">
+            <div class="lg:pb-6">
+              <img
+                alt="Yoga Verde"
+                class="h-16 w-auto max-w-full sm:h-20 lg:h-28"
+                height="1400"
+                src="/yoga-verde/assets/brand/logo-yoga-verde.svg"
+                width="1400"
+              />
+              <p class="mt-4 max-w-[22ch] font-headline text-[clamp(1.5rem,7vw,2rem)] leading-[1.15] text-primary lg:mt-6 lg:max-w-[16ch] lg:text-[clamp(2.25rem,3.2vw,3.25rem)]">
+                Piel, cabello y bienestar
+                <span class="italic text-secondary">de origen natural</span>
+              </p>
+            </div>
+
+            <div class="mt-6 lg:mt-0">
+              <div class="relative overflow-hidden rounded-[28px] bg-surface-container-lowest p-3 shadow-parchment sm:rounded-[32px] sm:p-4">
+                <div data-hero-slider>
+                  {heroSlides.map((product, index) => (
+                    <article
+                      class:list={["hero-slide", index === 0 && "is-active"]}
+                      data-hero-slide={index}
+                    >
+                      <img
+                        alt={`${product.name}, ${product.scent}`}
+                        class="aspect-square w-full max-w-full rounded-[22px] bg-surface-container-lowest object-contain"
+                        decoding={index === 0 ? "sync" : "async"}
+                        loading={index === 0 ? "eager" : "lazy"}
+                        src={product.image}
+                      />
+                      <div class="flex flex-wrap items-end justify-between gap-x-4 gap-y-3 px-1 pb-1 pt-4">
+                        <div class="min-w-0 flex-1 basis-[9rem]">
+                          <h2 class="product-name font-headline text-lg leading-snug text-primary sm:text-xl">
+                            {product.name}
+                          </h2>
+                          <p class="mt-0.5 text-sm text-on-surface-variant">{product.scent}</p>
+                        </div>
+                        <div class="flex min-w-0 shrink-0 items-center gap-3">
+                          <span class="price text-xl sm:text-2xl">{formatMoney(product.price)}</span>
+                          <button
+                            class="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full bg-secondary px-4 text-xs font-bold text-on-secondary transition hover:bg-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/50"
+                            data-add-item={product.id}
+                            type="button"
+                          >
+                            Añadir
+                            <span aria-hidden="true" class="material-symbols-outlined text-sm">add_shopping_cart</span>
+                          </button>
+                        </div>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+
+                <div class="mt-3 flex items-center justify-center gap-2">
+                  {heroSlides.map((product, index) => (
+                    <button
+                      aria-label={`Ver ${product.name}`}
+                      class:list={["hero-dot", index === 0 && "is-active"]}
+                      data-hero-dot={index}
+                      type="button"
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+
+        <section class="reveal mx-auto max-w-screen-2xl px-4 py-10 sm:px-6 lg:px-8" id="best-sellers">
+          <div class="mb-5 flex flex-wrap items-end justify-between gap-x-6 gap-y-2 sm:mb-6">
+            <div class="min-w-0">
+              <p class="specimen-label text-xs font-semibold uppercase tracking-[0.22em] text-secondary">
+                Selección
+              </p>
+              <h2 class="mt-2 font-headline text-2xl text-primary sm:text-3xl">Para empezar</h2>
+            </div>
+            <button
+              class="inline-flex min-h-11 shrink-0 items-center gap-1.5 text-sm font-semibold text-primary transition hover:text-secondary focus-visible:outline-none"
+              data-scroll-to="catalogo"
+              type="button"
+            >
+              Ver todo
+              <span aria-hidden="true" class="material-symbols-outlined text-base">arrow_forward</span>
+            </button>
+          </div>
+
+          <!-- En móvil es un carril horizontal con snap: apilar 8 tarjetas dejaba
+               ~6.800px de scroll antes del catálogo. En md+ vuelve a ser grid. -->
+          <div class="hide-scrollbar -mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 sm:-mx-6 sm:px-6 md:mx-0 md:grid md:grid-cols-2 md:gap-6 md:overflow-visible md:px-0 xl:grid-cols-4">
+            {bestSellers.map((product) => (
+              <article
+                class="group w-[78vw] max-w-[19rem] shrink-0 snap-start overflow-hidden rounded-[30px] md:w-auto md:max-w-none md:shrink bg-surface-container-lowest shadow-parchment transition-transform hover:-translate-y-1"
+                style={`--accent: ${accentOf(product)}`}
+              >
+                <div class="relative overflow-hidden bg-surface-container-low p-4">
+                  {product.badge && (
+                    <span class="absolute left-4 top-4 z-10 rounded-full bg-surface px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                      {product.badge}
+                    </span>
+                  )}
+                  <img
+                    alt={`${product.name} ${product.scent}`}
+                    class="aspect-[4/3] product-media w-full rounded-[24px] bg-surface-container-lowest p-1 transition duration-500 group-hover:scale-105"
+                    src={product.image}
+                  />
+                </div>
+                <div class="p-5 sm:p-6">
+                  <p class="text-[11px] uppercase tracking-[0.22em] text-on-surface-variant">
+                    {product.typeLabel}
+                  </p>
+                  <h3 class="product-name mt-1.5 font-headline text-xl leading-snug text-primary">{product.name}</h3>
+                  <p class="mt-0.5 text-sm text-on-surface-variant">{product.scent}</p>
+                  <p class="mt-3 text-sm leading-6 text-on-surface-variant">{product.short}</p>
+                  <div class="mt-4 flex flex-wrap gap-2">
+                    <span class="accent-dot rounded-full bg-surface-container-low px-3 py-1.5 text-xs font-semibold text-primary">
+                      {product.useLabel}
+                    </span>
+                    {product.size && (
+                      <span class="rounded-full bg-surface-container-low px-3 py-1.5 text-xs font-semibold text-on-surface-variant">
+                        {product.size}
+                      </span>
+                    )}
+                  </div>
+                  <div class="mt-5 flex flex-wrap items-center justify-between gap-x-4 gap-y-3 border-t border-outline-variant/40 pt-4">
+                    <span class="price text-xl">{formatMoney(product.price)}</span>
+                    <div class="flex min-w-0 flex-wrap items-center gap-x-4 gap-y-2">
+                      <button
+                        class="inline-flex min-h-11 shrink-0 items-center gap-1.5 text-sm font-semibold text-primary transition hover:text-secondary focus-visible:outline-none"
+                        data-open-detail={product.id}
+                        type="button"
+                      >
+                        Ver detalle
+                      </button>
+                      <button
+                        aria-label={`Añadir ${product.name} al carrito`}
+                        class="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-2xl bg-primary px-4 text-sm font-semibold text-on-primary transition hover:bg-primary-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35"
+                        data-add-item={product.id}
+                        type="button"
+                      >
+                        Añadir
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        
+
+        <section class="relative overflow-hidden bg-surface px-4 py-16 sm:px-6 lg:px-8" id="catalogo">
+          <div class="relative mx-auto max-w-screen-2xl">
+          <div class="mb-8 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+            <div class="min-w-0">
+              <h2 class="font-headline text-2xl text-primary sm:text-3xl">Catálogo completo</h2>
+              <p class="mt-1 text-sm text-on-surface-variant">
+                <span data-product-count>{PRODUCTS.length}</span> productos
+              </p>
+            </div>
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <div class="flex w-full min-w-[280px] items-center gap-3 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-3 shadow-parchment">
+                <span class="material-symbols-outlined text-on-surface-variant">search</span>
+                <input
+                  aria-label="Buscar productos"
+                  class="w-full border-none bg-transparent p-0 text-sm text-on-surface placeholder:text-on-surface-variant/70 focus:outline-none focus:ring-0"
+                  data-search-input
+                  placeholder="Buscar almendra, crema facial, vela de soya..."
+                  type="search"
+                />
+              </div>
+              <button
+                aria-label="Abrir filtros"
+                class="inline-flex items-center justify-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-5 py-3 text-sm font-semibold text-primary transition hover:border-secondary/40 hover:text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35 xl:hidden"
+                data-open-filters
+                type="button"
+              >
+                <span class="material-symbols-outlined text-base">tune</span>
+                Filtros
+              </button>
+            </div>
+          </div>
+
+          <div class="grid gap-8 xl:grid-cols-[300px_minmax(0,1fr)]">
+            <div class="pointer-events-none fixed inset-0 z-[72] bg-primary/25 opacity-0 transition xl:hidden" data-filters-overlay></div>
+            <aside
+              class="hide-scrollbar fixed inset-y-0 left-0 z-[80] w-[88vw] max-w-sm -translate-x-full overflow-y-auto bg-surface-container-low p-6 shadow-float transition duration-300 xl:sticky xl:top-28 xl:z-auto xl:w-auto xl:max-w-none xl:translate-x-0 xl:overflow-visible xl:rounded-[32px] xl:border xl:border-outline-variant/45 xl:bg-surface-container-low xl:shadow-parchment"
+              data-filters-drawer
+            >
+              <div class="mb-8 flex items-center justify-between xl:hidden">
+                <div>
+                  <p class="specimen-label text-xs font-semibold uppercase tracking-[0.22em] text-secondary">
+                    Filtros
+                  </p>
+                  <h3 class="mt-2 font-headline text-3xl text-primary">Compra por afinidad</h3>
+                </div>
+                <button
+                  aria-label="Cerrar filtros"
+                  class="inline-flex h-11 w-11 items-center justify-center rounded-full border border-outline-variant/60 text-primary transition hover:border-secondary/40 hover:text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35"
+                  data-close-filters
+                  type="button"
+                >
+                  <span class="material-symbols-outlined">close</span>
+                </button>
+              </div>
+
+              <div class="space-y-8">
+                <div>
+                  <h3 class="font-headline text-2xl text-primary">Familia de aroma</h3>
+                  <div class="mt-4 flex flex-wrap gap-2">
+                    {useFilters.map((useFilter) => (
+                      <button
+                        aria-pressed="false"
+                        class="rounded-full bg-surface-container-highest px-4 py-2 text-sm font-medium text-on-surface-variant transition hover:bg-tertiary-container hover:text-on-tertiary-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35"
+                        data-filter-use={useFilter.slug}
+                        type="button"
+                      >
+                        {useFilter.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <h3 class="font-headline text-2xl text-primary">Categoría</h3>
+                  <div class="mt-4 flex flex-wrap gap-2">
+                    {typeFilters.map((typeFilter) => (
+                      <button
+                        aria-pressed="false"
+                        class="rounded-full bg-surface-container-highest px-4 py-2 text-sm font-medium text-on-surface-variant transition hover:bg-tertiary-container hover:text-on-tertiary-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35"
+                        data-filter-type={typeFilter.slug}
+                        type="button"
+                      >
+                        {typeFilter.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+
+
+                <button
+                  class="w-full rounded-2xl border border-outline-variant/70 px-4 py-3 text-sm font-semibold text-primary transition hover:border-secondary/40 hover:text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35"
+                  data-clear-filters
+                  type="button"
+                >
+                  Limpiar filtros
+                </button>
+              </div>
+            </aside>
+
+            <div class="min-w-0">
+              <div class="rounded-[32px] bg-surface-container-low p-6 shadow-parchment">
+                <div class="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+                  <div>
+                    <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-on-surface-variant">
+                      <span data-product-count-filtered>{PRODUCTS.length}</span> piezas visibles
+                    </p>
+                    <p class="mt-2 text-sm leading-7 text-on-surface-variant">
+                      Filtra por aroma, categoría o tamaño de envase.
+                    </p>
+                    <div class="mt-4 flex flex-wrap gap-2" data-active-filters></div>
+                  </div>
+                  <div class="flex flex-wrap gap-3">
+                    <button
+                      class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2 text-sm font-semibold text-primary transition hover:border-secondary/40 hover:text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35"
+                      data-open-cart
+                      type="button"
+                    >
+                      Ver carrito
+                      <span class="material-symbols-outlined text-base">shopping_cart</span>
+                    </button>
+                    <button
+                      class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2 text-sm font-semibold text-primary transition hover:border-secondary/40 hover:text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35"
+                      data-scroll-to="kits"
+                      type="button"
+                    >
+                      Ver kits
+                      <span class="material-symbols-outlined text-base">inventory_2</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mt-8 grid gap-6 md:grid-cols-2 2xl:grid-cols-3" data-products-grid>
+                {PRODUCTS.map((product) => (
+                  <article
+                    class="group overflow-hidden rounded-[30px] bg-surface-container-lowest shadow-parchment transition-transform hover:-translate-y-1"
+                    style={`--accent: ${accentOf(product)}`}
+                  >
+                    <div class="relative overflow-hidden bg-surface-container-low p-4">
+                      <span class="absolute left-4 top-4 z-10 rounded-full bg-surface px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                        {product.badge}
+                      </span>
+                      <img
+                        alt={`${product.name} ${product.scent}`}
+                        class="aspect-[4/3] product-media w-full rounded-[24px] bg-surface-container-lowest p-1 transition duration-500 group-hover:scale-105"
+                        src={product.image}
+                      />
+                    </div>
+                    <div class="p-6">
+                      <div class="flex items-start justify-between gap-4">
+                        <div class="min-w-0">
+                          <p class="text-[11px] uppercase tracking-[0.22em] text-on-surface-variant">
+                            {product.typeLabel} · {product.scent}
+                          </p>
+                          <h3 class="product-name mt-1.5 font-headline text-xl leading-snug text-primary">
+                            {product.name}
+                          </h3>
+                        </div>
+                        <span class="price shrink-0 text-xl">{formatMoney(product.price)}</span>
+                      </div>
+                      <p class="mt-4 min-h-[84px] text-sm italic leading-7 text-on-surface-variant">{product.short}</p>
+                      <div class="mt-4 flex flex-wrap gap-2">
+                        <span class="accent-dot rounded-full bg-surface-container-low px-3 py-2 text-xs font-semibold text-primary">
+                          {product.useLabel}
+                        </span>
+                        <span class="rounded-full bg-surface-container-low px-3 py-2 text-xs font-semibold text-on-surface-variant">
+                          {product.size}
+                        </span>
+                      </div>
+                      <div class="mt-6 flex items-center justify-between gap-3 border-t border-outline-variant/40 pt-5">
+                        <button
+                          class="inline-flex items-center gap-2 text-sm font-semibold text-primary transition hover:text-secondary focus-visible:outline-none"
+                          data-open-detail={product.id}
+                          type="button"
+                        >
+                          <span class="material-symbols-outlined text-base">auto_stories</span>
+                          Ver detalle
+                        </button>
+                        <button
+                          aria-label={`Añadir ${product.name} al carrito`}
+                          class="inline-flex items-center gap-2 rounded-2xl bg-primary px-4 py-3 text-sm font-semibold text-on-primary transition hover:bg-primary-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35"
+                          data-add-item={product.id}
+                          type="button"
+                        >
+                          Añadir al carrito
+                        </button>
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+
+              <div
+                class="mt-8 hidden rounded-[32px] border border-dashed border-outline-variant/80 bg-surface-container-low p-10 text-center shadow-parchment"
+                data-empty-state
+              >
+                <p class="font-headline text-3xl text-primary">Sin coincidencias</p>
+                <p class="mt-3 text-on-surface-variant">
+                  Cambia filtros o limpia la búsqueda para volver a ver el catálogo completo.
+                </p>
+              </div>
+            </div>
+          </div>
+          </div>
+        </section>
+
+
+        <section class="reveal mx-auto max-w-screen-2xl px-4 py-10 sm:px-6 lg:px-8" id="kits">
+          <div class="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div class="max-w-2xl">
+              <p class="specimen-label text-xs font-semibold uppercase tracking-[0.22em] text-secondary">
+                Kits recomendados
+              </p>
+              <h2 class="mt-3 font-headline text-4xl text-primary">Comprar mejor, en menos pasos</h2>
+              <p class="mt-4 text-lg leading-8 text-on-surface-variant">
+                Combinaciones pensadas para primera compra o regalo, con ahorro frente a comprar
+                cada pieza por separado.
+              </p>
+            </div>
+            <button
+              class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-5 py-3 text-sm font-semibold text-primary transition hover:border-secondary/40 hover:text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35"
+              data-open-cart
+              type="button"
+            >
+              Ver carrito
+              <span class="material-symbols-outlined text-base">shopping_bag</span>
+            </button>
+          </div>
+
+          <div class="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+            {KITS.map((kit) => (
+              <article class="overflow-hidden rounded-[30px] bg-surface-container-lowest shadow-parchment" style={`--accent: ${accentOf(kit)}`}>
+                <div class="relative overflow-hidden p-4">
+                  {/* Un kit incluye 2-3 piezas; se muestran todas, no solo una. */}
+                  <div class="grid aspect-square grid-cols-2 gap-2 rounded-[24px] bg-surface-container-lowest p-2">
+                    {kitItems(kit).map((piece, index) => (
+                      <img
+                        alt={`${piece.name} ${piece.scent}`}
+                        class:list={[
+                          "product-media h-full w-full rounded-[16px]",
+                          kitItems(kit).length === 3 && index === 0 && "col-span-2",
+                        ]}
+                        loading="lazy"
+                        src={piece.image}
+                      />
+                    ))}
+                  </div>
+                  <span class="absolute left-8 top-8 rounded-full bg-primary px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-white">
+                    {kit.badge}
+                  </span>
+                </div>
+                <div class="p-6">
+                  <div class="flex items-start justify-between gap-4">
+                    <div class="min-w-0">
+                      <p class="text-[11px] uppercase tracking-[0.22em] text-on-surface-variant">
+                        {kit.useLabel}
+                      </p>
+                      <h3 class="product-name mt-1.5 font-headline text-xl leading-snug text-primary">{kit.name}</h3>
+                    </div>
+                    <span class="price shrink-0 text-xl">{formatMoney(kit.price)}</span>
+                  </div>
+                  <p class="mt-4 text-sm italic leading-7 text-on-surface-variant">{kit.short}</p>
+                  <div class="mt-5 flex flex-wrap gap-2">
+                    <span class="rounded-full bg-surface-container-low px-3 py-2 text-xs font-semibold text-primary">
+                      {kit.typeLabel}
+                    </span>
+                    <span class="rounded-full bg-surface-container-low px-3 py-2 text-xs font-semibold text-on-surface-variant">
+                      Regalo o primera compra
+                    </span>
+                  </div>
+                  <div class="mt-6 flex items-center justify-between gap-3 border-t border-outline-variant/40 pt-5">
+                    <button
+                      class="inline-flex items-center gap-2 text-sm font-semibold text-primary transition hover:text-secondary focus-visible:outline-none"
+                      data-open-detail={kit.id}
+                      type="button"
+                    >
+                      <span class="material-symbols-outlined text-base">auto_stories</span>
+                      Ver detalle
+                    </button>
+                    <button
+                      class="inline-flex items-center gap-2 rounded-2xl bg-primary px-4 py-3 text-sm font-semibold text-on-primary transition hover:bg-primary-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35"
+                      data-add-item={kit.id}
+                      type="button"
+                    >
+                      Añadir al carrito
+                    </button>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section class="reveal mx-auto max-w-screen-2xl px-4 py-12 sm:px-6 lg:px-8">
+          <div class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
+            <article class="overflow-hidden rounded-[36px] bg-surface-container-lowest shadow-parchment">
+              <div class="grid gap-8 p-8 lg:grid-cols-[minmax(0,1fr)_220px] lg:items-center lg:p-10">
+                <div>
+                  <p class="specimen-label text-xs font-semibold uppercase tracking-[0.22em] text-secondary">
+                    Nuestra filosofía
+                  </p>
+                  <h2 class="mt-3 font-headline text-4xl text-primary">Alta cosmética de origen botánico</h2>
+                  <blockquote class="mt-5 max-w-2xl font-headline text-xl italic leading-relaxed text-tertiary">
+                    “Cada fórmula se construye alrededor de un activo botánico, en la
+                    concentración necesaria para que haga su trabajo.”
+                  </blockquote>
+                  <div class="mt-8 grid gap-6 md:grid-cols-2">
+                    <p class="leading-7 text-on-surface-variant">
+                      El color de cada etiqueta indica su aroma: terracota para cítricos y frutos
+                      suaves, verde para menta y bergamota, morado para uva y lavanda, dorado para
+                      leche de coco.
+                    </p>
+                    <p class="leading-7 text-on-surface-variant">
+                      Envasado en vidrio ámbar y cristal, que protegen los activos de la luz y
+                      conservan la fórmula estable.
+                    </p>
+                  </div>
+                </div>
+                <div class="overflow-hidden rounded-[28px] bg-surface-container-low p-3">
+                  <img
+                    alt="Crema corporal de leche de coco Yoga Verde"
+                    class="aspect-square product-media w-full rounded-[22px] bg-surface-container-lowest p-1"
+                    src="/yoga-verde/assets/products/crema-corporal-leche-de-coco.jpg"
+                  />
+                </div>
+              </div>
+            </article>
+
+            <article class="rounded-[36px] bg-primary p-8 text-on-primary shadow-float">
+              <p class="text-xs font-semibold uppercase tracking-[0.22em] text-on-primary-container">
+                Newsletter
+              </p>
+              <h2 class="mt-3 font-headline text-4xl text-white">Lanzamientos y descuentos</h2>
+              <p class="mt-5 text-base leading-8 text-on-primary-container">
+                Te avisamos cuando sale un producto nuevo o hay descuento de temporada.
+              </p>
+              <div class="mt-8 rounded-[28px] bg-white/10 p-4">
+                <label class="sr-only" for="newsletter-email">Correo electrónico</label>
+                <div class="flex items-center gap-3 rounded-full border border-white/15 px-4 py-3">
+                  <input
+                    class="w-full border-none bg-transparent p-0 text-sm text-white placeholder:text-on-primary-container focus:outline-none focus:ring-0"
+                    id="newsletter-email"
+                    placeholder="Tu correo electrónico"
+                    type="email"
+                  />
+                  <button
+                    class="inline-flex h-11 w-11 items-center justify-center rounded-full bg-secondary text-white transition hover:bg-[#c25a42] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+                    type="button"
+                  >
+                    <span class="material-symbols-outlined">arrow_forward</span>
+                  </button>
+                </div>
+              </div>
+              <p class="mt-4 text-sm leading-7 text-on-primary-container">
+                Sin spam: solo avisos de producto nuevo y promociones puntuales.
+              </p>
+            </article>
+          </div>
+        </section>
+
+        
+      </main>
+
+      <footer class="bg-primary py-16 text-on-primary" id="contacto">
+        <div class="mx-auto grid max-w-screen-2xl gap-10 px-4 sm:px-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1fr)] lg:px-8">
+          <div>
+            <div class="inline-flex items-center rounded-2xl bg-surface-container-lowest/95 px-4 py-3 shadow-parchment ring-1 ring-black/5">
+              <img
+                alt="Yoga Verde — Cosmética natural"
+                class="h-14 w-auto sm:h-16"
+                height="1400"
+                src="/yoga-verde/assets/brand/logo-yoga-verde.svg"
+                width="1400"
+              />
+            </div>
+            <p class="mt-5 max-w-sm leading-8 text-on-primary-container">
+              Cosmética natural formulada en México: rostro, cuerpo, cabello, labios
+              y aromaterapia.
+            </p>
+          </div>
+          <div>
+            <h3 class="font-headline text-2xl">Explorar</h3>
+            <div class="mt-4 space-y-3 text-on-primary-container">
+              {NAV_ITEMS.filter((item) => item.id !== "inicio").map((item) => (
+                <button class="block transition hover:text-white" data-scroll-to={item.id} type="button">
+                  {item.label}
+                </button>
+              ))}
+              <button class="block transition hover:text-white" data-open-cart type="button">
+                Carrito
+              </button>
+            </div>
+          </div>
+          <div>
+            <h3 class="font-headline text-2xl">Cosmética natural</h3>
+            {/* Certificaciones impresas en las etiquetas reales del cliente. */}
+            <div class="mt-5 flex flex-wrap gap-2">
+              <span class="rounded-full border border-white/15 px-3 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-on-primary-container">
+                Producto vegano
+              </span>
+              <span class="rounded-full border border-white/15 px-3 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-on-primary-container">
+                Cruelty free
+              </span>
+              <span class="rounded-full border border-white/15 px-3 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-on-primary-container">
+                Libre de parabenos
+              </span>
+              <span class="rounded-full border border-white/15 px-3 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-on-primary-container">
+                Libre de sulfatos
+              </span>
+              <span class="rounded-full border border-white/15 px-3 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-on-primary-container">
+                Hecho en México
+              </span>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <nav
+      aria-label="Navegación principal"
+      class="tab-bar fixed inset-x-3 bottom-3 z-[64] rounded-[26px] border border-outline-variant/40 bg-surface-container-lowest/95 px-2 py-1.5 shadow-float backdrop-blur md:hidden"
+    >
+      <div class="grid grid-cols-5 gap-1">
+        {tabBarItems.map((item) => (
+          <button class="tab-link" data-nav-link={item.id} data-scroll-to={item.id} type="button">
+            <span aria-hidden="true" class="material-symbols-outlined text-[20px]">{item.icon}</span>
+            {item.label}
+          </button>
+        ))}
+        <button class="tab-link" data-focus-search type="button">
+          <span aria-hidden="true" class="material-symbols-outlined text-[20px]">search</span>
+          Buscar
+        </button>
+        <button class="tab-link relative" data-open-cart type="button">
+          <span aria-hidden="true" class="material-symbols-outlined text-[20px]">shopping_bag</span>
+          Carrito
+          <span
+            class="absolute right-1.5 top-0.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-secondary px-1 text-[9px] font-bold text-white"
+            data-cart-count
+          >
+            0
+          </span>
+        </button>
+      </div>
+    </nav>
+
+    <div class="pointer-events-none fixed inset-0 z-[82] bg-primary/35 opacity-0 transition-opacity" data-cart-overlay></div>
+    <aside
+      class="fixed right-0 top-0 z-[83] flex h-full w-full max-w-[460px] translate-x-full flex-col bg-surface-container-lowest shadow-[0_24px_80px_rgba(23,48,32,0.22)] transition-transform duration-300"
+      data-cart-drawer
+    >
+      <div class="flex items-center justify-between border-b border-outline-variant/40 px-6 py-5">
+        <div>
+          <p class="text-xs uppercase tracking-[0.22em] text-on-surface-variant">Carrito interactivo</p>
+          <h2 class="font-headline text-4xl text-primary">Tu carrito</h2>
+        </div>
+        <button
+          aria-label="Cerrar carrito"
+          class="inline-flex h-11 w-11 items-center justify-center rounded-full border border-outline-variant/50 text-primary transition hover:border-secondary/40 hover:text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35"
+          data-close-cart
+          type="button"
+        >
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <div class="hide-scrollbar flex-1 overflow-y-auto px-6 py-6">
+        <div class="rounded-[28px] bg-surface-container-low p-5 shadow-parchment">
+          <div class="flex items-center justify-between gap-3">
+            <p class="text-sm font-semibold text-primary">Progreso para envío gratis</p>
+            <p class="text-xs uppercase tracking-[0.22em] text-on-surface-variant">
+              Meta {formatMoney(FREE_SHIPPING_THRESHOLD)}
+            </p>
+          </div>
+          <div class="mt-4 h-3 overflow-hidden rounded-full bg-surface-container-highest">
+            <div class="h-full rounded-full bg-secondary transition-all duration-300" data-shipping-progress style="width: 0%"></div>
+          </div>
+          <p class="mt-4 text-sm leading-7 text-on-surface-variant" data-shipping-message>
+            Te faltan {formatMoney(FREE_SHIPPING_THRESHOLD)} para envío gratis.
+          </p>
+        </div>
+
+        <div class="mt-6 space-y-4" data-cart-items></div>
+
+        <div class="mt-6 hidden rounded-[28px] bg-surface-container-low p-6 text-center shadow-parchment" data-cart-empty>
+          <span class="material-symbols-outlined text-5xl text-on-surface-variant/40">shopping_bag</span>
+          <p class="mt-4 font-headline text-3xl text-primary">Tu canasta está vacía</p>
+          <p class="mt-3 text-on-surface-variant">
+            Explora el catálogo o suma un kit para empezar tu pedido.
+          </p>
+        </div>
+
+        <div class="mt-6 rounded-[28px] bg-primary p-6 text-on-primary shadow-float">
+          <div class="mb-4 flex items-center gap-3">
+            <span class="material-symbols-outlined text-secondary">local_shipping</span>
+            <h3 class="font-headline text-3xl italic text-on-primary-container">Envío seguro</h3>
+          </div>
+          <p class="leading-8 text-on-primary-container/95">
+            Empaque protector para que frascos de vidrio y tarros lleguen completos, sin fugas.
+          </p>
+        </div>
+
+        <div class="mt-6 rounded-[28px] bg-surface-container-low p-5 shadow-parchment" data-cart-upsell></div>
+      </div>
+
+      <div class="border-t border-outline-variant/40 bg-surface px-6 py-6">
+        <div class="space-y-3 text-sm text-on-surface-variant">
+          <div class="flex items-center justify-between">
+            <span>Subtotal</span>
+            <span data-subtotal>{formatMoney(0)}</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span>Envío</span>
+            <span data-shipping>{formatMoney(0)}</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span>Impuestos</span>
+            <span data-tax>{formatMoney(0)}</span>
+          </div>
+        </div>
+        <div class="mt-5 flex items-end justify-between gap-5 border-t border-outline-variant/50 pt-5">
+          <div>
+            <p class="text-xs uppercase tracking-[0.2em] text-on-surface-variant">Total</p>
+            <p class="price text-3xl" data-total>{formatMoney(0)}</p>
+          </div>
+          <button
+            class="inline-flex items-center gap-2 rounded-2xl bg-primary px-5 py-4 font-semibold text-on-primary transition hover:bg-primary-container disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35"
+            data-checkout
+            disabled
+            type="button"
+          >
+            Pagar de forma segura
+            <span class="material-symbols-outlined text-lg">lock</span>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+
+
+    <script is:inline>
+      (function () {
+        var prefersReduced =
+          window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+        var sprigGrown = false;
+        function growSprig() {
+          if (sprigGrown) return;
+          sprigGrown = true;
+          document
+            .querySelectorAll(
+              "[data-sprig] .sprig-path, [data-sprig] .sprig-leaf, [data-sprig] .sprig-heart, [data-stamp]",
+            )
+            .forEach(function (node) {
+              node.classList.add("is-grown");
+            });
+        }
+
+        if (prefersReduced) {
+          growSprig();
+        } else {
+          window.setTimeout(growSprig, 250);
+        }
+
+        var revealTargets = document.querySelectorAll(".reveal");
+        if ("IntersectionObserver" in window && revealTargets.length) {
+          var observer = new IntersectionObserver(
+            function (entries) {
+              entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                  entry.target.classList.add("is-visible");
+                  observer.unobserve(entry.target);
+                }
+              });
+            },
+            // threshold must stay at 0: sections taller than the viewport (the
+            // 8-card best-sellers row on mobile) can never reach a high ratio,
+            // so any positive threshold forced the visitor to scroll hundreds
+            // of px past the heading into blank space before it faded in.
+            { threshold: 0, rootMargin: "0px 0px -10% 0px" },
+          );
+          revealTargets.forEach(function (target) {
+            observer.observe(target);
+          });
+        } else {
+          revealTargets.forEach(function (target) {
+            target.classList.add("is-visible");
+          });
+        }
+
+        // Hero product slider.
+        var slides = document.querySelectorAll("[data-hero-slide]");
+        var dots = document.querySelectorAll("[data-hero-dot]");
+        if (slides.length > 1) {
+          var current = 0;
+          var timer = null;
+
+          var showSlide = function (index) {
+            current = (index + slides.length) % slides.length;
+            slides.forEach(function (slide, i) {
+              slide.classList.toggle("is-active", i === current);
+            });
+            dots.forEach(function (dot, i) {
+              dot.classList.toggle("is-active", i === current);
+            });
+          };
+
+          var stopAuto = function () {
+            if (timer) {
+              window.clearInterval(timer);
+              timer = null;
+            }
+          };
+
+          dots.forEach(function (dot) {
+            dot.addEventListener("click", function () {
+              stopAuto();
+              showSlide(Number(dot.dataset.heroDot));
+            });
+          });
+
+          if (!prefersReduced) {
+            timer = window.setInterval(function () {
+              showSlide(current + 1);
+            }, 5000);
+            var slider = document.querySelector("[data-hero-slider]");
+            if (slider) {
+              slider.addEventListener("mouseenter", stopAuto);
+              slider.addEventListener("focusin", stopAuto);
+            }
+          }
+        }
+
+        // Scrollspy.
+        //
+        // La versión anterior elegía la sección con mayor `intersectionRatio`,
+        // lo que es inestable: una sección más alta que el viewport (el catálogo,
+        // con 27 productos) nunca supera un ratio bajo, así que cualquier sección
+        // corta totalmente visible le ganaba y el resaltado saltaba de una a otra.
+        //
+        // Aquí se observa una banda de 1px justo debajo del header sticky: solo
+        // una sección puede cruzarla a la vez, así que el resultado es determinista
+        // y no depende de la altura de la sección.
+        var stickyHeader = document.querySelector(".sticky");
+        var navLinks = document.querySelectorAll("[data-nav-link]");
+
+        var spySections = [];
+        var seenSections = {};
+        navLinks.forEach(function (link) {
+          var id = link.dataset.navLink;
+          if (seenSections[id]) return;
+          var section = document.getElementById(id);
+          if (section) {
+            seenSections[id] = true;
+            spySections.push(section);
+          }
+        });
+
+        if (spySections.length) {
+          var activeId = null;
+          var setActive = function (id) {
+            if (!id || id === activeId) return;
+            activeId = id;
+            navLinks.forEach(function (link) {
+              var on = link.dataset.navLink === id;
+              link.classList.toggle("is-active", on);
+              if (on) {
+                link.setAttribute("aria-current", "true");
+              } else {
+                link.removeAttribute("aria-current");
+              }
+            });
+          };
+
+          // La altura real del header alimenta tanto la banda del observer como
+          // el scroll-margin-top de las secciones, para que al navegar el título
+          // quede visible y no debajo del header.
+          var syncHeaderHeight = function () {
+            var h = stickyHeader ? Math.round(stickyHeader.getBoundingClientRect().height) : 112;
+            document.documentElement.style.setProperty("--header-h", h + "px");
+            return h;
+          };
+
+          var spy = null;
+          var buildObserver = function () {
+            if (spy) spy.disconnect();
+            var h = syncHeaderHeight();
+            // La banda va algunos píxeles POR DEBAJO del punto donde aterriza una
+            // sección al navegar (scroll-margin-top = header + 12px). Si se
+            // colocara justo en el borde del header, tras hacer click la banda
+            // quedaría todavía dentro de la sección anterior y el resaltado se
+            // marcaría una sección atrás.
+            var band = h + 32;
+            var bottom = Math.max(0, window.innerHeight - band - 1);
+            spy = new IntersectionObserver(
+              function (entries) {
+                entries.forEach(function (entry) {
+                  if (entry.isIntersecting) setActive(entry.target.id);
+                });
+              },
+              { threshold: 0, rootMargin: "-" + band + "px 0px -" + bottom + "px 0px" },
+            );
+            spySections.forEach(function (section) {
+              spy.observe(section);
+            });
+          };
+
+          if ("IntersectionObserver" in window) {
+            buildObserver();
+            window.addEventListener("resize", buildObserver);
+          }
+
+          // Estado correcto al cargar: arriba del todo es "inicio"; con hash, la
+          // sección del hash. El observer se encarga del resto al hacer scroll.
+          var initial = window.location.hash.replace("#", "");
+          if (initial && seenSections[initial]) {
+            setActive(initial);
+          } else {
+            setActive(spySections[0].id);
+          }
+
+          // Volver arriba siempre debe marcar "inicio", aunque la banda no
+          // llegue a cruzar ninguna sección.
+          window.addEventListener(
+            "scroll",
+            function () {
+              if (window.scrollY < 8) setActive(spySections[0].id);
+            },
+            { passive: true },
+          );
+        }
+      })();
+    </script>
+    <!-- Detalle de producto.
+         Antes era un div centrado con -translate-y-1/2 sin max-height ni scroll
+         propio: en 400x692 medía 376x1277, así que ~585px quedaban fuera de la
+         pantalla y, con el body bloqueado, no había forma de alcanzarlos.
+         Ahora es una hoja a pantalla completa con su propio scroll. -->
+    <div class="detail-overlay" data-modal-overlay></div>
+    <div
+      aria-labelledby="detail-title"
+      aria-modal="true"
+      aria-hidden="true"
+      class="detail-panel"
+      data-detail-modal
+      role="dialog"
+      tabindex="-1"
+    >
+      <div class="detail-bar">
+        <p class="min-w-0 truncate text-xs uppercase tracking-[0.22em] text-on-surface-variant" data-detail-badge></p>
+        <button
+          aria-label="Cerrar detalle"
+          class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-outline-variant/50 bg-surface-container-lowest text-primary transition hover:border-secondary/40 hover:text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/40"
+          data-close-detail
+          type="button"
+        >
+          <span aria-hidden="true" class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <div class="detail-body">
+        <div class="mx-auto w-full max-w-[22rem] md:max-w-none">
+          <img
+            alt=""
+            class="product-media mx-auto block aspect-[4/3] w-full rounded-[22px] bg-surface-container-lowest"
+            data-detail-image
+            src=""
+          />
+        </div>
+
+        <div class="mt-5 md:mt-0">
+          <h2 class="product-name font-headline text-2xl leading-tight text-primary" data-detail-title id="detail-title"></h2>
+          <p class="mt-1 text-sm text-on-surface-variant" data-detail-scent></p>
+          <p class="price mt-3 text-2xl" data-detail-price></p>
+
+          <p class="mt-4 leading-7 text-on-surface-variant" data-detail-description></p>
+
+          <div class="mt-5 flex flex-wrap gap-2" data-detail-tags></div>
+
+          <section class="mt-6" data-detail-benefits-block>
+            <h3 class="text-xs font-semibold uppercase tracking-[0.22em] text-on-surface-variant">Beneficios</h3>
+            <ul class="mt-3 space-y-2.5 text-sm leading-6 text-on-surface-variant" data-detail-benefits></ul>
+          </section>
+
+          <section class="mt-6" data-detail-instructions-block>
+            <h3 class="text-xs font-semibold uppercase tracking-[0.22em] text-on-surface-variant">Cómo usarlo</h3>
+            <p class="mt-3 text-sm leading-6 text-on-surface-variant" data-detail-instructions></p>
+          </section>
+        </div>
+      </div>
+
+      <div class="detail-cta">
+        <button
+          class="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-primary px-5 font-semibold text-on-primary transition hover:bg-primary-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35"
+          data-detail-add
+          type="button"
+        >
+          Añadir al carrito
+          <span aria-hidden="true" class="material-symbols-outlined text-lg">add_shopping_cart</span>
+        </button>
+      </div>
+    </div>
+
+    <script defer is:inline src="/yoga-verde/shop.js"></script>
+  </body>
+</html>
