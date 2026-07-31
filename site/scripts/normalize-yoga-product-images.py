@@ -23,6 +23,7 @@ SOURCE_DIR = ROOT / "public/yoga-verde/assets/products"
 OUTPUT_DIR = SOURCE_DIR / "display"
 CANVAS_SIZE = 1200
 TARGET_FOREGROUND = 1000
+FOREGROUND_BASELINE = CANVAS_SIZE - 70
 CANVAS_BACKGROUND = (250, 248, 244, 255)
 
 
@@ -104,26 +105,56 @@ def normalize(source: Path, destination: Path) -> None:
     bbox = largest_component_bbox(mask)
 
     left, top, right, bottom = bbox
+    foreground_width = right - left
+    foreground_height = bottom - top
     padding_x = max(12, int((right - left) * 0.08))
     padding_y = max(12, int((bottom - top) * 0.08))
-    left = max(0, left - padding_x)
-    top = max(0, top - padding_y)
-    right = min(image.width, right + padding_x)
-    bottom = min(image.height, bottom + padding_y)
+    crop_left = max(0, left - padding_x)
+    crop_top = max(0, top - padding_y)
+    crop_right = min(image.width, right + padding_x)
+    crop_bottom = min(image.height, bottom + padding_y)
 
-    cropped = image.crop((left, top, right, bottom))
-    cropped.putalpha(mask.crop((left, top, right, bottom)).filter(ImageFilter.GaussianBlur(radius=0.8)))
+    cropped = image.crop((crop_left, crop_top, crop_right, crop_bottom))
+    cropped.putalpha(
+        mask.crop((crop_left, crop_top, crop_right, crop_bottom)).filter(
+            ImageFilter.GaussianBlur(radius=0.8),
+        ),
+    )
 
-    scale = TARGET_FOREGROUND / max(cropped.width, cropped.height)
+    # Scale the detected object, not the padded crop. The previous formula
+    # scaled the added 8% margin too, producing visible 59% and 72% bands in
+    # the same grid. The object now has the same maximum dimension regardless
+    # of how much white space the source photo contains.
+    scale = TARGET_FOREGROUND / max(foreground_width, foreground_height)
     resized = cropped.resize(
         (max(1, round(cropped.width * scale)), max(1, round(cropped.height * scale))),
         Image.Resampling.LANCZOS,
     )
 
     canvas = Image.new("RGBA", (CANVAS_SIZE, CANVAS_SIZE), CANVAS_BACKGROUND)
-    x = (CANVAS_SIZE - resized.width) // 2
-    y = CANVAS_SIZE - resized.height - 70
-    canvas.alpha_composite(resized, (x, max(40, y)))
+    # Align the visible foreground itself, rather than the padded crop. This
+    # keeps product centers and bases consistent even when the source object
+    # was photographed off-center or touches an image edge.
+    foreground_left = (left - crop_left) * scale
+    foreground_top = (top - crop_top) * scale
+    foreground_right = (right - crop_left) * scale
+    foreground_bottom = (bottom - crop_top) * scale
+    x = round(CANVAS_SIZE / 2 - (foreground_left + foreground_right) / 2)
+    y = round(FOREGROUND_BASELINE - foreground_bottom)
+
+    # Crop only any padded pixels that extend beyond the canvas. The detected
+    # product remains inside the safe area because its baseline and center are
+    # placed explicitly above.
+    visible_left = max(0, x)
+    visible_top = max(0, y)
+    visible_right = min(CANVAS_SIZE, x + resized.width)
+    visible_bottom = min(CANVAS_SIZE, y + resized.height)
+    if visible_right <= visible_left or visible_bottom <= visible_top:
+        raise RuntimeError(f"Normalized crop does not intersect canvas: {source}")
+    clipped = resized.crop(
+        (visible_left - x, visible_top - y, visible_right - x, visible_bottom - y),
+    )
+    canvas.alpha_composite(clipped, (visible_left, visible_top))
     destination.parent.mkdir(parents=True, exist_ok=True)
     canvas.convert("RGB").save(destination, "WEBP", quality=94, method=6)
 

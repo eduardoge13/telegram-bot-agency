@@ -535,7 +535,7 @@ function triggerMedia(trigger) {
   return trigger?.closest?.("article")?.querySelector("img") || null;
 }
 
-function openDetail(itemId) {
+function openDetail(itemId, trigger = document.activeElement) {
   const item = ITEM_INDEX.get(itemId);
   // Nunca bloquees la página si el panel no está completo. Esto deja la
   // navegación usable aunque una edición futura rompa el markup del modal.
@@ -547,7 +547,10 @@ function openDetail(itemId) {
   state.detailItemId = itemId;
   state.detailOpen = true;
   // Se recuerda quién abrió para devolverle el foco al cerrar.
-  lastDetailTrigger = document.activeElement;
+  lastDetailTrigger =
+    trigger instanceof Element && trigger.matches("[data-open-detail]")
+      ? trigger
+      : document.activeElement;
 
   withViewTransition(() => applyDetail(item), triggerMedia(lastDetailTrigger), els.detailImage);
 }
@@ -795,7 +798,7 @@ document.addEventListener("click", (event) => {
 
   if (target.matches("[data-open-detail]")) {
     event.preventDefault();
-    openDetail(target.getAttribute("data-open-detail"));
+    openDetail(target.getAttribute("data-open-detail"), target);
   }
 
   if (target.matches("[data-close-detail]")) {
