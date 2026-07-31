@@ -442,10 +442,12 @@ function renderCart() {
 }
 
 function syncBodyLock() {
-  document.body.classList.toggle(
-    "ui-locked",
-    state.cartOpen || state.detailOpen || state.filtersOpen,
-  );
+  const locked = state.cartOpen || state.detailOpen || state.filtersOpen;
+  // El scroll de la página vive en `html` en Chrome móvil y en `body` en
+  // algunos escritorios. Bloquear ambos evita que el fondo se mueva mientras
+  // el detalle conserva su propio scroll interno.
+  document.documentElement.classList.toggle("ui-locked", locked);
+  document.body.classList.toggle("ui-locked", locked);
 }
 
 function openFilters() {
@@ -494,7 +496,12 @@ function detailFocusableElements() {
 
 function openDetail(itemId) {
   const item = ITEM_INDEX.get(itemId);
-  if (!item) return;
+  // Nunca bloquees la página si el panel no está completo. Esto deja la
+  // navegación usable aunque una edición futura rompa el markup del modal.
+  if (!item || !els.modal || !els.modalOverlay || !els.detailBody) return;
+
+  closeCart();
+  closeFilters();
 
   state.detailItemId = itemId;
   state.detailOpen = true;

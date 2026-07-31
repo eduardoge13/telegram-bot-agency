@@ -186,7 +186,8 @@ body {
   display: none;
 }
 
-.ui-locked {
+html.ui-locked,
+body.ui-locked {
   overflow: hidden;
 }
 
