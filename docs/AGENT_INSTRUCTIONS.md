@@ -1,5 +1,14 @@
 # 🤖 Agent Instructions - Telegram Client Data Bot
 
+> **Este repositorio contiene más de un despliegue.** Este documento cubre el
+> **bot de Telegram** (Cloud Run). Si vas a tocar el sitio web bajo `site/`
+> (blueskytravelmx.com y la tienda Yoga Verde), su despliegue es distinto y
+> tiene trampas propias: lee **[docs/SITE_DEPLOYMENT.md](SITE_DEPLOYMENT.md)**
+> antes de desplegar.
+>
+> Resumen para el sitio: usa `site/scripts/deploy.sh` y **nunca** `rsync` ni
+> `scp -r` (fallan en silencio y han destruido el código en el servidor).
+
 ## Project Overview
 
 This is a **production Telegram bot** deployed on Google Cloud Run that provides instant client data lookups from Google Sheets for business teams. The bot is actively used by authorized users to search client information in real-time.
@@ -100,6 +109,41 @@ This is a **production Telegram bot** deployed on Google Cloud Run that provides
   - Dev: `dev_config.env` + `telegram_dev_token.txt`
   - Prod: `prod_setup/prod_config.env` + `prod_setup/telegram_prod_token.txt`
 - **Never**: Hardcode sensitive values in this script
+
+## Yoga Verde Site Deployment Rule (Mandatory)
+
+Yoga Verde is the static storefront under `site/src/pages/yoga-verde/` and is
+served by the shared `bluesky-site` container on the VPS. When deploying this
+site, always package the `site/` directory as a single `.tar.gz` tarball,
+transfer that archive, extract it on the VPS, and rebuild/recreate the Docker
+Compose service.
+
+- Never use `rsync` for Yoga Verde deployments.
+- Never use recursive directory copies such as `scp -r`.
+- `scp` is permitted only for the single tarball artifact.
+- Exclude `.git`, `node_modules`, `.astro`, `dist`, `.env` files, tokens,
+  credentials, service-account JSON, private keys, and other secrets.
+- Stage/extract the archive beside `/docker/blueskytravel-site` on the same
+  volume, replace the complete release directory, and run `docker compose
+  build` followed by `docker compose up -d` from the active root. Never apply
+  the tarball as an additive overlay: deleted repository files must also
+  disappear from the release.
+- The script has a state-aware `EXIT`/`INT`/`TERM` rollback, verifies
+  `/yoga-verde/deploy-manifest.json`, and refuses to replace a root containing
+  secrets, databases or operational overrides.
+- Deploy only from the current `main` checkout. Do not deploy from the stale
+  `.claude/worktrees/yoga-verde-redesign` worktree.
+- Verify `docker compose ps`, both live domains, and the build manifest after
+  deployment.
+- Read `docs/VPS_SERVICE_INVENTORY.md` and
+  `docs/VPS_CLIENT_ONE_PAGER_2026-06-15.md` before changing VPS state.
+- Do not deploy merely because a code change exists; deploy only when the
+  user explicitly requests it or the active workflow requires it.
+
+The current product/design brief for the storefront pass is kept in
+`docs/YOGA_VERDE_OPUS5_MOBILE_PREMIUM_PROMPT.md`.
+`docs/YOGA_VERDE_OPUS_PLAN_PROMPT.md` is an older historical brief; use the
+Opus 5 prompt for the active iteration.
 
 ## Response Format Specification
 

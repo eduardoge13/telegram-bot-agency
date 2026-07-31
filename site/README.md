@@ -27,21 +27,66 @@ npm run build
 
 ## Deploy to VPS
 
-Expected VPS target:
-
-- code path: `/docker/blueskytravel-site`
-- compose file: `/docker/blueskytravel-site/docker-compose.yml`
-- shared Traefik network: `n8n_default`
-
-Deployment sequence:
+**Use `./scripts/deploy.sh`. It is the only supported deployment path.**
 
 ```bash
-scp -r site root@72.60.228.135:/docker/blueskytravel-site
-ssh root@72.60.228.135
-cd /docker/blueskytravel-site
-docker compose build
-docker compose up -d
+cd site
+./scripts/deploy.sh              # check + build + deploy + verify
+./scripts/deploy.sh --no-check   # skip `npm run check`
 ```
+
+Target:
+
+- code path: `/docker/blueskytravel-site` — **the repo root, not the `site/`
+  subdirectory inside it**
+- compose file: `/docker/blueskytravel-site/docker-compose.yml`
+- shared Traefik network: `n8n_default`
+- SSH: host alias `vps-n8n`, **port 2222** (port 22 times out)
+
+### Never use `rsync` or `scp -r` for this
+
+Both were used here before and failed *silently*: they reported success with a
+half-copied tree, which left `src/` empty and deleted `scripts/run-astro.mjs`,
+breaking the build on the server. The canonical path is a single tarball with a
+verified SHA-256 checksum. The tarball is validated in a staging release before
+the active directory is touched; publication then replaces the complete
+directory instead of applying an additive overlay.
+
+### What the script does, and why each step exists
+
+1. `npm run check` and `npm run build` — nothing that fails to compile ships.
+2. Packs `site/` into one `.tar.gz`, excluding `node_modules`, `.git`,
+   `.astro`, `dist`, `.env*`, keys and credentials, then **aborts** if anything
+   sensitive still matched.
+3. Copies that one file and compares SHA-256 on both ends.
+4. Extracts to a staging release beside the active directory and asserts the
+   package and build manifest are complete **before** production is modified.
+   It also aborts if the active server root contains secrets or operational
+   files that the full-release replacement would delete.
+5. Replaces `/docker/blueskytravel-site` with the complete staging release,
+   keeping the previous release aside while Docker rebuilds with `--no-cache`
+   and recreates the container. This also removes files deleted from the repo;
+   it is not an additive tar overlay.
+6. Polls both live URLs until they answer 200, then verifies
+   `/yoga-verde/deploy-manifest.json` against the current build ID. Build,
+   startup, interruption, or live-check failures trigger a state-aware rollback
+   to the previous release. The old release is deleted only after verification.
+
+### Two traps specific to this server
+
+- `/docker/blueskytravel-site/site/` may exist as an **orphan copy** from an old
+  deployment. Docker builds from the parent directory. Deploying into `site/`
+  looks like it works and changes nothing. The full-release replacement removes
+  that orphan intentionally; do not store secrets or runtime state under the
+  active root.
+- `ufw` rate-limits port 2222: more than ~6 SSH connections in 30s gets you
+  temporarily refused. Don't loop retries tightly.
+
+### CI/CD
+
+There is none yet. If it is added later it must call this same script (or
+reproduce these steps exactly) so the deployment path stays single. A pipeline
+would need an SSH key with access to `vps-n8n:2222` stored as a secret.
 
 ## Routes
 

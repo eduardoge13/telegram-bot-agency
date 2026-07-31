@@ -1,0 +1,1075 @@
+---
+import {
+  ACCENT_COLORS,
+  ANNOUNCEMENT,
+  FREE_SHIPPING_THRESHOLD,
+  KITS,
+  PRODUCTS,
+  SHIPPING_FLAT,
+  TAX_RATE,
+} from "../../data/yoga-verde-store";
+
+const accentOf = (item: { use?: string }) => ACCENT_COLORS[item.use as keyof typeof ACCENT_COLORS] || ACCENT_COLORS.terracota;
+import "../../styles/yoga-verde.css";
+
+const money = new Intl.NumberFormat("es-MX", {
+  style: "currency",
+  currency: "MXN",
+  maximumFractionDigits: 0,
+});
+
+const formatMoney = (value: number) => money.format(value);
+
+const displayImage = (path: string) =>
+  path.replace("/products/", "/products/display/").replace(/\.jpg$/i, ".webp");
+
+const displayProducts = PRODUCTS.map((product) => ({
+  ...product,
+  image: displayImage(product.image),
+}));
+
+const displayKits = KITS.map((kit) => ({
+  ...kit,
+  image: displayImage(kit.image),
+}));
+
+const bestSellers = displayProducts.filter((product) => product.featured).slice(0, 8);
+
+// Solo estos SKUs tienen fotografía real del envase; el resto de los assets son
+// la etiqueta plana renderizada, que en un banner se leería como arte, no como
+// producto. El hero se compone únicamente con los primeros.
+const REAL_PHOTO_IDS = [
+  "desmaquillante-almendra-dulce",
+  "crema-facial-chabacano",
+  "agua-micelar-manzanilla",
+  "crema-corporal-leche-de-coco",
+  "mousse-corporal-uva",
+  "vela-soya-vainilla",
+  "contorno-de-ojos-lavanda",
+  "balsamo-labial-coco-menta",
+  "vela-soya-bergamota",
+];
+
+const heroSlides = REAL_PHOTO_IDS.map((id) =>
+  displayProducts.find((product) => product.id === id),
+).filter(Boolean).slice(0, 5) as typeof displayProducts;
+
+// Las piezas reales que componen cada kit (ver `items` en yoga-verde-store.js),
+// para poder mostrarlas todas en la tarjeta en vez de una sola foto.
+const productById = new Map(displayProducts.map((product) => [product.id, product]));
+const kitItems = (kit: { items?: string[] }) =>
+  (kit.items || []).map((id) => productById.get(id)).filter(Boolean) as typeof displayProducts;
+
+// Fuente de verdad única de la navegación. El orden aquí ES el orden comercial
+// de la página, y lo consumen el header, el menú móvil, el footer y el
+// scrollspy, de modo que no puedan desincronizarse entre sí.
+const NAV_ITEMS = [
+  { id: "inicio", label: "Inicio" },
+  { id: "best-sellers", label: "Selección" },
+  { id: "catalogo", label: "Catálogo" },
+  { id: "kits", label: "Kits" },
+  { id: "contacto", label: "Contacto" },
+];
+
+const useFilters = Array.from(
+  new Map(displayProducts.map((product) => [product.use, { slug: product.use, label: product.useLabel }])).values(),
+);
+const typeFilters = Array.from(
+  new Map(displayProducts.map((product) => [product.type, { slug: product.type, label: product.typeLabel }])).values(),
+);
+
+const storeData = {
+  announcement: ANNOUNCEMENT,
+  freeShippingThreshold: FREE_SHIPPING_THRESHOLD,
+  shippingFlat: SHIPPING_FLAT,
+  taxRate: TAX_RATE,
+  products: displayProducts,
+  kits: displayKits,
+  accentColors: ACCENT_COLORS,
+};
+---
+
+<html class="light" lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Yoga Verde | Cosmética natural hecha en México</title>
+    <meta
+      content="Yoga Verde es cosmética natural hecha en México: desmaquillante, agua micelar, crema facial, crema corporal, mousse, bálsamo labial y velas de soya. Compra fácil desde móvil o desktop."
+      name="description"
+    />
+    <meta content="Yoga Verde | Cosmética natural hecha en México" property="og:title" />
+    <meta
+      content="Cosmética natural hecha en México: cremas, desmaquillante, aceites capilares, bálsamo labial y velas de soya con almendra, coco, uva, lavanda y más."
+      property="og:description"
+    />
+    <meta content="website" property="og:type" />
+    <meta content="https://yoga-verde.srv1175749.hstgr.cloud/" property="og:url" />
+    <meta
+      content="https://yoga-verde.srv1175749.hstgr.cloud/yoga-verde/assets/brand/og-image.png"
+      property="og:image"
+    />
+    <meta content="1200" property="og:image:width" />
+    <meta content="630" property="og:image:height" />
+    <link href="/yoga-verde/assets/brand/favicon-32.png" rel="icon" sizes="32x32" type="image/png" />
+    <link href="/yoga-verde/assets/brand/favicon-180.png" rel="apple-touch-icon" />
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
+    <link href="https://yoga-verde.srv1175749.hstgr.cloud/" rel="canonical" />
+  </head>
+  <body class="bg-surface text-on-surface selection:bg-secondary/20 selection:text-primary">
+    <script id="yoga-verde-data" is:inline set:html={JSON.stringify(storeData)} type="application/json"></script>
+
+    <div class="min-h-screen bg-surface" data-page-content>
+      <div class="sticky top-0 z-[70]">
+        <div class="site-announcement px-4 py-2 text-center text-[10px] font-semibold uppercase tracking-[0.2em] sm:text-[11px]">
+          {ANNOUNCEMENT}
+        </div>
+        <header class="site-header border-b border-outline-variant/35 bg-surface/95 backdrop-blur-xl">
+          <nav class="relative mx-auto flex h-[4.75rem] max-w-screen-2xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-1 items-center gap-4">
+              <details class="mobile-menu relative md:hidden" data-mobile-menu>
+                <summary aria-label="Abrir menú" class="inline-flex h-11 w-11 cursor-pointer list-none items-center justify-center border border-outline-variant/60 text-primary">
+                  <span aria-hidden="true" class="material-symbols-outlined">menu</span>
+                </summary>
+                <div class="absolute left-0 top-14 z-[90] w-56 border border-outline-variant/50 bg-surface-container-lowest p-4 shadow-float">
+                  <div class="grid gap-1">
+                    {NAV_ITEMS.map((item) => (
+                      <button class="mobile-menu-link" data-nav-link={item.id} data-scroll-to={item.id} type="button">
+                        {item.label}
+                      </button>
+                    ))}
+                    <button class="mobile-menu-link" data-focus-search type="button">Buscar productos</button>
+                  </div>
+                </div>
+              </details>
+              <div class="hidden items-center gap-6 md:flex">
+                {NAV_ITEMS.map((item) => (
+                  <button class="nav-link" data-nav-link={item.id} data-scroll-to={item.id} type="button">
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <a class="site-logo absolute left-1/2 top-1/2 inline-flex -translate-x-1/2 -translate-y-1/2 items-center justify-center" href="#inicio">
+              <picture>
+                <source media="(max-width: 767px)" srcset="/yoga-verde/assets/brand/logo-monogram.png" />
+                <img
+                  alt="Yoga Verde — Cosmética natural"
+                  class="h-20 w-20 object-contain sm:h-[5.5rem] sm:w-[5.5rem]"
+                  height="1400"
+                  src="/yoga-verde/assets/brand/logo-yoga-verde.svg"
+                  width="1400"
+                />
+              </picture>
+            </a>
+
+            <div class="flex flex-1 items-center justify-end gap-2 sm:gap-3">
+              <button
+                aria-label="Buscar en el catálogo"
+                class="inline-flex h-11 w-11 items-center justify-center border border-outline-variant/60 text-primary transition hover:border-secondary hover:text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35 lg:h-auto lg:w-auto lg:gap-2 lg:px-4 lg:py-2 lg:text-sm"
+                data-focus-search
+                type="button"
+              >
+                <span class="material-symbols-outlined text-base">search</span>
+                <span class="hidden lg:inline">Buscar productos</span>
+              </button>
+              <button
+                aria-label="Abrir carrito"
+                class="group relative inline-flex h-11 w-11 items-center justify-center border border-outline-variant/60 text-primary transition hover:border-secondary hover:text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35"
+                data-open-cart
+                type="button"
+              >
+                <span class="material-symbols-outlined">shopping_cart</span>
+                <span
+                  class="absolute -right-1 -top-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-secondary px-1 text-[10px] font-bold text-white"
+                  data-cart-count
+                >
+                  0
+                </span>
+              </button>
+            </div>
+          </nav>
+        </header>
+      </div>
+
+      <main>
+        <section class="hero-editorial" id="inicio">
+          <div class="hero-editorial__inner">
+            <div class="hero-brand-lockup">
+              <img
+                alt="Yoga Verde"
+                class="hero-logo"
+                height="1400"
+                src="/yoga-verde/assets/brand/logo-yoga-verde.svg"
+                width="1400"
+              />
+            </div>
+
+            <div class="hero-gallery">
+              <div class="hero-frame">
+                <div data-hero-slider>
+                  {heroSlides.map((product, index) => (
+                    <article
+                      class:list={["hero-slide", index === 0 && "is-active"]}
+                      data-hero-slide={index}
+                    >
+                      <img
+                        alt={`${product.name}, ${product.scent}`}
+                        class="hero-product-image"
+                        decoding={index === 0 ? "sync" : "async"}
+                        loading={index === 0 ? "eager" : "lazy"}
+                        src={product.image}
+                      />
+                      <div class="hero-caption">
+                        <div class="min-w-0">
+                          <p class="hero-kicker">{product.typeLabel}</p>
+                          <h2 class="product-name hero-product-name">{product.name}</h2>
+                          <p class="hero-benefit">{product.short}</p>
+                        </div>
+                        <button aria-controls="detail-title" aria-haspopup="dialog" class="hero-link" data-open-detail={product.id} type="button">
+                          Ver producto
+                          <svg aria-hidden="true" class="text-link__icon" fill="none" focusable="false" height="14" viewBox="0 0 24 24" width="14">
+                            <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
+                          </svg>
+                        </button>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+
+                <div class="hero-dots">
+                  {heroSlides.map((product, index) => (
+                    <button
+                      aria-label={`Ver ${product.name}`}
+                      class:list={["hero-dot", index === 0 && "is-active"]}
+                      data-hero-dot={index}
+                      type="button"
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+
+        <section class="reveal editorial-section mx-auto max-w-screen-2xl px-4 py-14 sm:px-6 lg:px-8" id="best-sellers">
+          <div class="mb-5 flex flex-wrap items-end justify-between gap-x-6 gap-y-2 sm:mb-6">
+            <div class="min-w-0">
+              <p class="specimen-label text-xs font-semibold uppercase tracking-[0.22em] text-secondary">
+                Selección
+              </p>
+              <h2 class="mt-2 font-headline text-2xl text-primary sm:text-3xl">Para empezar</h2>
+            </div>
+            <button
+              class="inline-flex min-h-11 shrink-0 items-center gap-1.5 text-sm font-semibold text-primary transition hover:text-secondary focus-visible:outline-none"
+              data-scroll-to="catalogo"
+              type="button"
+            >
+              Ver todo
+              <span aria-hidden="true" class="material-symbols-outlined text-base">arrow_forward</span>
+            </button>
+          </div>
+
+          <!-- En móvil es un carril horizontal con snap: apilar 8 tarjetas dejaba
+               ~6.800px de scroll antes del catálogo. En md+ vuelve a ser grid. -->
+          <div class="hide-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto px-0 pb-2 md:mx-0 md:grid md:grid-cols-2 md:gap-6 md:overflow-visible md:px-0 xl:grid-cols-4">
+            {bestSellers.map((product) => (
+              <article
+                class="product-card group w-[calc(100vw-2rem)] max-w-none shrink-0 snap-start md:w-auto md:shrink"
+                style={`--accent: ${accentOf(product)}`}
+              >
+                <div class="product-image-frame relative">
+                  {product.badge && (
+                    <span class="product-badge absolute left-4 top-4 z-10">
+                      {product.badge}
+                    </span>
+                  )}
+                  <img
+                    alt={`${product.name} ${product.scent}`}
+                    class="product-media aspect-square w-full transition duration-500 group-hover:scale-[1.02]"
+                    src={product.image}
+                  />
+                </div>
+                <div class="product-card__body">
+                  <p class="product-eyebrow">
+                    {product.typeLabel}
+                  </p>
+                  <div class="mt-1 flex items-start justify-between gap-4">
+                    <div class="min-w-0">
+                      <h3 class="product-name product-card__title">{product.name}</h3>
+                      <p class="product-card__scent">{product.scent}</p>
+                    </div>
+                    <span class="price shrink-0 text-lg">{formatMoney(product.price)}</span>
+                  </div>
+                  <p class="product-card__description">{product.short}</p>
+                  <div class="product-card__meta">
+                    <span>{product.useLabel}</span>
+                    {product.size && <span>{product.size}</span>}
+                  </div>
+                  <div class="product-card__actions">
+                    <button aria-controls="detail-title" aria-haspopup="dialog" class="text-link" data-open-detail={product.id} type="button">
+                      <svg aria-hidden="true" class="text-link__icon" fill="none" focusable="false" height="14" viewBox="0 0 24 24" width="14">
+                        <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
+                      </svg>
+                      Ver detalle
+                    </button>
+                    <button
+                      aria-label={`Añadir ${product.name} al carrito`}
+                      class="primary-action"
+                      data-add-item={product.id}
+                      type="button"
+                    >
+                      Añadir
+                    </button>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        
+
+        <section class="editorial-section relative overflow-hidden bg-surface px-4 py-14 sm:px-6 lg:px-8" id="catalogo">
+          <div class="relative mx-auto max-w-screen-2xl">
+            <div class="catalog-heading">
+              <div class="min-w-0">
+                <h2 class="font-headline text-3xl text-primary sm:text-4xl">Catálogo completo</h2>
+                <p class="mt-2 text-sm text-on-surface-variant">
+                  <span data-product-count>{displayProducts.length}</span> productos
+                </p>
+              </div>
+              <div class="catalog-search-row">
+                <div class="catalog-search">
+                <span class="material-symbols-outlined text-on-surface-variant">search</span>
+                <input
+                  aria-label="Buscar productos"
+                  class="w-full border-none bg-transparent p-0 text-sm text-on-surface placeholder:text-on-surface-variant/70 focus:outline-none focus:ring-0"
+                  data-search-input
+                  placeholder="Buscar almendra, crema facial, vela de soya..."
+                  type="search"
+                />
+                </div>
+              <button
+                aria-label="Abrir filtros"
+                class="secondary-action"
+                data-open-filters
+                type="button"
+              >
+                <span class="material-symbols-outlined text-base">tune</span>
+                Filtrar
+              </button>
+            </div>
+          </div>
+
+          <div class="grid gap-8">
+            <div class="pointer-events-none fixed inset-0 z-[72] bg-primary/20 opacity-0 transition" data-filters-overlay></div>
+            <aside
+              class="filters-drawer hide-scrollbar fixed inset-y-0 left-0 z-[80] w-[88vw] max-w-sm -translate-x-full overflow-y-auto bg-surface-container-lowest p-6 shadow-float transition duration-300"
+              data-filters-drawer
+            >
+              <div class="mb-8 flex items-center justify-between">
+                <div>
+                  <p class="product-eyebrow">Filtros</p>
+                  <h3 class="mt-2 font-headline text-3xl text-primary">Encuentra tu producto</h3>
+                </div>
+                <button
+                  aria-label="Cerrar filtros"
+                  class="icon-action"
+                  data-close-filters
+                  type="button"
+                >
+                  <span class="material-symbols-outlined">close</span>
+                </button>
+              </div>
+
+              <div class="space-y-8">
+                <div>
+                  <h3 class="font-headline text-xl text-primary">Familia de aroma</h3>
+                  <div class="mt-4 grid gap-2">
+                    {useFilters.map((useFilter) => (
+                      <button
+                        aria-pressed="false"
+                        class="filter-option"
+                        data-filter-use={useFilter.slug}
+                        type="button"
+                      >
+                        {useFilter.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <h3 class="font-headline text-xl text-primary">Categoría</h3>
+                  <div class="mt-4 grid gap-2">
+                    {typeFilters.map((typeFilter) => (
+                      <button
+                        aria-pressed="false"
+                        class="filter-option"
+                        data-filter-type={typeFilter.slug}
+                        type="button"
+                      >
+                        {typeFilter.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+
+
+                <button
+                  class="secondary-action w-full"
+                  data-clear-filters
+                  type="button"
+                >
+                  Limpiar filtros
+                </button>
+              </div>
+            </aside>
+
+            <div class="min-w-0">
+              <div class="catalog-status">
+                <div class="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+                  <div>
+                    <p class="product-eyebrow">
+                      <span data-product-count-filtered>{displayProducts.length}</span> piezas visibles
+                    </p>
+                    <div class="mt-4 flex flex-wrap gap-2" data-active-filters></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mt-8 grid gap-x-6 gap-y-12 sm:grid-cols-2 xl:grid-cols-3" data-products-grid>
+                {displayProducts.map((product) => (
+                  <article
+                    class="product-card group"
+                    style={`--accent: ${accentOf(product)}`}
+                  >
+                    <div class="product-image-frame relative">
+                      {product.badge && <span class="product-badge absolute left-4 top-4 z-10">{product.badge}</span>}
+                      <img
+                        alt={`${product.name} ${product.scent}`}
+                        class="product-media aspect-square w-full transition duration-500 group-hover:scale-[1.02]"
+                        src={product.image}
+                      />
+                    </div>
+                    <div class="product-card__body">
+                      <div class="flex items-start justify-between gap-4">
+                        <div class="min-w-0">
+                          <p class="product-eyebrow">{product.typeLabel}</p>
+                          <h3 class="product-name product-card__title">{product.name}</h3>
+                          <p class="product-card__scent">{product.scent}</p>
+                        </div>
+                        <span class="price shrink-0 text-lg">{formatMoney(product.price)}</span>
+                      </div>
+                      <p class="product-card__description">{product.short}</p>
+                      <div class="product-card__meta">
+                        <span>{product.useLabel}</span>
+                        {product.size && <span>{product.size}</span>}
+                      </div>
+                      <div class="product-card__actions">
+                        <button aria-controls="detail-title" aria-haspopup="dialog" class="text-link" data-open-detail={product.id} type="button">
+                      <svg aria-hidden="true" class="text-link__icon" fill="none" focusable="false" height="14" viewBox="0 0 24 24" width="14">
+                        <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
+                      </svg>
+                      Ver detalle
+                    </button>
+                        <button
+                          aria-label={`Añadir ${product.name} al carrito`}
+                          class="primary-action"
+                          data-add-item={product.id}
+                          type="button"
+                        >
+                          Añadir
+                        </button>
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+
+              <div
+                class="mt-8 hidden border border-dashed border-outline-variant/80 bg-surface-container-lowest p-10 text-center"
+                data-empty-state
+              >
+                <p class="font-headline text-3xl text-primary">Sin coincidencias</p>
+                <p class="mt-3 text-on-surface-variant">
+                  Cambia filtros o limpia la búsqueda para volver a ver el catálogo completo.
+                </p>
+              </div>
+            </div>
+          </div>
+          </div>
+        </section>
+
+
+        <section class="reveal editorial-section mx-auto max-w-screen-2xl px-4 py-14 sm:px-6 lg:px-8" id="kits">
+          <div class="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div class="max-w-2xl">
+              <p class="specimen-label text-xs font-semibold uppercase tracking-[0.22em] text-secondary">
+                Kits recomendados
+              </p>
+              <h2 class="mt-3 font-headline text-4xl text-primary">Comprar mejor, en menos pasos</h2>
+              <p class="mt-4 text-lg leading-8 text-on-surface-variant">
+                Combinaciones pensadas para primera compra o regalo, con ahorro frente a comprar
+                cada pieza por separado.
+              </p>
+            </div>
+            <button
+              class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-5 py-3 text-sm font-semibold text-primary transition hover:border-secondary/40 hover:text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35"
+              data-open-cart
+              type="button"
+            >
+              Ver carrito
+              <span class="material-symbols-outlined text-base">shopping_bag</span>
+            </button>
+          </div>
+
+          <div class="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+            {displayKits.map((kit) => (
+              <article class="product-card overflow-hidden" style={`--accent: ${accentOf(kit)}`}>
+                <div class="relative overflow-hidden p-3">
+                  {/* Un kit incluye 2-3 piezas; se muestran todas, no solo una. */}
+                  <div class="grid aspect-square grid-cols-2 gap-1 bg-surface-container-low p-1">
+                    {kitItems(kit).map((piece, index) => (
+                      <img
+                        alt={`${piece.name} ${piece.scent}`}
+                        class:list={[
+                          "product-media h-full w-full",
+                          kitItems(kit).length === 3 && index === 0 && "col-span-2",
+                        ]}
+                        loading="lazy"
+                        src={piece.image}
+                      />
+                    ))}
+                  </div>
+                    <span class="product-badge absolute left-6 top-6">
+                    {kit.badge}
+                  </span>
+                </div>
+                <div class="product-card__body">
+                  <div class="flex items-start justify-between gap-4">
+                    <div class="min-w-0">
+                      <p class="product-eyebrow">
+                        {kit.useLabel}
+                      </p>
+                      <h3 class="product-name product-card__title">{kit.name}</h3>
+                    </div>
+                    <span class="price shrink-0 text-xl">{formatMoney(kit.price)}</span>
+                  </div>
+                  <p class="product-card__description">{kit.short}</p>
+                  <div class="product-card__meta">
+                    <span>{kit.typeLabel}</span>
+                    <span>Regalo o primera compra</span>
+                  </div>
+                  <div class="product-card__actions">
+                    <button
+                      aria-controls="detail-title"
+                      aria-haspopup="dialog"
+                      class="text-link"
+                      data-open-detail={kit.id}
+                      type="button"
+                    >
+                      <svg aria-hidden="true" class="text-link__icon" fill="none" focusable="false" height="14" viewBox="0 0 24 24" width="14">
+                        <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
+                      </svg>
+                      Ver detalle
+                    </button>
+                    <button
+                      class="primary-action"
+                      data-add-item={kit.id}
+                      type="button"
+                    >
+                      Añadir al carrito
+                    </button>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section class="reveal editorial-section mx-auto max-w-screen-2xl px-4 py-14 sm:px-6 lg:px-8">
+          <div class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
+            <article class="overflow-hidden border border-outline-variant bg-surface-container-lowest">
+              <div class="grid gap-8 p-8 lg:grid-cols-[minmax(0,1fr)_220px] lg:items-center lg:p-10">
+                <div>
+                  <p class="specimen-label text-xs font-semibold uppercase tracking-[0.22em] text-secondary">
+                    Nuestra filosofía
+                  </p>
+                  <h2 class="mt-3 font-headline text-4xl text-primary">Alta cosmética de origen botánico</h2>
+                  <blockquote class="mt-5 max-w-2xl font-headline text-xl italic leading-relaxed text-tertiary">
+                    “Cada fórmula se construye alrededor de un activo botánico, en la
+                    concentración necesaria para que haga su trabajo.”
+                  </blockquote>
+                  <div class="mt-8 grid gap-6 md:grid-cols-2">
+                    <p class="leading-7 text-on-surface-variant">
+                      El color de cada etiqueta indica su aroma: terracota para cítricos y frutos
+                      suaves, verde para menta y bergamota, morado para uva y lavanda, dorado para
+                      leche de coco.
+                    </p>
+                    <p class="leading-7 text-on-surface-variant">
+                      Envasado en vidrio ámbar y cristal, que protegen los activos de la luz y
+                      conservan la fórmula estable.
+                    </p>
+                  </div>
+                </div>
+                <div class="overflow-hidden bg-surface-container-low p-3">
+                  <img
+                    alt="Crema corporal de leche de coco Yoga Verde"
+                    class="aspect-square product-media w-full bg-surface-container-lowest p-1"
+                    src="/yoga-verde/assets/products/display/crema-corporal-leche-de-coco.webp"
+                  />
+                </div>
+              </div>
+            </article>
+
+            <article class="bg-primary p-8 text-on-primary">
+              <p class="text-xs font-semibold uppercase tracking-[0.22em] text-on-primary-container">
+                Newsletter
+              </p>
+              <h2 class="mt-3 font-headline text-4xl text-white">Lanzamientos y descuentos</h2>
+              <p class="mt-5 text-base leading-8 text-on-primary-container">
+                Te avisamos cuando sale un producto nuevo o hay descuento de temporada.
+              </p>
+                <div class="mt-8 border-y border-white/15 py-4">
+                <label class="sr-only" for="newsletter-email">Correo electrónico</label>
+                <div class="flex items-center gap-3 border-b border-white/20 px-1 py-3">
+                  <input
+                    class="w-full border-none bg-transparent p-0 text-sm text-white placeholder:text-on-primary-container focus:outline-none focus:ring-0"
+                    id="newsletter-email"
+                    placeholder="Tu correo electrónico"
+                    type="email"
+                  />
+                  <button
+                    class="inline-flex h-11 w-11 items-center justify-center bg-secondary text-white transition hover:bg-[#c25a42] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+                    type="button"
+                  >
+                    <span class="material-symbols-outlined">arrow_forward</span>
+                  </button>
+                </div>
+              </div>
+              <p class="mt-4 text-sm leading-7 text-on-primary-container">
+                Sin spam: solo avisos de producto nuevo y promociones puntuales.
+              </p>
+            </article>
+          </div>
+        </section>
+
+        
+      </main>
+
+      <footer class="bg-primary py-16 text-on-primary" id="contacto">
+        <div class="mx-auto grid max-w-screen-2xl gap-10 px-4 sm:px-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1fr)] lg:px-8">
+          <div>
+            <div class="inline-flex items-center border-b border-white/20 pb-3">
+              <img
+                alt="Yoga Verde — Cosmética natural"
+                class="h-14 w-auto sm:h-16"
+                height="1400"
+                src="/yoga-verde/assets/brand/logo-yoga-verde-cream.svg"
+                width="1400"
+              />
+            </div>
+            <p class="mt-5 max-w-sm leading-8 text-on-primary-container">
+              Cosmética natural formulada en México: rostro, cuerpo, cabello, labios
+              y aromaterapia.
+            </p>
+          </div>
+          <div>
+            <h3 class="font-headline text-2xl">Explorar</h3>
+            <div class="mt-4 space-y-3 text-on-primary-container">
+              {NAV_ITEMS.filter((item) => item.id !== "inicio").map((item) => (
+                <button class="block transition hover:text-white" data-scroll-to={item.id} type="button">
+                  {item.label}
+                </button>
+              ))}
+              <button class="block transition hover:text-white" data-open-cart type="button">
+                Carrito
+              </button>
+            </div>
+          </div>
+          <div>
+            <h3 class="font-headline text-2xl">Cosmética natural</h3>
+            {/* Certificaciones impresas en las etiquetas reales del cliente. */}
+            <div class="mt-5 grid gap-3 text-sm text-on-primary-container sm:grid-cols-2">
+              <span class="border-b border-white/15 pb-3">Producto vegano</span>
+              <span class="border-b border-white/15 pb-3">Cruelty free</span>
+              <span class="border-b border-white/15 pb-3">Libre de parabenos</span>
+              <span class="border-b border-white/15 pb-3">Libre de sulfatos</span>
+              <span class="border-b border-white/15 pb-3">Hecho en México</span>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <div class="pointer-events-none fixed inset-0 z-[82] bg-primary/35 opacity-0 transition-opacity" data-cart-overlay></div>
+    <aside
+      class="fixed right-0 top-0 z-[83] flex h-full w-full max-w-[460px] translate-x-full flex-col bg-surface-container-lowest shadow-[0_24px_80px_rgba(23,48,32,0.22)] transition-transform duration-300"
+      data-cart-drawer
+    >
+      <div class="flex items-center justify-between border-b border-outline-variant/40 px-6 py-5">
+        <div>
+          <p class="text-xs uppercase tracking-[0.22em] text-on-surface-variant">Carrito interactivo</p>
+          <h2 class="font-headline text-4xl text-primary">Tu carrito</h2>
+        </div>
+        <button
+          aria-label="Cerrar carrito"
+          class="inline-flex h-11 w-11 items-center justify-center rounded-full border border-outline-variant/50 text-primary transition hover:border-secondary/40 hover:text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35"
+          data-close-cart
+          type="button"
+        >
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <div class="hide-scrollbar flex-1 overflow-y-auto px-6 py-6">
+        <div class="border border-outline-variant/50 bg-surface-container-low p-5">
+          <div class="flex items-center justify-between gap-3">
+            <p class="text-sm font-semibold text-primary">Progreso para envío gratis</p>
+            <p class="text-xs uppercase tracking-[0.22em] text-on-surface-variant">
+              Meta {formatMoney(FREE_SHIPPING_THRESHOLD)}
+            </p>
+          </div>
+          <div class="mt-4 h-3 overflow-hidden rounded-full bg-surface-container-highest">
+            <div class="h-full rounded-full bg-secondary transition-all duration-300" data-shipping-progress style="width: 0%"></div>
+          </div>
+          <p class="mt-4 text-sm leading-7 text-on-surface-variant" data-shipping-message>
+            Te faltan {formatMoney(FREE_SHIPPING_THRESHOLD)} para envío gratis.
+          </p>
+        </div>
+
+        <div class="mt-6 space-y-4" data-cart-items></div>
+
+        <div class="mt-6 hidden border border-outline-variant/50 bg-surface-container-low p-6 text-center" data-cart-empty>
+          <span class="material-symbols-outlined text-5xl text-on-surface-variant/40">shopping_bag</span>
+          <p class="mt-4 font-headline text-3xl text-primary">Tu canasta está vacía</p>
+          <p class="mt-3 text-on-surface-variant">
+            Explora el catálogo o suma un kit para empezar tu pedido.
+          </p>
+        </div>
+
+        <div class="mt-6 bg-primary p-6 text-on-primary">
+          <div class="mb-4 flex items-center gap-3">
+            <span class="material-symbols-outlined text-secondary">local_shipping</span>
+            <h3 class="font-headline text-3xl italic text-on-primary-container">Envío seguro</h3>
+          </div>
+          <p class="leading-8 text-on-primary-container/95">
+            Empaque protector para que frascos de vidrio y tarros lleguen completos, sin fugas.
+          </p>
+        </div>
+
+        <div class="mt-6 border border-outline-variant/50 bg-surface-container-low p-5" data-cart-upsell></div>
+      </div>
+
+      <div class="border-t border-outline-variant/40 bg-surface px-6 py-6">
+        <div class="space-y-3 text-sm text-on-surface-variant">
+          <div class="flex items-center justify-between">
+            <span>Subtotal</span>
+            <span data-subtotal>{formatMoney(0)}</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span>Envío</span>
+            <span data-shipping>{formatMoney(0)}</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span>Impuestos</span>
+            <span data-tax>{formatMoney(0)}</span>
+          </div>
+        </div>
+        <div class="mt-5 flex items-end justify-between gap-5 border-t border-outline-variant/50 pt-5">
+          <div>
+            <p class="text-xs uppercase tracking-[0.2em] text-on-surface-variant">Total</p>
+            <p class="price text-3xl" data-total>{formatMoney(0)}</p>
+          </div>
+          <button
+            class="inline-flex items-center gap-2 rounded-2xl bg-primary px-5 py-4 font-semibold text-on-primary transition hover:bg-primary-container disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35"
+            data-checkout
+            disabled
+            type="button"
+          >
+            Pagar de forma segura
+            <span class="material-symbols-outlined text-lg">lock</span>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+
+
+    <script is:inline>
+      (function () {
+        var prefersReduced =
+          window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+        var sprigGrown = false;
+        function growSprig() {
+          if (sprigGrown) return;
+          sprigGrown = true;
+          document
+            .querySelectorAll(
+              "[data-sprig] .sprig-path, [data-sprig] .sprig-leaf, [data-sprig] .sprig-heart, [data-stamp]",
+            )
+            .forEach(function (node) {
+              node.classList.add("is-grown");
+            });
+        }
+
+        if (prefersReduced) {
+          growSprig();
+        } else {
+          window.setTimeout(growSprig, 250);
+        }
+
+        var revealTargets = document.querySelectorAll(".reveal");
+        if ("IntersectionObserver" in window && revealTargets.length) {
+          var observer = new IntersectionObserver(
+            function (entries) {
+              entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                  entry.target.classList.add("is-visible");
+                  observer.unobserve(entry.target);
+                }
+              });
+            },
+            // threshold must stay at 0: sections taller than the viewport (the
+            // 8-card best-sellers row on mobile) can never reach a high ratio,
+            // so any positive threshold forced the visitor to scroll hundreds
+            // of px past the heading into blank space before it faded in.
+            { threshold: 0, rootMargin: "0px 0px -10% 0px" },
+          );
+          revealTargets.forEach(function (target) {
+            observer.observe(target);
+          });
+        } else {
+          revealTargets.forEach(function (target) {
+            target.classList.add("is-visible");
+          });
+        }
+
+        // Hero product slider.
+        var slides = document.querySelectorAll("[data-hero-slide]");
+        var dots = document.querySelectorAll("[data-hero-dot]");
+        if (slides.length > 1) {
+          var current = 0;
+          var timer = null;
+
+          var showSlide = function (index) {
+            current = (index + slides.length) % slides.length;
+            slides.forEach(function (slide, i) {
+              slide.classList.toggle("is-active", i === current);
+            });
+            dots.forEach(function (dot, i) {
+              dot.classList.toggle("is-active", i === current);
+            });
+          };
+
+          var stopAuto = function () {
+            if (timer) {
+              window.clearInterval(timer);
+              timer = null;
+            }
+          };
+
+          dots.forEach(function (dot) {
+            dot.addEventListener("click", function () {
+              stopAuto();
+              showSlide(Number(dot.dataset.heroDot));
+            });
+          });
+
+          if (!prefersReduced) {
+            timer = window.setInterval(function () {
+              showSlide(current + 1);
+            }, 5000);
+            var slider = document.querySelector("[data-hero-slider]");
+            if (slider) {
+              slider.addEventListener("mouseenter", stopAuto);
+              slider.addEventListener("focusin", stopAuto);
+            }
+          }
+        }
+
+        // Scrollspy.
+        //
+        // La versión anterior elegía la sección con mayor `intersectionRatio`,
+        // lo que es inestable: una sección más alta que el viewport (el catálogo,
+        // con 27 productos) nunca supera un ratio bajo, así que cualquier sección
+        // corta totalmente visible le ganaba y el resaltado saltaba de una a otra.
+        //
+        // Aquí se observa una banda de 1px justo debajo del header sticky: solo
+        // una sección puede cruzarla a la vez, así que el resultado es determinista
+        // y no depende de la altura de la sección.
+        var stickyHeader = document.querySelector(".sticky");
+        var navLinks = document.querySelectorAll("[data-nav-link]");
+
+        var spySections = [];
+        var seenSections = {};
+        navLinks.forEach(function (link) {
+          var id = link.dataset.navLink;
+          if (seenSections[id]) return;
+          var section = document.getElementById(id);
+          if (section) {
+            seenSections[id] = true;
+            spySections.push(section);
+          }
+        });
+
+        if (spySections.length) {
+          var activeId = null;
+          var setActive = function (id) {
+            if (!id || id === activeId) return;
+            activeId = id;
+            navLinks.forEach(function (link) {
+              var on = link.dataset.navLink === id;
+              link.classList.toggle("is-active", on);
+              if (on) {
+                link.setAttribute("aria-current", "true");
+              } else {
+                link.removeAttribute("aria-current");
+              }
+            });
+          };
+
+          // La altura real del header alimenta tanto la banda del observer como
+          // el scroll-margin-top de las secciones, para que al navegar el título
+          // quede visible y no debajo del header.
+          var syncHeaderHeight = function () {
+            var h = stickyHeader ? Math.round(stickyHeader.getBoundingClientRect().height) : 112;
+            document.documentElement.style.setProperty("--header-h", h + "px");
+            return h;
+          };
+
+          var spy = null;
+          var buildObserver = function () {
+            if (spy) spy.disconnect();
+            var h = syncHeaderHeight();
+            // La banda va algunos píxeles POR DEBAJO del punto donde aterriza una
+            // sección al navegar (scroll-margin-top = header + 12px). Si se
+            // colocara justo en el borde del header, tras hacer click la banda
+            // quedaría todavía dentro de la sección anterior y el resaltado se
+            // marcaría una sección atrás.
+            var band = h + 32;
+            var bottom = Math.max(0, window.innerHeight - band - 1);
+            spy = new IntersectionObserver(
+              function (entries) {
+                entries.forEach(function (entry) {
+                  if (entry.isIntersecting) setActive(entry.target.id);
+                });
+              },
+              { threshold: 0, rootMargin: "-" + band + "px 0px -" + bottom + "px 0px" },
+            );
+            spySections.forEach(function (section) {
+              spy.observe(section);
+            });
+          };
+
+          if ("IntersectionObserver" in window) {
+            buildObserver();
+            window.addEventListener("resize", buildObserver);
+          }
+
+          // Estado correcto al cargar: arriba del todo es "inicio"; con hash, la
+          // sección del hash. El observer se encarga del resto al hacer scroll.
+          var initial = window.location.hash.replace("#", "");
+          if (initial && seenSections[initial]) {
+            setActive(initial);
+          } else {
+            setActive(spySections[0].id);
+          }
+
+          // Volver arriba siempre debe marcar "inicio", aunque la banda no
+          // llegue a cruzar ninguna sección.
+          window.addEventListener(
+            "scroll",
+            function () {
+              if (window.scrollY < 8) setActive(spySections[0].id);
+            },
+            { passive: true },
+          );
+        }
+      })();
+    </script>
+    <!-- Detalle de producto.
+         Antes era un div centrado con -translate-y-1/2 sin max-height ni scroll
+         propio: en 400x692 medía 376x1277, así que ~585px quedaban fuera de la
+         pantalla y, con el body bloqueado, no había forma de alcanzarlos.
+         Ahora es una hoja a pantalla completa con su propio scroll. -->
+    <div class="detail-overlay" data-modal-overlay></div>
+    <div
+      aria-labelledby="detail-title"
+      aria-modal="true"
+      aria-hidden="true"
+      class="detail-panel"
+      data-detail-modal
+      role="dialog"
+      tabindex="-1"
+    >
+      <div class="detail-bar">
+        <p class="min-w-0 truncate text-xs uppercase tracking-[0.22em] text-on-surface-variant" data-detail-badge></p>
+        <button
+          aria-label="Cerrar detalle"
+          class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-outline-variant/50 bg-surface-container-lowest text-primary transition hover:border-secondary/40 hover:text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/40"
+          data-close-detail
+          type="button"
+        >
+          <span aria-hidden="true" class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <div class="detail-body">
+        <div class="mx-auto w-full max-w-[22rem] md:max-w-none">
+          <img
+            alt=""
+            class="product-media mx-auto block aspect-square w-full bg-surface-container-lowest"
+            data-detail-image
+            src=""
+          />
+        </div>
+
+        <div class="mt-5 md:mt-0">
+          <h2 class="product-name font-headline text-2xl leading-tight text-primary" data-detail-title id="detail-title"></h2>
+          <p class="mt-1 text-sm text-on-surface-variant" data-detail-scent></p>
+          <p class="price mt-3 text-2xl" data-detail-price></p>
+
+          <p class="mt-4 leading-7 text-on-surface-variant" data-detail-description></p>
+
+          <div class="mt-5 flex flex-wrap gap-2" data-detail-tags></div>
+
+          <section class="mt-6" data-detail-benefits-block>
+            <h3 class="text-xs font-semibold uppercase tracking-[0.22em] text-on-surface-variant">Beneficios</h3>
+            <ul class="mt-3 space-y-2.5 text-sm leading-6 text-on-surface-variant" data-detail-benefits></ul>
+          </section>
+
+          <section class="mt-6" data-detail-instructions-block>
+            <h3 class="text-xs font-semibold uppercase tracking-[0.22em] text-on-surface-variant">Cómo usarlo</h3>
+            <p class="mt-3 text-sm leading-6 text-on-surface-variant" data-detail-instructions></p>
+          </section>
+        </div>
+      </div>
+
+      <div class="detail-cta">
+        <button
+          class="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-primary px-5 font-semibold text-on-primary transition hover:bg-primary-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35"
+          data-detail-add
+          type="button"
+        >
+          Añadir al carrito
+          <span aria-hidden="true" class="material-symbols-outlined text-lg">add_shopping_cart</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Versiona este entrypoint porque vive en public/ y no recibe hash de Astro. -->
+    <script defer is:inline src="/yoga-verde/shop.js?v=20260731-detail-modal"></script>
+  </body>
+</html>
