@@ -123,10 +123,18 @@ Compose service.
 - `scp` is permitted only for the single tarball artifact.
 - Exclude `.git`, `node_modules`, `.astro`, `dist`, `.env` files, tokens,
   credentials, service-account JSON, private keys, and other secrets.
-- Stage/extract the archive under `/docker/blueskytravel-site` and run
-  `docker compose build` followed by `docker compose up -d` there.
-- Verify `docker compose ps` and
-  `https://yoga-verde.srv1175749.hstgr.cloud/` after deployment.
+- Stage/extract the archive beside `/docker/blueskytravel-site` on the same
+  volume, replace the complete release directory, and run `docker compose
+  build` followed by `docker compose up -d` from the active root. Never apply
+  the tarball as an additive overlay: deleted repository files must also
+  disappear from the release.
+- The script has a state-aware `EXIT`/`INT`/`TERM` rollback, verifies
+  `/yoga-verde/deploy-manifest.json`, and refuses to replace a root containing
+  secrets, databases or operational overrides.
+- Deploy only from the current `main` checkout. Do not deploy from the stale
+  `.claude/worktrees/yoga-verde-redesign` worktree.
+- Verify `docker compose ps`, both live domains, and the build manifest after
+  deployment.
 - Read `docs/VPS_SERVICE_INVENTORY.md` and
   `docs/VPS_CLIENT_ONE_PAGER_2026-06-15.md` before changing VPS state.
 - Do not deploy merely because a code change exists; deploy only when the

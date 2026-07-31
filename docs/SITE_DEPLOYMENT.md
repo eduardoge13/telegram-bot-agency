@@ -20,8 +20,11 @@ El resultado fue `src/` vacío en el servidor y `scripts/run-astro.mjs` borrado,
 lo que rompía el build. Como el contenedor seguía sirviendo la imagen anterior,
 el sitio parecía sano mientras el código fuente en el servidor estaba destruido.
 
-La ruta correcta es **un solo tarball con checksum verificado**: es atómica y se
-puede comprobar antes de tocar producción.
+La ruta correcta es **un solo tarball con SHA-256 verificado**. Se extrae y se
+valida en un release staging en el mismo volumen; la publicación reemplaza el
+directorio completo, no aplica el tarball como un overlay aditivo. El script
+aborta antes del intercambio si detecta secretos, bases de datos o archivos
+operativos dentro del root activo.
 
 ---
 
@@ -34,7 +37,9 @@ puede comprobar antes de tocar producción.
 
 Ambas tienen `docker-compose.yml` y `Dockerfile`, así que desplegar en `site/`
 **parece funcionar**: el build corre limpio y no cambia nada. Costó cerca de una
-hora de depuración la primera vez. El script excluye `site/` a propósito.
+hora de depuración la primera vez. El script publica la raíz completa; al
+completar correctamente el intercambio, la copia huérfana deja de formar parte
+del release activo.
 
 Comprobación rápida de que el contenido llegó de verdad:
 
@@ -57,11 +62,29 @@ ssh -p 2222 vps-n8n "sudo docker exec blueskytravel-site-bluesky-site-1 \
 | Paso | Por qué |
 |---|---|
 | `npm run check` + `npm run build` | No se despliega algo que no compila. |
-| Empaqueta un `.tar.gz` | Excluye `node_modules`, `.git`, `.astro`, `dist`, `.env*`, `*.pem`, `*.key`, credenciales. **Aborta** si algo sensible se coló. |
-| Transfiere **un** archivo y compara md5 | Detecta la transferencia incompleta que rsync ocultaba. |
-| Extrae a staging y valida el paquete | Comprueba que existen `run-astro.mjs`, `package.json`, la página y los datos **antes** de tocar producción. Este es el paso que faltaba. |
-| Publica y reconstruye `--no-cache` | El contexto de build es la raíz, no `site/`. |
-| Verifica en vivo con reintentos | Espera a que nginx acepte tráfico y luego **grepea el HTML servido** para confirmar que es este build: un 200 puede venir de una imagen vieja. |
+| Empaqueta un `.tar.gz` | Excluye `node_modules`, `.git`, `.astro`, `dist`, `.env*`, `*.pem`, `*.key`, credenciales y tokens. **Aborta** si algo sensible se coló. |
+| Transfiere **un** archivo y compara SHA-256 | Detecta la transferencia incompleta que rsync ocultaba. |
+| Extrae a staging y valida el paquete | Comprueba que existen el runtime, la página, los datos y `deploy-manifest.json` **antes** de tocar producción. |
+| Protege el root activo | Aborta si encuentra `.env`, llaves, bases de datos, overrides de Compose u otros archivos operativos que serían eliminados por el reemplazo completo. |
+| Intercambia el release completo | Mueve el release activo a un respaldo y coloca el staging en su lugar. Así también desaparecen archivos borrados del repositorio; no se usa un overlay aditivo. |
+| Reconstruye `--no-cache` y recrea | El contexto de build es la raíz, no `site/`. Si falla el build, restaura directorios sin reconstruir innecesariamente el contenedor viejo. |
+| Verifica en vivo con reintentos | Espera a que nginx acepte tráfico y confirma ambos dominios. Después valida el manifest con el ID exacto de esta ejecución. |
+
+## Rollback y limpieza
+
+Durante el deploy el script mantiene una máquina de estados: `none`, `swapping`,
+`swapped`, `running` y `done`. Un `trap` para `EXIT`, `INT` y `TERM` limpia el
+staging y el tarball; si el proceso se interrumpe después del intercambio,
+restaura el release anterior moviendo el release fallido a cuarentena. Si la
+interrupción ocurre después de `up -d`, también reconstruye y recrea el release
+anterior. Un fallo de `build` no reconstruye el contenedor viejo porque este
+seguía sirviendo la imagen anterior.
+
+El identificador servido en
+`/yoga-verde/deploy-manifest.json` combina el commit y la ejecución actual. Solo
+después de verificarlo se elimina el respaldo. Un recolector posterior elimina
+directorios temporales antiguos con el prefijo exacto del sitio; nunca toca el
+release activo.
 
 ---
 
