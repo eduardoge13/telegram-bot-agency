@@ -234,7 +234,9 @@ const storeData = {
                         </div>
                         <button aria-controls="detail-title" aria-haspopup="dialog" class="hero-link" data-open-detail={product.id} type="button">
                           Ver producto
-                          <span aria-hidden="true" class="material-symbols-outlined text-base">arrow_forward</span>
+                          <svg aria-hidden="true" class="text-link__icon" fill="none" focusable="false" height="14" viewBox="0 0 24 24" width="14">
+                            <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
+                          </svg>
                         </button>
                       </div>
                     </article>
@@ -312,7 +314,12 @@ const storeData = {
                     {product.size && <span>{product.size}</span>}
                   </div>
                   <div class="product-card__actions">
-                    <button aria-controls="detail-title" aria-haspopup="dialog" class="text-link" data-open-detail={product.id} type="button">Ver detalle</button>
+                    <button aria-controls="detail-title" aria-haspopup="dialog" class="text-link" data-open-detail={product.id} type="button">
+                      <svg aria-hidden="true" class="text-link__icon" fill="none" focusable="false" height="14" viewBox="0 0 24 24" width="14">
+                        <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
+                      </svg>
+                      Ver detalle
+                    </button>
                     <button
                       aria-label={`Añadir ${product.name} al carrito`}
                       class="primary-action"
@@ -469,7 +476,12 @@ const storeData = {
                         {product.size && <span>{product.size}</span>}
                       </div>
                       <div class="product-card__actions">
-                        <button aria-controls="detail-title" aria-haspopup="dialog" class="text-link" data-open-detail={product.id} type="button">Ver detalle</button>
+                        <button aria-controls="detail-title" aria-haspopup="dialog" class="text-link" data-open-detail={product.id} type="button">
+                      <svg aria-hidden="true" class="text-link__icon" fill="none" focusable="false" height="14" viewBox="0 0 24 24" width="14">
+                        <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
+                      </svg>
+                      Ver detalle
+                    </button>
                         <button
                           aria-label={`Añadir ${product.name} al carrito`}
                           class="primary-action"
@@ -562,11 +574,13 @@ const storeData = {
                     <button
                       aria-controls="detail-title"
                       aria-haspopup="dialog"
-                      class="text-link inline-flex items-center gap-2"
+                      class="text-link"
                       data-open-detail={kit.id}
                       type="button"
                     >
-                      <span class="material-symbols-outlined text-base">auto_stories</span>
+                      <svg aria-hidden="true" class="text-link__icon" fill="none" focusable="false" height="14" viewBox="0 0 24 24" width="14">
+                        <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
+                      </svg>
                       Ver detalle
                     </button>
                     <button

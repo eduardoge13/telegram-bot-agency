@@ -548,18 +548,60 @@ img {
 .product-card__actions {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  gap: 1.25rem;
+  justify-content: space-between;
+  gap: 1rem;
   margin-top: 1rem;
   border-top: 1px solid var(--color-outline-variant);
   padding-top: 0.85rem;
 }
 
+/* El separador vertical se retiró: con `space-between` quedaba flotando a media
+   fila, desprendido del par de botones. El borde superior ya separa la fila. */
 .product-card__actions .text-link {
   min-width: 0;
-  padding-right: 1.25rem;
-  border-right: 1px solid var(--color-outline-variant);
   justify-content: flex-start;
+}
+
+/* Morfeo de la foto entre la tarjeta y el detalle. El navegador que no soporte
+   View Transitions ignora esta regla y el panel abre igual, sin animación. */
+::view-transition-group(yv-detail-media) {
+  animation-duration: 260ms;
+  animation-timing-function: cubic-bezier(0.2, 0, 0, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
+/* Flecha del enlace: se desplaza al interactuar. Es la única microanimación de
+   la tarjeta y es CSS puro, sin dependencias. */
+.text-link__icon {
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.text-link:hover .text-link__icon,
+.text-link:focus-visible .text-link__icon,
+.hero-link:hover .text-link__icon,
+.hero-link:focus-visible .text-link__icon {
+  transform: translateX(2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .text-link__icon {
+    transition: none;
+  }
+
+  .text-link:hover .text-link__icon,
+  .text-link:focus-visible .text-link__icon,
+  .hero-link:hover .text-link__icon,
+  .hero-link:focus-visible .text-link__icon {
+    transform: none;
+  }
 }
 
 .product-card__actions .primary-action {

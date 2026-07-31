@@ -224,7 +224,12 @@ function catalogCardMarkup(product) {
           ${product.size ? `<span>${escapeHtml(product.size)}</span>` : ""}
         </div>
         <div class="product-card__actions">
-          <button aria-controls="detail-title" aria-haspopup="dialog" class="text-link" data-open-detail="${escapeHtml(product.id)}" type="button">Ver detalle</button>
+          <button aria-controls="detail-title" aria-haspopup="dialog" class="text-link" data-open-detail="${escapeHtml(product.id)}" type="button">
+            <svg aria-hidden="true" class="text-link__icon" fill="none" focusable="false" height="14" viewBox="0 0 24 24" width="14">
+              <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
+            </svg>
+            Ver detalle
+          </button>
           <button aria-label="Añadir ${escapeHtml(product.name)} al carrito" class="primary-action" data-add-item="${escapeHtml(product.id)}" type="button">
             Añadir
           </button>
@@ -494,6 +499,42 @@ function detailFocusableElements() {
   });
 }
 
+// Nombre único que enlaza la foto de la tarjeta con la del detalle durante la
+// transición. Solo puede existir en UN elemento a la vez o el navegador aborta.
+const MEDIA_TRANSITION_NAME = "yv-detail-media";
+
+const prefersReducedMotion = () =>
+  window.matchMedia?.("(prefers-reduced-motion: reduce)").matches === true;
+
+// View Transitions es progresivo: si el navegador no la soporta o el usuario
+// pidió menos movimiento, el cambio se aplica igual, solo que sin animación.
+function withViewTransition(mutate, from, to) {
+  if (typeof document.startViewTransition !== "function" || prefersReducedMotion()) {
+    mutate();
+    return;
+  }
+
+  const clear = () => {
+    if (from) from.style.viewTransitionName = "";
+    if (to) to.style.viewTransitionName = "";
+  };
+
+  if (from) from.style.viewTransitionName = MEDIA_TRANSITION_NAME;
+  const transition = document.startViewTransition(() => {
+    // El nombre se libera del origen ANTES de asignarlo al destino: si ambos lo
+    // tuvieran a la vez, la transición se cancelaría por nombre duplicado.
+    if (from) from.style.viewTransitionName = "";
+    mutate();
+    if (to) to.style.viewTransitionName = MEDIA_TRANSITION_NAME;
+  });
+  transition.finished.then(clear, clear);
+}
+
+// Foto de la tarjeta que disparó la apertura, para morfearla hacia el detalle.
+function triggerMedia(trigger) {
+  return trigger?.closest?.("article")?.querySelector("img") || null;
+}
+
 function openDetail(itemId) {
   const item = ITEM_INDEX.get(itemId);
   // Nunca bloquees la página si el panel no está completo. Esto deja la
@@ -508,6 +549,10 @@ function openDetail(itemId) {
   // Se recuerda quién abrió para devolverle el foco al cerrar.
   lastDetailTrigger = document.activeElement;
 
+  withViewTransition(() => applyDetail(item), triggerMedia(lastDetailTrigger), els.detailImage);
+}
+
+function applyDetail(item) {
   if (els.modal) els.modal.style.setProperty("--accent", accentOf(item));
 
   // El badge se arma solo con las partes que existen: así no queda " · algo".
@@ -556,6 +601,16 @@ function openDetail(itemId) {
 }
 
 function closeDetail() {
+  // Sin panel abierto no hay nada que animar: esto cubre la llamada de arranque
+  // que deja el modal en su estado cerrado al cargar la página.
+  if (!state.detailOpen) {
+    applyCloseDetail();
+    return;
+  }
+  withViewTransition(applyCloseDetail, els.detailImage, triggerMedia(lastDetailTrigger));
+}
+
+function applyCloseDetail() {
   state.detailItemId = null;
   state.detailOpen = false;
   els.modal?.classList.remove("is-open");
