@@ -33,7 +33,15 @@ const displayKits = KITS.map((kit) => ({
   image: displayImage(kit.image),
 }));
 
-const bestSellers = displayProducts.filter((product) => product.featured).slice(0, 8);
+const essentialIds = [
+  "agua-micelar-manzanilla",
+  "crema-facial-chabacano",
+  "contorno-de-ojos-lavanda",
+];
+const essentialProducts = essentialIds
+  .map((id) => displayProducts.find((product) => product.id === id))
+  .filter(Boolean) as typeof displayProducts;
+const featuredKit = displayKits.find((kit) => kit.id === "kit-ritual-facial") || displayKits[0];
 
 // Solo estos SKUs tienen fotografía real del envase; el resto de los assets son
 // la etiqueta plana renderizada, que en un banner se leería como arte, no como
@@ -130,14 +138,24 @@ const storeData = {
           {ANNOUNCEMENT}
         </div>
         <header class="site-header border-b border-outline-variant/35 bg-surface/95 backdrop-blur-xl">
-          <nav class="relative mx-auto flex h-[4.75rem] max-w-screen-2xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+          <nav class="relative mx-auto flex h-16 max-w-screen-2xl items-center justify-between gap-4 px-4 sm:px-6 md:h-[4.75rem] md:px-6 lg:px-8">
             <div class="flex flex-1 items-center gap-4">
               <details class="mobile-menu relative md:hidden" data-mobile-menu>
-                <summary aria-label="Abrir menú" class="inline-flex h-11 w-11 cursor-pointer list-none items-center justify-center border border-outline-variant/60 text-primary">
+                <summary aria-label="Abrir menú" class="header-action relative z-[93] inline-flex h-11 w-11 cursor-pointer list-none items-center justify-center border border-outline-variant/60 text-primary">
                   <span aria-hidden="true" class="material-symbols-outlined">menu</span>
                 </summary>
-                <div class="absolute left-0 top-14 z-[90] w-56 border border-outline-variant/50 bg-surface-container-lowest p-4 shadow-float">
-                  <div class="grid gap-1">
+                <button aria-label="Cerrar menú" class="mobile-menu-backdrop" data-close-mobile-menu type="button"></button>
+                <div class="mobile-menu-panel" aria-label="Navegación principal">
+                  <div class="mobile-menu-panel__header">
+                    <div>
+                      <p class="product-eyebrow">Yoga Verde</p>
+                      <p class="mt-1 font-headline text-3xl text-primary">Explorar</p>
+                    </div>
+                    <button aria-label="Cerrar menú" class="icon-action" data-close-mobile-menu type="button">
+                      <span aria-hidden="true" class="material-symbols-outlined">close</span>
+                    </button>
+                  </div>
+                  <div class="mobile-menu-panel__body">
                     {NAV_ITEMS.map((item) => (
                       <button class="mobile-menu-link" data-nav-link={item.id} data-scroll-to={item.id} type="button">
                         {item.label}
@@ -161,7 +179,7 @@ const storeData = {
                 <source media="(max-width: 767px)" srcset="/yoga-verde/assets/brand/logo-monogram.png" />
                 <img
                   alt="Yoga Verde — Cosmética natural"
-                  class="h-20 w-20 object-contain sm:h-[5.5rem] sm:w-[5.5rem]"
+                  class="site-logo-image h-11 w-11 object-contain md:h-[5.5rem] md:w-[5.5rem]"
                   height="1400"
                   src="/yoga-verde/assets/brand/logo-yoga-verde.svg"
                   width="1400"
@@ -172,7 +190,7 @@ const storeData = {
             <div class="flex flex-1 items-center justify-end gap-2 sm:gap-3">
               <button
                 aria-label="Buscar en el catálogo"
-                class="inline-flex h-11 w-11 items-center justify-center border border-outline-variant/60 text-primary transition hover:border-secondary hover:text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35 lg:h-auto lg:w-auto lg:gap-2 lg:px-4 lg:py-2 lg:text-sm"
+                class="header-action header-search inline-flex h-11 w-11 items-center justify-center border border-outline-variant/60 text-primary transition hover:border-secondary hover:text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35 lg:h-auto lg:w-auto lg:gap-2 lg:px-4 lg:py-2 lg:text-sm"
                 data-focus-search
                 type="button"
               >
@@ -181,7 +199,7 @@ const storeData = {
               </button>
               <button
                 aria-label="Abrir carrito"
-                class="group relative inline-flex h-11 w-11 items-center justify-center border border-outline-variant/60 text-primary transition hover:border-secondary hover:text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35"
+                class="header-action group relative inline-flex h-11 w-11 items-center justify-center border border-outline-variant/60 text-primary transition hover:border-secondary hover:text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35"
                 data-open-cart
                 type="button"
               >
@@ -213,7 +231,7 @@ const storeData = {
 
             <div class="hero-gallery">
               <div class="hero-frame">
-                <div data-hero-slider>
+                <div aria-label="Productos destacados" aria-live="polite" aria-roledescription="carousel" class="hero-slider" data-hero-slider role="region">
                   {heroSlides.map((product, index) => (
                     <article
                       class:list={["hero-slide", index === 0 && "is-active"]}
@@ -259,74 +277,40 @@ const storeData = {
         </section>
 
 
-        <section class="reveal editorial-section mx-auto max-w-screen-2xl px-4 py-14 sm:px-6 lg:px-8" id="best-sellers">
-          <div class="mb-5 flex flex-wrap items-end justify-between gap-x-6 gap-y-2 sm:mb-6">
-            <div class="min-w-0">
-              <p class="specimen-label text-xs font-semibold uppercase tracking-[0.22em] text-secondary">
-                Selección
+        <section class="reveal ritual-section editorial-section mx-auto max-w-screen-2xl px-4 py-20 sm:px-6 lg:px-8" id="best-sellers">
+          <div class="ritual-section__header">
+            <div class="max-w-md">
+              <p class="specimen-label text-xs font-semibold uppercase tracking-[0.22em] text-secondary">Rituales esenciales</p>
+              <h2 class="mt-3 font-headline text-4xl leading-tight text-primary sm:text-5xl">Lo esencial para empezar.</h2>
+              <p class="mt-5 max-w-sm text-sm leading-7 text-on-surface-variant">
+                Tres fórmulas para construir una rutina sencilla, sensorial y honesta.
               </p>
-              <h2 class="mt-2 font-headline text-2xl text-primary sm:text-3xl">Para empezar</h2>
             </div>
-            <button
-              class="inline-flex min-h-11 shrink-0 items-center gap-1.5 text-sm font-semibold text-primary transition hover:text-secondary focus-visible:outline-none"
-              data-scroll-to="catalogo"
-              type="button"
-            >
-              Ver todo
-              <span aria-hidden="true" class="material-symbols-outlined text-base">arrow_forward</span>
+            <button class="text-link ritual-section__link" data-scroll-to="catalogo" type="button">
+              Ver catálogo completo
+              <svg aria-hidden="true" class="text-link__icon" fill="none" focusable="false" height="14" viewBox="0 0 24 24" width="14">
+                <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
+              </svg>
             </button>
           </div>
 
-          <!-- En móvil es un carril horizontal con snap: apilar 8 tarjetas dejaba
-               ~6.800px de scroll antes del catálogo. En md+ vuelve a ser grid. -->
-          <div class="hide-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto px-0 pb-2 md:mx-0 md:grid md:grid-cols-2 md:gap-6 md:overflow-visible md:px-0 xl:grid-cols-4">
-            {bestSellers.map((product) => (
-              <article
-                class="product-card group w-[calc(100vw-2rem)] max-w-none shrink-0 snap-start md:w-auto md:shrink"
-                style={`--accent: ${accentOf(product)}`}
-              >
-                <div class="product-image-frame relative">
-                  {product.badge && (
-                    <span class="product-badge absolute left-4 top-4 z-10">
-                      {product.badge}
-                    </span>
-                  )}
-                  <img
-                    alt={`${product.name} ${product.scent}`}
-                    class="product-media aspect-square w-full transition duration-500 group-hover:scale-[1.02]"
-                    src={product.image}
-                  />
-                </div>
-                <div class="product-card__body">
-                  <p class="product-eyebrow">
-                    {product.typeLabel}
-                  </p>
-                  <div class="mt-1 flex items-start justify-between gap-4">
-                    <div class="min-w-0">
-                      <h3 class="product-name product-card__title">{product.name}</h3>
-                      <p class="product-card__scent">{product.scent}</p>
-                    </div>
-                    <span class="price shrink-0 text-lg">{formatMoney(product.price)}</span>
-                  </div>
-                  <p class="product-card__description">{product.short}</p>
-                  <div class="product-card__meta">
-                    <span>{product.useLabel}</span>
-                    {product.size && <span>{product.size}</span>}
-                  </div>
-                  <div class="product-card__actions">
+          <div class="ritual-grid">
+            {essentialProducts.map((product) => (
+              <article class="ritual-card" style={`--accent: ${accentOf(product)}`}>
+                <button aria-controls="detail-title" aria-haspopup="dialog" class="ritual-card__media" data-open-detail={product.id} type="button">
+                  <img alt={`${product.name} ${product.scent}`} class="product-media" src={product.image} />
+                </button>
+                <div class="ritual-card__body">
+                  <p class="product-eyebrow">{product.typeLabel}</p>
+                  <h3 class="product-name ritual-card__title">{product.name}</h3>
+                  <p class="ritual-card__scent">{product.scent}</p>
+                  <div class="ritual-card__footer">
+                    <span class="price">{formatMoney(product.price)}</span>
                     <button aria-controls="detail-title" aria-haspopup="dialog" class="text-link" data-open-detail={product.id} type="button">
+                      Descubrir
                       <svg aria-hidden="true" class="text-link__icon" fill="none" focusable="false" height="14" viewBox="0 0 24 24" width="14">
                         <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
                       </svg>
-                      Ver detalle
-                    </button>
-                    <button
-                      aria-label={`Añadir ${product.name} al carrito`}
-                      class="primary-action"
-                      data-add-item={product.id}
-                      type="button"
-                    >
-                      Añadir
                     </button>
                   </div>
                 </div>
@@ -337,7 +321,7 @@ const storeData = {
 
         
 
-        <section class="editorial-section relative overflow-hidden bg-surface px-4 py-14 sm:px-6 lg:px-8" id="catalogo">
+        <section class="catalog-editorial reveal editorial-section relative overflow-hidden px-4 py-14 sm:px-6 lg:px-8" id="catalogo">
           <div class="relative mx-auto max-w-screen-2xl">
             <div class="catalog-heading">
               <div class="min-w-0">
@@ -447,7 +431,7 @@ const storeData = {
                 </div>
               </div>
 
-              <div class="mt-8 grid gap-x-6 gap-y-12 sm:grid-cols-2 xl:grid-cols-3" data-products-grid>
+              <div class="catalog-grid mt-8 grid grid-cols-2 gap-x-3 gap-y-10 sm:gap-x-6 sm:gap-y-12 xl:grid-cols-3" data-products-grid>
                 {displayProducts.map((product) => (
                   <article
                     class="product-card group"
@@ -511,118 +495,75 @@ const storeData = {
         </section>
 
 
-        <section class="reveal editorial-section mx-auto max-w-screen-2xl px-4 py-14 sm:px-6 lg:px-8" id="kits">
-          <div class="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-            <div class="max-w-2xl">
-              <p class="specimen-label text-xs font-semibold uppercase tracking-[0.22em] text-secondary">
-                Kits recomendados
-              </p>
-              <h2 class="mt-3 font-headline text-4xl text-primary">Comprar mejor, en menos pasos</h2>
-              <p class="mt-4 text-lg leading-8 text-on-surface-variant">
-                Combinaciones pensadas para primera compra o regalo, con ahorro frente a comprar
-                cada pieza por separado.
-              </p>
+        <section class="reveal editorial-section mx-auto max-w-screen-2xl px-4 py-20 sm:px-6 lg:px-8" id="kits">
+          <div class="kit-feature">
+            <div class="kit-feature__media">
+              <div class="kit-feature__wash"></div>
+              <div class="kit-feature__products">
+                {kitItems(featuredKit).map((piece, index) => (
+                  <img
+                    alt={`${piece.name} ${piece.scent}`}
+                    class:list={["product-media", index === 1 && "is-raised", index === 2 && "is-small"]}
+                    loading="lazy"
+                    src={piece.image}
+                  />
+                ))}
+              </div>
             </div>
-            <button
-              class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-5 py-3 text-sm font-semibold text-primary transition hover:border-secondary/40 hover:text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35"
-              data-open-cart
-              type="button"
-            >
-              Ver carrito
-              <span class="material-symbols-outlined text-base">shopping_bag</span>
-            </button>
+            <div class="kit-feature__content">
+              <p class="specimen-label text-xs font-semibold uppercase tracking-[0.22em] text-secondary">Colección para empezar</p>
+              <h2 class="mt-4 font-headline text-4xl leading-tight text-primary sm:text-5xl">{featuredKit.name}</h2>
+              <p class="mt-5 max-w-md text-base leading-8 text-on-surface-variant">
+                Una rutina completa en tres pasos: limpiar, hidratar y cuidar la zona de ojos con fórmulas botánicas hechas en México.
+              </p>
+              <div class="kit-feature__price">
+                <span class="price text-2xl">{formatMoney(featuredKit.price)}</span>
+                <span class="text-sm text-on-surface-variant">{kitItems(featuredKit).length} productos · precio especial</span>
+              </div>
+              <button aria-controls="detail-title" aria-haspopup="dialog" class="primary-action mt-8" data-open-detail={featuredKit.id} type="button">
+                Explorar kit
+                <svg aria-hidden="true" class="text-link__icon" fill="none" focusable="false" height="14" viewBox="0 0 24 24" width="14">
+                  <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
+                </svg>
+              </button>
+            </div>
           </div>
 
-          <div class="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-            {displayKits.map((kit) => (
-              <article class="product-card overflow-hidden" style={`--accent: ${accentOf(kit)}`}>
-                <div class="relative overflow-hidden p-3">
-                  {/* Un kit incluye 2-3 piezas; se muestran todas, no solo una. */}
-                  <div class="grid aspect-square grid-cols-2 gap-1 bg-surface-container-low p-1">
-                    {kitItems(kit).map((piece, index) => (
-                      <img
-                        alt={`${piece.name} ${piece.scent}`}
-                        class:list={[
-                          "product-media h-full w-full",
-                          kitItems(kit).length === 3 && index === 0 && "col-span-2",
-                        ]}
-                        loading="lazy"
-                        src={piece.image}
-                      />
-                    ))}
-                  </div>
-                    <span class="product-badge absolute left-6 top-6">
-                    {kit.badge}
-                  </span>
-                </div>
-                <div class="product-card__body">
-                  <div class="flex items-start justify-between gap-4">
-                    <div class="min-w-0">
-                      <p class="product-eyebrow">
-                        {kit.useLabel}
-                      </p>
-                      <h3 class="product-name product-card__title">{kit.name}</h3>
-                    </div>
-                    <span class="price shrink-0 text-xl">{formatMoney(kit.price)}</span>
-                  </div>
-                  <p class="product-card__description">{kit.short}</p>
-                  <div class="product-card__meta">
-                    <span>{kit.typeLabel}</span>
-                    <span>Regalo o primera compra</span>
-                  </div>
-                  <div class="product-card__actions">
-                    <button
-                      aria-controls="detail-title"
-                      aria-haspopup="dialog"
-                      class="text-link"
-                      data-open-detail={kit.id}
-                      type="button"
-                    >
-                      <svg aria-hidden="true" class="text-link__icon" fill="none" focusable="false" height="14" viewBox="0 0 24 24" width="14">
-                        <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
-                      </svg>
-                      Ver detalle
-                    </button>
-                    <button
-                      class="primary-action"
-                      data-add-item={kit.id}
-                      type="button"
-                    >
-                      Añadir al carrito
-                    </button>
-                  </div>
-                </div>
-              </article>
-            ))}
+          <div class="kit-list-link">
+            <span>Descubre todos nuestros kits y regalos</span>
+            <button class="text-link" data-scroll-to="catalogo" type="button">
+              Ver catálogo
+              <svg aria-hidden="true" class="text-link__icon" fill="none" focusable="false" height="14" viewBox="0 0 24 24" width="14">
+                <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
+              </svg>
+            </button>
           </div>
         </section>
 
-        <section class="reveal editorial-section mx-auto max-w-screen-2xl px-4 py-14 sm:px-6 lg:px-8">
+        <section class="philosophy-section reveal editorial-section mx-auto max-w-screen-2xl px-4 py-14 sm:px-6 lg:px-8">
           <div class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
-            <article class="overflow-hidden border border-outline-variant bg-surface-container-lowest">
+            <article class="philosophy-panel overflow-hidden border border-outline-variant bg-surface-container-lowest">
               <div class="grid gap-8 p-8 lg:grid-cols-[minmax(0,1fr)_220px] lg:items-center lg:p-10">
                 <div>
                   <p class="specimen-label text-xs font-semibold uppercase tracking-[0.22em] text-secondary">
-                    Nuestra filosofía
+                    El lenguaje de la marca
                   </p>
-                  <h2 class="mt-3 font-headline text-4xl text-primary">Alta cosmética de origen botánico</h2>
+                  <h2 class="mt-3 font-headline text-4xl text-primary">Naturaleza con una estética clara</h2>
                   <blockquote class="mt-5 max-w-2xl font-headline text-xl italic leading-relaxed text-tertiary">
-                    “Cada fórmula se construye alrededor de un activo botánico, en la
-                    concentración necesaria para que haga su trabajo.”
+                    “Elegancia, minimalismo y naturalidad.”
                   </blockquote>
                   <div class="mt-8 grid gap-6 md:grid-cols-2">
                     <p class="leading-7 text-on-surface-variant">
-                      El color de cada etiqueta indica su aroma: terracota para cítricos y frutos
-                      suaves, verde para menta y bergamota, morado para uva y lavanda, dorado para
-                      leche de coco.
+                      La identidad de Yoga Verde combina una base crema con terracota, verde salvia,
+                      verde olivo y verde bosque: una paleta cálida que deja respirar al producto.
                     </p>
                     <p class="leading-7 text-on-surface-variant">
-                      Envasado en vidrio ámbar y cristal, que protegen los activos de la luz y
-                      conservan la fórmula estable.
+                      El logotipo se construyó para conservar sus proporciones, área de seguridad,
+                      legibilidad y claridad en cualquier tamaño y aplicación.
                     </p>
                   </div>
                 </div>
-                <div class="overflow-hidden bg-surface-container-low p-3">
+                <div class="philosophy-image-frame overflow-hidden bg-surface-container-low p-3">
                   <img
                     alt="Crema corporal de leche de coco Yoga Verde"
                     class="aspect-square product-media w-full bg-surface-container-lowest p-1"
@@ -632,32 +573,32 @@ const storeData = {
               </div>
             </article>
 
-            <article class="bg-primary p-8 text-on-primary">
-              <p class="text-xs font-semibold uppercase tracking-[0.22em] text-on-primary-container">
+            <article class="newsletter-panel p-8">
+              <p class="text-xs font-semibold uppercase tracking-[0.22em] text-secondary">
                 Newsletter
               </p>
-              <h2 class="mt-3 font-headline text-4xl text-white">Lanzamientos y descuentos</h2>
-              <p class="mt-5 text-base leading-8 text-on-primary-container">
+              <h2 class="mt-3 font-headline text-4xl text-primary">Lanzamientos y descuentos</h2>
+              <p class="mt-5 text-base leading-8 text-on-surface-variant">
                 Te avisamos cuando sale un producto nuevo o hay descuento de temporada.
               </p>
-                <div class="mt-8 border-y border-white/15 py-4">
+                <div class="newsletter-input mt-8 border-y border-outline-variant py-4">
                 <label class="sr-only" for="newsletter-email">Correo electrónico</label>
-                <div class="flex items-center gap-3 border-b border-white/20 px-1 py-3">
+                <div class="flex items-center gap-3 border-b border-outline-variant px-1 py-3">
                   <input
-                    class="w-full border-none bg-transparent p-0 text-sm text-white placeholder:text-on-primary-container focus:outline-none focus:ring-0"
+                    class="w-full border-none bg-transparent p-0 text-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:ring-0"
                     id="newsletter-email"
                     placeholder="Tu correo electrónico"
                     type="email"
                   />
                   <button
-                    class="inline-flex h-11 w-11 items-center justify-center bg-secondary text-white transition hover:bg-[#c25a42] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+                    class="newsletter-submit inline-flex h-11 w-11 items-center justify-center bg-secondary text-white transition hover:bg-[#c25a42] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35"
                     type="button"
                   >
                     <span class="material-symbols-outlined">arrow_forward</span>
                   </button>
                 </div>
               </div>
-              <p class="mt-4 text-sm leading-7 text-on-primary-container">
+              <p class="mt-4 text-sm leading-7 text-on-surface-variant">
                 Sin spam: solo avisos de producto nuevo y promociones puntuales.
               </p>
             </article>
@@ -667,45 +608,45 @@ const storeData = {
         
       </main>
 
-      <footer class="bg-primary py-16 text-on-primary" id="contacto">
+      <footer class="site-footer py-16" id="contacto">
         <div class="mx-auto grid max-w-screen-2xl gap-10 px-4 sm:px-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1fr)] lg:px-8">
           <div>
-            <div class="inline-flex items-center border-b border-white/20 pb-3">
+            <div class="site-footer__logo inline-flex items-center border-b border-outline-variant pb-3">
               <img
                 alt="Yoga Verde — Cosmética natural"
                 class="h-14 w-auto sm:h-16"
                 height="1400"
-                src="/yoga-verde/assets/brand/logo-yoga-verde-cream.svg"
+                src="/yoga-verde/assets/brand/logo-yoga-verde.svg"
                 width="1400"
               />
             </div>
-            <p class="mt-5 max-w-sm leading-8 text-on-primary-container">
+            <p class="mt-5 max-w-sm leading-8 text-on-surface-variant">
               Cosmética natural formulada en México: rostro, cuerpo, cabello, labios
               y aromaterapia.
             </p>
           </div>
           <div>
-            <h3 class="font-headline text-2xl">Explorar</h3>
-            <div class="mt-4 space-y-3 text-on-primary-container">
+            <h3 class="font-headline text-2xl text-primary">Explorar</h3>
+            <div class="mt-4 space-y-3 text-on-surface-variant">
               {NAV_ITEMS.filter((item) => item.id !== "inicio").map((item) => (
-                <button class="block transition hover:text-white" data-scroll-to={item.id} type="button">
+                <button class="block transition hover:text-secondary" data-scroll-to={item.id} type="button">
                   {item.label}
                 </button>
               ))}
-              <button class="block transition hover:text-white" data-open-cart type="button">
+              <button class="block transition hover:text-secondary" data-open-cart type="button">
                 Carrito
               </button>
             </div>
           </div>
           <div>
-            <h3 class="font-headline text-2xl">Cosmética natural</h3>
+            <h3 class="font-headline text-2xl text-primary">Cosmética natural</h3>
             {/* Certificaciones impresas en las etiquetas reales del cliente. */}
-            <div class="mt-5 grid gap-3 text-sm text-on-primary-container sm:grid-cols-2">
-              <span class="border-b border-white/15 pb-3">Producto vegano</span>
-              <span class="border-b border-white/15 pb-3">Cruelty free</span>
-              <span class="border-b border-white/15 pb-3">Libre de parabenos</span>
-              <span class="border-b border-white/15 pb-3">Libre de sulfatos</span>
-              <span class="border-b border-white/15 pb-3">Hecho en México</span>
+            <div class="mt-5 grid gap-3 text-sm text-on-surface-variant sm:grid-cols-2">
+              <span class="border-b border-outline-variant pb-3">Producto vegano</span>
+              <span class="border-b border-outline-variant pb-3">Cruelty free</span>
+              <span class="border-b border-outline-variant pb-3">Libre de parabenos</span>
+              <span class="border-b border-outline-variant pb-3">Libre de sulfatos</span>
+              <span class="border-b border-outline-variant pb-3">Hecho en México</span>
             </div>
           </div>
         </div>
@@ -758,12 +699,12 @@ const storeData = {
           </p>
         </div>
 
-        <div class="mt-6 bg-primary p-6 text-on-primary">
+        <div class="shipping-note mt-6 p-6">
           <div class="mb-4 flex items-center gap-3">
             <span class="material-symbols-outlined text-secondary">local_shipping</span>
-            <h3 class="font-headline text-3xl italic text-on-primary-container">Envío seguro</h3>
+            <h3 class="font-headline text-3xl italic text-primary">Envío seguro</h3>
           </div>
-          <p class="leading-8 text-on-primary-container/95">
+          <p class="leading-8 text-on-surface-variant">
             Empaque protector para que frascos de vidrio y tarros lleguen completos, sin fugas.
           </p>
         </div>
@@ -841,11 +782,11 @@ const storeData = {
                 }
               });
             },
-            // threshold must stay at 0: sections taller than the viewport (the
-            // 8-card best-sellers row on mobile) can never reach a high ratio,
-            // so any positive threshold forced the visitor to scroll hundreds
-            // of px past the heading into blank space before it faded in.
-            { threshold: 0, rootMargin: "0px 0px -10% 0px" },
+            // Keep threshold at 0 because sections taller than the viewport
+            // cannot reach a high ratio. The negative bottom margin delays the
+            // reveal until the visitor has moved farther into the section,
+            // instead of firing as soon as its top edge kisses the viewport.
+            { threshold: 0, rootMargin: "0px 0px -24% 0px" },
           );
           revealTargets.forEach(function (target) {
             observer.observe(target);
@@ -856,18 +797,42 @@ const storeData = {
           });
         }
 
-        // Hero product slider.
+        // Hero product slider. The first frame stays fully visible; only
+        // subsequent changes receive the editorial enter/leave choreography.
         var slides = document.querySelectorAll("[data-hero-slide]");
         var dots = document.querySelectorAll("[data-hero-dot]");
+        var slider = document.querySelector("[data-hero-slider]");
         if (slides.length > 1) {
           var current = 0;
           var timer = null;
+          var enterTimer = null;
 
-          var showSlide = function (index) {
-            current = (index + slides.length) % slides.length;
+          var showSlide = function (index, direction, animate) {
+            var next = (index + slides.length) % slides.length;
+            var movement = direction || (next >= current ? "forward" : "backward");
+            var movementClass = movement === "backward" ? "is-backward" : "is-forward";
+            var outgoing = slides[current];
+
+            if (enterTimer) {
+              window.clearTimeout(enterTimer);
+              enterTimer = null;
+            }
+
             slides.forEach(function (slide, i) {
-              slide.classList.toggle("is-active", i === current);
+              slide.classList.remove("is-entering", "is-leaving", "is-forward", "is-backward");
+              slide.classList.toggle("is-active", i === next);
             });
+
+            if (animate && outgoing !== slides[next]) {
+              outgoing.classList.add("is-leaving", movementClass);
+              slides[next].classList.add("is-entering", movementClass);
+              enterTimer = window.setTimeout(function () {
+                outgoing.classList.remove("is-leaving", "is-forward", "is-backward");
+                slides[next].classList.remove("is-entering", "is-forward", "is-backward");
+              }, 900);
+            }
+
+            current = next;
             dots.forEach(function (dot, i) {
               dot.classList.toggle("is-active", i === current);
             });
@@ -883,18 +848,41 @@ const storeData = {
           dots.forEach(function (dot) {
             dot.addEventListener("click", function () {
               stopAuto();
-              showSlide(Number(dot.dataset.heroDot));
+              var requested = Number(dot.dataset.heroDot);
+              showSlide(requested, requested >= current ? "forward" : "backward", !prefersReduced);
             });
           });
 
           if (!prefersReduced) {
             timer = window.setInterval(function () {
-              showSlide(current + 1);
+              showSlide(current + 1, "forward", true);
             }, 5000);
-            var slider = document.querySelector("[data-hero-slider]");
             if (slider) {
               slider.addEventListener("mouseenter", stopAuto);
               slider.addEventListener("focusin", stopAuto);
+            }
+          }
+
+          if (slider) {
+            window.requestAnimationFrame(function () {
+              window.requestAnimationFrame(function () {
+                slider.classList.add("is-ready");
+                slider.closest(".hero-frame")?.classList.add("is-ready");
+              });
+            });
+
+            if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+              slider.addEventListener("pointermove", function (event) {
+                var bounds = slider.getBoundingClientRect();
+                var x = ((event.clientX - bounds.left) / bounds.width - 0.5) * 10;
+                var y = ((event.clientY - bounds.top) / bounds.height - 0.5) * 6;
+                slider.style.setProperty("--hero-parallax-x", x.toFixed(2) + "px");
+                slider.style.setProperty("--hero-parallax-y", y.toFixed(2) + "px");
+              });
+              slider.addEventListener("pointerleave", function () {
+                slider.style.setProperty("--hero-parallax-x", "0px");
+                slider.style.setProperty("--hero-parallax-y", "0px");
+              });
             }
           }
         }
@@ -1045,15 +1033,21 @@ const storeData = {
 
           <div class="mt-5 flex flex-wrap gap-2" data-detail-tags></div>
 
-          <section class="mt-6" data-detail-benefits-block>
-            <h3 class="text-xs font-semibold uppercase tracking-[0.22em] text-on-surface-variant">Beneficios</h3>
-            <ul class="mt-3 space-y-2.5 text-sm leading-6 text-on-surface-variant" data-detail-benefits></ul>
-          </section>
+          <details class="product-accordion mt-6" data-detail-benefits-block>
+            <summary>
+              <span>Beneficios</span>
+              <span aria-hidden="true" class="product-accordion__icon">+</span>
+            </summary>
+            <ul class="product-accordion__content space-y-2.5 text-sm leading-6 text-on-surface-variant" data-detail-benefits></ul>
+          </details>
 
-          <section class="mt-6" data-detail-instructions-block>
-            <h3 class="text-xs font-semibold uppercase tracking-[0.22em] text-on-surface-variant">Cómo usarlo</h3>
-            <p class="mt-3 text-sm leading-6 text-on-surface-variant" data-detail-instructions></p>
-          </section>
+          <details class="product-accordion" data-detail-instructions-block>
+            <summary>
+              <span>Cómo usarlo</span>
+              <span aria-hidden="true" class="product-accordion__icon">+</span>
+            </summary>
+            <p class="product-accordion__content text-sm leading-6 text-on-surface-variant" data-detail-instructions></p>
+          </details>
         </div>
       </div>
 

@@ -1,6 +1,11 @@
-# Blue Sky Travel Site
+# Blue Sky Travel Site + Yoga Verde
 
 Phase 1 marketing site for `blueskytravelmx.com`.
+
+The same Astro/nginx release also serves the Yoga Verde storefront at
+`/yoga-verde`. Yoga Verde is a premium natural-cosmetics storefront; its active
+visual rules and Claude/Opus handoff are documented in
+[`../docs/AGENT_INSTRUCTIONS.md`](../docs/AGENT_INSTRUCTIONS.md).
 
 ## Stack
 
@@ -114,3 +119,13 @@ Before Meta Live and production cutover, replace the legal placeholders in `src/
 - privacy email if it changes
 - sales email if it changes
 - production-grade visual assets and proof
+
+### Yoga Verde release guardrails
+
+- Deploy through `./scripts/deploy.sh` only; never use `rsync` or `scp -r`.
+- Use the normalized `public/yoga-verde/assets/products/display/*.webp`
+  derivatives with `contain`/centered placement.
+- Keep warm white/cream surfaces dominant; reserve forest green and terracotta
+  for text, active states and actions.
+- Validate mobile detail scroll/close behavior and horizontal overflow before
+  publishing.

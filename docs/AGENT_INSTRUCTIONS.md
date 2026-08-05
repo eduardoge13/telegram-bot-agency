@@ -131,7 +131,10 @@ Compose service.
 - The script has a state-aware `EXIT`/`INT`/`TERM` rollback, verifies
   `/yoga-verde/deploy-manifest.json`, and refuses to replace a root containing
   secrets, databases or operational overrides.
-- Deploy only from the current `main` checkout. Do not deploy from the stale
+- Deploy only from the checkout that contains the approved release commit. The
+  preferred long-term source is the current `main` checkout; while a release
+  is being reviewed, an explicitly named feature worktree is valid only after
+  checking its branch, commit and diff. Never deploy from the stale
   `.claude/worktrees/yoga-verde-redesign` worktree.
 - Verify `docker compose ps`, both live domains, and the build manifest after
   deployment.
@@ -144,6 +147,58 @@ The current product/design brief for the storefront pass is kept in
 `docs/YOGA_VERDE_OPUS5_MOBILE_PREMIUM_PROMPT.md`.
 `docs/YOGA_VERDE_OPUS_PLAN_PROMPT.md` is an older historical brief; use the
 Opus 5 prompt for the active iteration.
+
+## Yoga Verde visual and interaction handoff (2026-08-05)
+
+Yoga Verde is the active brand and project name. Do not refer to this site as
+Dr Nature. The current iteration is an identity-compliance and premium-motion
+pass, not a new product or catalog migration.
+
+### Non-negotiable visual rules
+
+- Treat the identity manual as the source of truth: cream `#F8E3D2`, terracotta
+  `#C06145`, sage `#6B874C`, olive `#4F5E01` and forest `#183425`.
+- Cream and warm white are the dominant surfaces. Forest green is an accent for
+  text, active states, small highlights and primary actions; it must not become
+  a full-width footer, newsletter, hero or bottom-of-page block.
+- Prefer soft gradients, beveled/asymmetric radii and fine borders over rigid
+  square panels, heavy shadows, decorative pills or app-like chrome.
+- The hero is logo plus product slideshow. Do not restore the visible
+  “Piel, cabello y bienestar” headline or other generic slogan copy.
+- Keep the compact YG mark in the header; the full Yoga Verde logo belongs in
+  the hero/brand areas and must remain legible without overwhelming mobile.
+- Product derivatives under `public/yoga-verde/assets/products/display/` are
+  intentional normalized assets. Preserve `object-fit: contain`, centered
+  placement and consistent visual scale. Do not replace them with `cover` or
+  reintroduce the old JPG whitespace problem.
+
+### Interaction and QA rules
+
+- Mobile product cards occupy the visible width; no accidental clipped second
+  card and no document/body horizontal overflow at 320, 360, 390, 400 and
+  414 px.
+- Every “Ver detalle” trigger uses the shared inline SVG arrow, has a minimum
+  44 px target, remains visibly separated from “Añadir”, and opens a usable
+  detail sheet on mobile and desktop. The detail sheet must scroll internally,
+  close by button, overlay and Escape, and restore focus.
+- Scroll reveals should be calm and noticeable; the product slideshow may move
+  faster to show variety. Respect `prefers-reduced-motion`.
+- Before handoff, run `npm run check`, `npm run build`, and browser checks for
+  the detail flow, catalog, cart, navigation highlight, first-slide render,
+  overflow and console errors.
+
+### Claude / Opus handoff
+
+When Claude (including Opus 5) continues this site, it must first inspect the
+current branch and worktree and must not assume that a stale Claude worktree is
+the source of truth. It must preserve the normalized `display/*.webp` strategy,
+the identity palette, the light premium surface treatment, the modal behavior,
+and the no-`rsync` tarball deployment rule. Any deployment recommendation must
+name the exact checkout and commit it was tested against. Claude should keep
+site changes, deployment documentation and agent memory in focused commits;
+never use `git add .` when unrelated work is present, and never silently
+overwrite a dirty user checkout. If the visual result is in doubt, provide a
+desktop and mobile screenshot/checklist before proposing deployment.
 
 ## Response Format Specification
 

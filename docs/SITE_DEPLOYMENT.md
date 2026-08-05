@@ -10,6 +10,16 @@ cd site
 Este documento existe porque el sitio se desplegó mal varias veces y siempre por
 la misma razón. Si vas a tocar el despliegue, lee las dos trampas antes.
 
+## Fuente de una release
+
+Publica únicamente desde el checkout que contiene el commit aprobado para esa
+release. Antes de ejecutar el script confirma `git rev-parse --show-toplevel`,
+`git branch --show-current`, `git log -1 --oneline` y `git status`; el worktree
+`yoga-verde-redesign` quedó obsoleto y no es una fuente válida. La release de
+Yoga Verde del 2026-08-05 incluye el pase premium de identidad: superficies
+claras, verde solo como acento, paneles con bisel/radio suave, derivados de
+producto normalizados y el detalle móvil con scroll y cierre accesibles.
+
 ---
 
 ## Prohibido: `rsync` y `scp -r`
@@ -85,6 +95,18 @@ El identificador servido en
 después de verificarlo se elimina el respaldo. Un recolector posterior elimina
 directorios temporales antiguos con el prefijo exacto del sitio; nunca toca el
 release activo.
+
+## Checklist visual antes de publicar
+
+- Confirmar que el hero no muestra “Piel, cabello y bienestar” como titular.
+- Confirmar que el header usa el YG compacto en móvil y que el logo completo no
+  domina la barra superior.
+- Confirmar que catálogo, selección, kits, filosofía, newsletter y footer no
+  usan verde como superficie dominante.
+- Confirmar `object-fit: contain`, `object-position: center` y los derivados
+  `public/yoga-verde/assets/products/display/*.webp`; no volver a `cover`.
+- Confirmar en móvil que cada tarjeta se ve completa, que “Ver detalle” abre,
+  permite scroll y cierra, y que no existe overflow horizontal.
 
 ---
 

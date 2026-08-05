@@ -49,6 +49,7 @@ const els = {
   counts: document.querySelectorAll("[data-product-count], [data-product-count-filtered]"),
   activeFilters: document.querySelector("[data-active-filters]"),
   search: document.querySelector("[data-search-input]"),
+  mobileMenu: document.querySelector("[data-mobile-menu]"),
   filtersDrawer: document.querySelector("[data-filters-drawer]"),
   filtersOverlay: document.querySelector("[data-filters-overlay]"),
   cartDrawer: document.querySelector("[data-cart-drawer]"),
@@ -447,7 +448,7 @@ function renderCart() {
 }
 
 function syncBodyLock() {
-  const locked = state.cartOpen || state.detailOpen || state.filtersOpen;
+  const locked = state.cartOpen || state.detailOpen || state.filtersOpen || Boolean(els.mobileMenu?.open);
   // El scroll de la página vive en `html` en Chrome móvil y en `body` en
   // algunos escritorios. Bloquear ambos evita que el fondo se mueva mientras
   // el detalle conserva su propio scroll interno.
@@ -455,7 +456,16 @@ function syncBodyLock() {
   document.body.classList.toggle("ui-locked", locked);
 }
 
+function closeMobileMenu() {
+  if (!els.mobileMenu?.open) return;
+  els.mobileMenu.removeAttribute("open");
+  syncBodyLock();
+}
+
+els.mobileMenu?.addEventListener("toggle", syncBodyLock);
+
 function openFilters() {
+  closeMobileMenu();
   state.filtersOpen = true;
   els.filtersDrawer?.classList.remove("-translate-x-full");
   els.filtersOverlay?.classList.remove("pointer-events-none", "opacity-0");
@@ -472,6 +482,7 @@ function closeFilters() {
 }
 
 function openCart() {
+  closeMobileMenu();
   state.cartOpen = true;
   closeFilters();
   els.cartDrawer?.classList.remove("translate-x-full");
@@ -575,6 +586,9 @@ function applyDetail(item) {
     els.detailTags.innerHTML = tags.map(detailTagMarkup).join("");
     els.detailTags.hidden = tags.length === 0;
   }
+
+  if (els.detailBenefitsBlock) els.detailBenefitsBlock.open = false;
+  if (els.detailInstructionsBlock) els.detailInstructionsBlock.open = false;
 
   if (els.detailBenefits) {
     const benefits = (item.benefits || []).map(clean).filter(Boolean);
@@ -788,6 +802,7 @@ document.addEventListener("click", (event) => {
 
   if (target.matches("[data-open-filters]")) openFilters();
   if (target.matches("[data-close-filters]")) closeFilters();
+  if (target.matches("[data-close-mobile-menu]")) closeMobileMenu();
 
   if (target.matches("[data-open-cart]")) openCart();
   if (target.matches("[data-close-cart]")) closeCart();
@@ -841,12 +856,13 @@ document.addEventListener("click", (event) => {
 
   if (target.matches("[data-scroll-to]")) {
     closeFilters();
-    target.closest("[data-mobile-menu]")?.removeAttribute("open");
+    closeMobileMenu();
     scrollToSection(target.dataset.scrollTo);
   }
 
   if (target.matches("[data-focus-search]")) {
     closeFilters();
+    closeMobileMenu();
     focusSearch();
   }
 
@@ -898,6 +914,9 @@ document.addEventListener("keydown", (event) => {
   if (state.filtersOpen) {
     closeFilters();
     return;
+  }
+  if (els.mobileMenu?.open) {
+    closeMobileMenu();
   }
 });
 
