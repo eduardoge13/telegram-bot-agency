@@ -4,9 +4,11 @@ Fecha: 2026-08-08
 Rama: `codex/yoga-verde-webflow-redesign`
 Base: `5306b9e feat(yoga-verde): refine premium identity layer`
 
-## Estado al pausar
+## Estado actual
 
 - No se tocó `main`, no se hizo push, merge ni despliegue.
+- La primera capa visual ya está implementada en el commit
+  `4e3ea78 feat(yoga-verde): add editorial commerce visual layer`.
 - El sitio conserva la lógica actual de Astro: catálogo, búsqueda, filtros,
   carrito, detalle responsive, scrollspy y slider.
 - Se descartó la primera dirección de bodegón botánico generado porque no
@@ -14,6 +16,10 @@ Base: `5306b9e feat(yoga-verde): refine premium identity layer`
   movieron fuera del repositorio a `/tmp/yoga-verde-rejected-campaign/`.
 - No quedan cambios de esas escenas en `index.astro` ni un manifiesto de assets
   rechazados dentro del proyecto.
+- La validación local pasó `npm run check` con 0 errores/0 warnings propios y
+  `npm run build` correctamente. Se revisaron capturas a 390×844 y 1280×900;
+  el detalle móvil abre/cierra, el producto permanece centrado y no se observó
+  overflow horizontal.
 - Webflow sigue siendo un laboratorio visual/exportable, no la fuente de datos
   ni de checkout. La sesión de Webflow requiere que el usuario introduzca sus
   propias credenciales; el agente no debe escribirlas.
@@ -55,16 +61,13 @@ Cambiar a una referencia de e-commerce premium más limpia, cercana a
 
 ## Siguiente bloque de trabajo
 
-1. Aplicar el sistema visual SKIMS/editorial sobre `index.astro` y
-   `yoga-verde.css` usando los derivados reales `products/display/*.webp`.
-2. Convertir el hero actual en una composición editorial limpia: logo visible,
-   slider de producto real, caption corto y frame sin tarjeta pesada.
-3. Rehacer header, cards, búsqueda, catálogo, kit, filosofía, newsletter y
-   footer para eliminar rigidez cuadrada y verde dominante.
-4. Añadir únicamente hooks `data-wf-*` útiles para un futuro export de Webflow.
-5. Ejecutar `npm run check`, `npm run build`, revisión visual responsive y
-   auditoría read-only con Claude CLI.
-6. Presentar una vista local para aprobación. Solo después se considerará
+1. Revisar la vista local con el usuario y ajustar únicamente lo que no apruebe.
+2. Auditar funcionalidad completa: navegación, búsqueda, filtros, carrito y
+   detalle en 320, 390, 414, 1280 y 1440 px.
+3. Volver a intentar la auditoría con Claude CLI cuando haya sesión iniciada;
+   en esta ejecución respondió `Not logged in`.
+4. Revisar acceso a Webflow; el usuario debe introducir sus credenciales.
+5. Solo después de aprobación visual se considerará
    commit final, push, merge y despliegue mediante `site/scripts/deploy.sh`.
 
 ## Restricciones que siguen vigentes
