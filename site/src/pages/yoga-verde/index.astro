@@ -230,18 +230,10 @@ const storeData = {
                 src="/yoga-verde/assets/brand/logo-yoga-verde.svg"
                 width="1400"
               />
-              <div class="hero-brand-note" aria-hidden="true">
-                <span>Yoga Verde · 01—05</span>
-                <span>Selección de esenciales</span>
-              </div>
             </div>
 
             <div class="hero-gallery" data-wf-hook="hero-gallery">
               <div class="hero-frame" data-wf-hook="hero-frame">
-                <div class="hero-frame__topline" aria-hidden="true">
-                  <span>Cosmética natural hecha en México</span>
-                  <span>Explorar selección <span class="material-symbols-outlined">south_east</span></span>
-                </div>
                 <div aria-label="Productos destacados" aria-live="polite" aria-roledescription="carousel" class="hero-slider" data-hero-slider data-wf-hook="hero-slider" role="region">
                   {heroSlides.map((product, index) => (
                     <article
@@ -349,16 +341,8 @@ const storeData = {
 
         <section class="editorial-stage reveal mx-auto max-w-screen-2xl px-4 py-8 sm:px-6 lg:px-8" data-story-stage data-wf-section="campaign">
           <div class="editorial-stage__visual">
-            <img
-              alt="Estudio editorial en tonos crema para una selección de productos Yoga Verde"
-              class="editorial-stage__backdrop"
-              decoding="async"
-              loading="lazy"
-              src="/yoga-verde/assets/campaign/editorial-studio-backdrop.webp"
-            />
-            <div class="editorial-stage__wash" aria-hidden="true"></div>
             <div class="editorial-stage__products">
-                {essentialProducts.map((product, index) => (
+              {essentialProducts.map((product, index) => (
                 <button
                   aria-controls="detail-title"
                   aria-haspopup="dialog"
@@ -369,17 +353,31 @@ const storeData = {
                   type="button"
                 >
                   <img alt="" class="product-media" loading="lazy" src={product.image} />
-                  <span class="editorial-stage__product-label">{String(index + 1).padStart(2, "0")}</span>
                 </button>
               ))}
             </div>
             <div class="editorial-stage__copy">
-              <p class="product-eyebrow">El ritual se construye paso a paso</p>
-              <h2 class="motion-heading font-headline" data-motion-heading>Tres esenciales. Una pausa para ti.</h2>
+              <p class="product-eyebrow">Una rutina sin complicaciones</p>
+              <h2 class="motion-heading font-headline" data-motion-heading>Tu ritual, un paso a la vez.</h2>
+              <p class="editorial-stage__description">
+                Limpia, hidrata y cuida la mirada con tres fórmulas que funcionan mejor juntas.
+              </p>
+              <div class="editorial-stage__steps" aria-label="Explorar los tres pasos del ritual">
+                {essentialProducts.map((product, index) => (
+                  <button
+                    aria-pressed={index === 0 ? "true" : "false"}
+                    class:list={["editorial-stage__step", index === 0 && "is-active"]}
+                    data-story-select={index}
+                    type="button"
+                  >
+                    <span>{String(index + 1).padStart(2, "0")}</span>
+                    <span>{product.name}</span>
+                  </button>
+                ))}
+              </div>
               <div class="editorial-stage__status" aria-live="polite">
                 <span data-story-step>01</span>
-                <span class="editorial-stage__status-rule"></span>
-                <span>03 esenciales</span>
+                <span>de 03</span>
               </div>
               <button class="text-link" data-magnetic data-scroll-to="catalogo" type="button">
                 Explorar todos los productos
@@ -901,11 +899,26 @@ const storeData = {
         var scrollProgress = document.querySelector("[data-scroll-progress]");
         var storyStage = document.querySelector("[data-story-stage]");
         var storyProducts = storyStage ? storyStage.querySelectorAll("[data-story-product]") : [];
+        var storySelectors = storyStage ? storyStage.querySelectorAll("[data-story-select]") : [];
         var storyStep = storyStage ? storyStage.querySelector("[data-story-step]") : null;
         var scrollMotionQueued = false;
 
         var clamp = function (value, min, max) {
           return Math.min(max, Math.max(min, value));
+        };
+
+        var setStoryIndex = function (requestedIndex) {
+          if (!storyProducts.length) return;
+          var activeIndex = clamp(requestedIndex, 0, storyProducts.length - 1);
+          storyProducts.forEach(function (product, index) {
+            product.classList.toggle("is-active", index === activeIndex);
+          });
+          storySelectors.forEach(function (selector, index) {
+            var active = index === activeIndex;
+            selector.classList.toggle("is-active", active);
+            selector.setAttribute("aria-pressed", active ? "true" : "false");
+          });
+          if (storyStep) storyStep.textContent = String(activeIndex + 1).padStart(2, "0");
         };
 
         var syncEditorialMotion = function () {
@@ -926,10 +939,7 @@ const storeData = {
             );
             var activeIndex = Math.min(storyProducts.length - 1, Math.floor(stageProgress * storyProducts.length));
             storyStage.style.setProperty("--story-progress", stageProgress.toFixed(4));
-            storyProducts.forEach(function (product, index) {
-              product.classList.toggle("is-active", index === activeIndex);
-            });
-            if (storyStep) storyStep.textContent = String(activeIndex + 1).padStart(2, "0");
+            setStoryIndex(activeIndex);
           }
         };
 
@@ -942,6 +952,11 @@ const storeData = {
         syncEditorialMotion();
         window.addEventListener("scroll", requestEditorialMotion, { passive: true });
         window.addEventListener("resize", requestEditorialMotion, { passive: true });
+        storySelectors.forEach(function (selector) {
+          selector.addEventListener("click", function () {
+            setStoryIndex(Number(selector.dataset.storySelect));
+          });
+        });
 
         // SplitText-style editorial headings: words enter in a staggered line
         // reveal, but the original sentence remains available to assistive

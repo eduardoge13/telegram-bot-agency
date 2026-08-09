@@ -1,35 +1,29 @@
 # Yoga Verde — motion y assets editoriales
 
-## Asset integrado
+## Asset editorial retirado
 
-`site/public/yoga-verde/assets/campaign/editorial-studio-backdrop.webp`
+La primera iteración usó un fondo de estudio generado para colocar encima los
+productos reales. Se retiró por completo en la revisión de 2026-08-09: los
+derivados de producto tienen un fondo crema horneado, de modo que la mezcla con
+la escena generada producía rectángulos y una dirección fotográfica incoherente.
 
-- Origen: generado con ImageGen para Yoga Verde.
-- Uso: fondo atmosférico del hero y del bloque editorial de ritual.
-- Dimensión: 1672 × 941 px.
-- Peso: aproximadamente 98 KB en WebP.
-- Contenido: estudio cálido con tela crema, yeso mate y espacio negativo.
-- No contiene productos, etiquetas, logotipos, texto ni marcas inventadas.
-- Los envases que aparecen encima siguen siendo los derivados reales de
-  `products/display/*.webp`.
+El hero y el capítulo de ritual ahora usan únicamente:
 
-## Prompt final
+- los derivados reales de `products/display/*.webp`;
+- el color de canvas medido directamente en esos derivados: `#faf8f4`;
+- tipografía, composición y transiciones CSS, sin fondos de campaña generados.
 
-> Create a high-end editorial beauty campaign background that can sit behind
-> real product cutouts added separately in HTML/CSS. A quiet warm-white studio
-> with sculptural matte cream fabric, subtle folded forms, a soft plaster
-> surface, generous negative space, diffused daylight, muted terracotta and
-> cream, no products, packaging, labels, logos, letters, words, people, hands
-> or watermark.
+El archivo `editorial-studio-backdrop.webp` se eliminó del paquete para impedir
+que otro agente vuelva a activarlo por accidente.
 
 ## Motion aplicado
 
-- Hero con parallax de puntero en escritorio y desplazamiento de fondo reducido.
-- Barrido de luz editorial durante el primer ciclo del hero.
+- Hero de una sola escena con el logotipo, un producto activo y copy breve.
+- Cambio de slide sin captions superpuestos ni fondo fotográfico artificial.
 - Slider real de productos con transición direccional existente.
 - Header sticky que se compacta después del primer scroll.
 - Reveals lentos con stagger de cards.
-- Bloque editorial con profundidad por capas: backdrop, wash, copy y productos.
+- Bloque editorial de un producto a la vez, con tres pasos táctiles y crossfade.
 - Hover de tarjetas con desplazamiento, zoom mínimo y barrido de luz.
 - Todos los efectos se desactivan con `prefers-reduced-motion`.
 

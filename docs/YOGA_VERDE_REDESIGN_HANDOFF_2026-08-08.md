@@ -104,3 +104,30 @@ Validación de esta iteración: `npm run check` 0 errores/0 warnings, `npm run
 build` exitoso, 320×692 y 390×844 sin overflow horizontal, 27 quick views
 dinámicos, detalle abre/cierra con body lock y carrito abre desde el header.
 No se hizo push, merge ni despliegue.
+
+## Revisión crítica de hero y campaña — 2026-08-09
+
+La mezcla entre el fondo de estudio generado y los productos reales se
+descartó. Los derivados tienen un canvas `#faf8f4` horneado; sobre el antiguo
+degradado aparecían rectángulos claros y la campaña perdía coherencia.
+
+Cambios definitivos:
+
+- hero reconstruido como una sola escena móvil: logo, nombre/beneficio y un
+  producto protagonista sobre el mismo `#faf8f4` del asset;
+- fondo generado eliminado del CSS y del paquete;
+- captions salientes ocultos de inmediato para evitar texto fantasma durante
+  la transición;
+- “Tres esenciales. Una pausa para ti.” reemplazado por “Tu ritual, un paso a
+  la vez.”;
+- collage de tres productos sustituido por un solo producto activo con tres
+  pasos táctiles;
+- eliminadas la línea terracota móvil y las marcas técnicas que cruzaban la
+  composición;
+- referencia visual principal: la jerarquía móvil de Sustain Yourself —una
+  escena, un producto, un mensaje— adaptada a los assets reales de Yoga Verde.
+
+Validación adicional: 320×692, 390×844, 414×896 y 1280×900 sin overflow;
+un solo caption activo durante el slider; detalle móvil abre con cierre visible;
+preview del build estático en puerto limpio con 0 errores, 0 warnings y ninguna
+petición al asset retirado.
