@@ -66,12 +66,9 @@ Cambiar a una referencia de e-commerce premium más limpia, cercana a
 ## Siguiente bloque de trabajo
 
 1. Revisar la vista local con el usuario y ajustar únicamente lo que no apruebe.
-2. Auditar funcionalidad completa: navegación, búsqueda, filtros, carrito y
-   detalle en 320, 390, 414, 1280 y 1440 px.
-3. Volver a intentar la auditoría con Claude CLI cuando haya sesión iniciada;
-   en esta ejecución respondió `Not logged in`.
-4. Revisar acceso a Webflow; el usuario debe introducir sus credenciales.
-5. Solo después de aprobación visual se considerará
+2. Revisar acceso a Webflow si se abre una nueva fase visual; el usuario debe
+   introducir sus credenciales.
+3. Solo después de aprobación visual se considerará
    commit final, push, merge y despliegue mediante `site/scripts/deploy.sh`.
 
 ## Restricciones que siguen vigentes
@@ -134,6 +131,9 @@ petición al asset retirado.
 
 ## Menú móvil editorial — 2026-08-09
 
+> Esta versión quedó reemplazada por la corrección móvil integral documentada
+> abajo. Se conserva aquí únicamente como historial de la iteración.
+
 El menú superior izquierdo dejó de ser un drawer genérico y ahora funciona
 como una interacción móvil completa:
 
@@ -152,3 +152,50 @@ Validación: `npm run check` con 0 errores/0 warnings y `npm run build` exitoso;
 320×692, 390×844 y 414×896 sin overflow horizontal ni enlaces recortados; 0
 errores de consola; cierre animado, Escape, bloqueo de fondo, retorno de foco,
 Catálogo activo y detalle móvil verificados. No se hizo push, merge ni deploy.
+
+## Corrección móvil integral + auditoría Claude — 2026-08-09
+
+La iteración final reemplaza el drawer decorativo por una navegación sobria y
+full-screen, y armoniza el resto del home móvil sin cambiar datos ni precios:
+
+- panel crema de `100vw × 100dvh`, sin blur, sombra, máscara, números, flechas
+  ni radios; cinco destinos principales, búsqueda separada y pie con envío,
+  origen y contador real del carrito;
+- monograma móvil de 30 px, header estable y controles de 44 px sin colisiones;
+- animación real de apertura de 320 ms, cierre de 240 ms y stagger de enlaces;
+  el `<details>` permanece abierto durante la salida;
+- foco inicial, trampa de foco, Escape, retorno de foco, `inert`, scroll lock y
+  variante `prefers-reduced-motion` de solo fade a 120 ms;
+- cierre inmediato y liberación del fondo si una rotación o resize cruza el
+  breakpoint desktop de 768 px;
+- catálogo y selección con medios 4:5, `object-fit: contain`, radio de 16 px,
+  sin sombras permanentes ni quick-view superpuesto; ninguna segunda tarjeta
+  asoma en el carril móvil;
+- hero sin guiones automáticos en el nombre y composición corregida a 320 px;
+- terracota de texto oscurecida a `#b4563c` para 4.64:1 sobre papel cálido;
+- los botones de imagen anuncian nombre, aroma y badge, incluidos los tres
+  productos con “Formato mini”;
+- navegación calculada con `offsetTop` para ignorar transforms de entrada y
+  dejar los títulos debajo del header sticky.
+
+Validación desde el build estático en un contexto nuevo:
+
+- `npm run check`: 0 errores, 0 warnings, 0 hints;
+- `npm run build`: exitoso; `git diff --check`: limpio;
+- 320×692, 375×812, 390×844, 414×896 y 1280×900: cero overflow y cero
+  colisiones en el header;
+- menú completo sin scroll interno, apertura 351–361 ms medida con overhead de
+  navegador, cierre 250–253 ms, foco y scroll lock correctos;
+- rotación simulada 390→844 libera `inert`, `aria-hidden` y scroll;
+- búsqueda, carrito, navegación, scrollspy y foco atrapado verificados;
+- detalle de kit visible, desplazable y cerrable en móvil y escritorio;
+- consola: 0 errores y 0 warnings.
+
+Claude Opus realizó la segunda auditoría de solo lectura. Encontró el bloqueo
+de breakpoint y el badge accesible; ambos se corrigieron. La comprobación final
+reportó `P0: ninguno`, `P1: ninguno` y `APROBADO`. Sus P2 visuales aplicables
+también quedaron resueltos (blend normal, hover solo en puntero fino, tokens de
+menú, cobertura 375 y limpieza de quick-view muerto). Queda únicamente CSS
+histórico de `.ritual-mobile-hint`, sin marcado ni impacto runtime.
+
+No se hizo push, merge ni despliegue.

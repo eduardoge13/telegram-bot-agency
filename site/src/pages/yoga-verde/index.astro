@@ -137,7 +137,7 @@ const storeData = {
         <div class="site-announcement px-4 py-2 text-center text-[10px] font-semibold uppercase tracking-[0.2em] sm:text-[11px]">
           {ANNOUNCEMENT}
         </div>
-        <header class="site-header border-b border-outline-variant/35 bg-surface/95 backdrop-blur-xl" data-wf-section="header">
+        <header class="site-header border-b border-outline-variant/35 bg-surface/95" data-wf-section="header">
           <nav class="relative mx-auto flex h-16 max-w-screen-2xl items-center justify-between gap-4 px-4 sm:px-6 md:h-[4.75rem] md:px-6 lg:px-8" data-wf-hook="nav">
             <div class="flex flex-1 items-center gap-4">
               <details class="mobile-menu relative md:hidden" data-mobile-menu>
@@ -153,7 +153,6 @@ const storeData = {
                     <span></span>
                   </span>
                 </summary>
-                <button aria-label="Cerrar menú" class="mobile-menu-backdrop" data-close-mobile-menu tabindex="-1" type="button"></button>
                 <div
                   aria-label="Navegación principal"
                   aria-modal="true"
@@ -163,25 +162,37 @@ const storeData = {
                   tabindex="-1"
                 >
                   <div class="mobile-menu-panel__header">
-                    <div>
-                      <p class="product-eyebrow">Yoga Verde</p>
-                      <p class="mt-1 font-headline text-3xl text-primary">Explorar</p>
-                    </div>
-                    <p class="mobile-menu-panel__edition" aria-hidden="true">Cosmética natural · MX</p>
+                    <img
+                      alt=""
+                      aria-hidden="true"
+                      class="mobile-menu-panel__mark"
+                      height="1400"
+                      src="/yoga-verde/assets/brand/logo-monogram.png"
+                      width="1400"
+                    />
                   </div>
                   <div class="mobile-menu-panel__body">
-                    {NAV_ITEMS.map((item, index) => (
+                    <div class="mobile-menu-panel__nav">
+                    {NAV_ITEMS.map((item) => (
                       <button class="mobile-menu-link" data-nav-link={item.id} data-scroll-to={item.id} type="button">
-                        <span class="mobile-menu-link__number" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
                         <span>{item.label}</span>
-                        <span class="mobile-menu-link__arrow" aria-hidden="true">&#8599;</span>
                       </button>
                     ))}
-                    <button class="mobile-menu-link" data-focus-search type="button">
-                      <span class="mobile-menu-link__number" aria-hidden="true">06</span>
+                    </div>
+                    <button class="mobile-menu-search" data-focus-search type="button">
+                      <span aria-hidden="true" class="material-symbols-outlined">search</span>
                       <span>Buscar productos</span>
-                      <span class="mobile-menu-link__arrow" aria-hidden="true">&#8599;</span>
                     </button>
+                  </div>
+                  <div class="mobile-menu-panel__footer">
+                    <p>Envío gratis desde $999 MXN</p>
+                    <div>
+                      <span>Hecho en México</span>
+                      <button data-open-cart type="button">
+                        Carrito
+                        <span aria-hidden="true">(</span><span data-cart-count>0</span><span aria-hidden="true">)</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
               </details>
@@ -194,7 +205,7 @@ const storeData = {
               </div>
             </div>
 
-            <a class="site-logo absolute left-1/2 top-1/2 inline-flex -translate-x-1/2 -translate-y-1/2 items-center justify-center" href="#inicio">
+            <a class="site-logo absolute left-1/2 top-1/2 inline-flex -translate-x-1/2 -translate-y-1/2 items-center justify-center" data-mobile-menu-background href="#inicio">
               <picture>
                 <source media="(max-width: 767px)" srcset="/yoga-verde/assets/brand/logo-monogram.png" />
                 <img
@@ -207,7 +218,7 @@ const storeData = {
               </picture>
             </a>
 
-            <div class="flex flex-1 items-center justify-end gap-2 sm:gap-3">
+            <div class="flex flex-1 items-center justify-end gap-2 sm:gap-3" data-mobile-menu-background>
               <button
                 aria-label="Buscar en el catálogo"
                 class="header-action header-search inline-flex h-11 w-11 items-center justify-center border border-outline-variant/60 text-primary transition hover:border-secondary hover:text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35 lg:h-auto lg:w-auto lg:gap-2 lg:px-4 lg:py-2 lg:text-sm"
@@ -239,7 +250,7 @@ const storeData = {
         </div>
       </div>
 
-      <main>
+      <main data-mobile-menu-background>
         <section class="hero-editorial" data-wf-section="hero" id="inicio">
           <div class="hero-editorial__inner" data-wf-hook="hero-inner">
             <div class="hero-brand-lockup" data-wf-hook="hero-brand">
@@ -355,7 +366,6 @@ const storeData = {
                 ></button>
               ))}
             </div>
-            <span class="ritual-mobile-hint">Desliza para explorar</span>
           </div>
         </section>
 
@@ -526,27 +536,21 @@ const storeData = {
                     data-wf-hook="product-card"
                     style={`--accent: ${accentOf(product)}`}
                   >
-                      <div class="product-image-frame relative">
+                      <button
+                        aria-controls="detail-title"
+                        aria-haspopup="dialog"
+                        aria-label={`Ver detalle de ${product.name}, ${product.scent}${product.badge ? `, ${product.badge}` : ""}`}
+                        class="product-image-frame relative"
+                        data-open-detail={product.id}
+                        type="button"
+                      >
                         {product.badge && <span class="product-badge absolute left-4 top-4 z-10">{product.badge}</span>}
                         <img
                         alt={`${product.name} ${product.scent}`}
                         class="product-media aspect-square w-full transition duration-500 group-hover:scale-[1.02]"
                           src={product.image}
                         />
-                        <button
-                          aria-controls="detail-title"
-                          aria-haspopup="dialog"
-                          aria-label={`Ver detalle de ${product.name}`}
-                          class="product-card__quick-view"
-                          data-open-detail={product.id}
-                          type="button"
-                        >
-                          Ver detalle
-                          <svg aria-hidden="true" class="text-link__icon" fill="none" focusable="false" height="14" viewBox="0 0 24 24" width="14">
-                            <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
-                          </svg>
-                        </button>
-                    </div>
+                    </button>
                     <div class="product-card__body">
                       <div class="flex items-start justify-between gap-4">
                         <div class="min-w-0">
@@ -710,7 +714,7 @@ const storeData = {
         
       </main>
 
-      <footer class="site-footer py-16" data-wf-section="footer" id="contacto">
+      <footer class="site-footer py-16" data-mobile-menu-background data-wf-section="footer" id="contacto">
         <div class="mx-auto grid max-w-screen-2xl gap-10 px-4 sm:px-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1fr)] lg:px-8">
           <div>
             <div class="site-footer__logo inline-flex items-center border-b border-outline-variant pb-3">
@@ -1362,6 +1366,6 @@ const storeData = {
     </div>
 
     <!-- Versiona este entrypoint porque vive en public/ y no recibe hash de Astro. -->
-    <script defer is:inline src="/yoga-verde/shop.js?v=20260809-mobile-menu"></script>
+    <script defer is:inline src="/yoga-verde/shop.js?v=20260809-mobile-premium"></script>
   </body>
 </html>

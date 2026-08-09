@@ -52,6 +52,7 @@ const els = {
   mobileMenu: document.querySelector("[data-mobile-menu]"),
   mobileMenuToggle: document.querySelector("[data-mobile-menu-toggle]"),
   mobileMenuPanel: document.getElementById("yoga-verde-mobile-menu"),
+  mobileMenuBackground: document.querySelectorAll("[data-mobile-menu-background]"),
   filtersDrawer: document.querySelector("[data-filters-drawer]"),
   filtersOverlay: document.querySelector("[data-filters-overlay]"),
   cartDrawer: document.querySelector("[data-cart-drawer]"),
@@ -208,16 +209,10 @@ function catalogCardMarkup(product) {
   const accent = accentOf(product);
   return `
     <article class="product-card group" style="--accent: ${escapeHtml(accent)}">
-      <div class="product-image-frame relative">
+      <button aria-controls="detail-title" aria-haspopup="dialog" aria-label="Ver detalle de ${escapeHtml(product.name)}, ${escapeHtml(product.scent || "")}${product.badge ? `, ${escapeHtml(product.badge)}` : ""}" class="product-image-frame relative" data-open-detail="${escapeHtml(product.id)}" type="button">
         ${product.badge ? `<span class="product-badge absolute left-4 top-4 z-10">${escapeHtml(product.badge)}</span>` : ""}
         <img alt="${escapeHtml(product.name)} ${escapeHtml(product.scent || "")}" class="product-media aspect-square w-full transition duration-500 group-hover:scale-[1.02]" src="${escapeHtml(product.image)}" />
-        <button aria-controls="detail-title" aria-haspopup="dialog" aria-label="Ver detalle de ${escapeHtml(product.name)}" class="product-card__quick-view" data-open-detail="${escapeHtml(product.id)}" type="button">
-          Ver detalle
-          <svg aria-hidden="true" class="text-link__icon" fill="none" focusable="false" height="14" viewBox="0 0 24 24" width="14">
-            <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
-          </svg>
-        </button>
-      </div>
+      </button>
       <div class="product-card__body">
         <div class="flex items-start justify-between gap-4">
           <div class="min-w-0">
@@ -466,12 +461,25 @@ function syncBodyLock() {
 
 const mobileMenuMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 let mobileMenuCloseTimer = 0;
+let mobileMenuFocusTimer = 0;
+
+function setMobileMenuBackgroundInert(inert) {
+  els.mobileMenuBackground.forEach((element) => {
+    element.inert = inert;
+    if (inert) {
+      element.setAttribute("aria-hidden", "true");
+    } else {
+      element.removeAttribute("aria-hidden");
+    }
+  });
+}
 
 function syncMobileMenuA11y(open) {
   els.mobileMenuToggle?.setAttribute("aria-expanded", String(open));
   els.mobileMenuToggle?.setAttribute("aria-label", open ? "Cerrar menú" : "Abrir menú");
   els.mobileMenuPanel?.setAttribute("aria-hidden", String(!open));
   if (els.mobileMenuPanel) els.mobileMenuPanel.inert = !open;
+  if (open) setMobileMenuBackgroundInert(true);
 }
 
 function closeMobileMenu(options = {}) {
@@ -485,12 +493,14 @@ function closeMobileMenu(options = {}) {
   if (els.mobileMenu.classList.contains("is-closing")) return;
 
   window.clearTimeout(mobileMenuCloseTimer);
+  window.clearTimeout(mobileMenuFocusTimer);
   els.mobileMenu.classList.add("is-closing");
   syncMobileMenuA11y(false);
 
   const finish = () => {
     els.mobileMenu?.removeAttribute("open");
     els.mobileMenu?.classList.remove("is-closing");
+    setMobileMenuBackgroundInert(false);
     syncBodyLock();
 
     if (restoreFocus && els.mobileMenuToggle instanceof HTMLElement) {
@@ -499,14 +509,14 @@ function closeMobileMenu(options = {}) {
     if (typeof afterClose === "function") afterClose();
   };
 
-  if (immediate || mobileMenuMotion.matches) {
+  if (immediate) {
     finish();
     return;
   }
 
   // Mantener `open` durante la salida es indispensable: si se retira antes,
   // <details> oculta el panel y la animación de cierre nunca llega a verse.
-  mobileMenuCloseTimer = window.setTimeout(finish, 740);
+  mobileMenuCloseTimer = window.setTimeout(finish, mobileMenuMotion.matches ? 120 : 240);
 }
 
 function mobileMenuFocusableElements() {
@@ -527,12 +537,32 @@ els.mobileMenu?.addEventListener("toggle", () => {
   if (open) {
     window.clearTimeout(mobileMenuCloseTimer);
     els.mobileMenu?.classList.remove("is-closing");
+    mobileMenuFocusTimer = window.setTimeout(() => {
+      const firstLink = els.mobileMenuPanel?.querySelector(".mobile-menu-link");
+      if (els.mobileMenu?.open && firstLink instanceof HTMLElement) {
+        firstLink.focus({ preventScroll: true });
+      }
+    }, mobileMenuMotion.matches ? 0 : 100);
+  } else {
+    window.clearTimeout(mobileMenuFocusTimer);
   }
   syncMobileMenuA11y(open);
   syncBodyLock();
 });
 
 syncMobileMenuA11y(Boolean(els.mobileMenu?.open));
+
+// Si un teléfono rota a horizontal o la ventana cruza al layout desktop, el
+// `<details class="md:hidden">` desaparece. Cerrar aquí evita dejar el resto
+// de la tienda inert y con el scroll bloqueado sin un control visible.
+const mobileMenuBreakpoint = window.matchMedia("(min-width: 768px)");
+const closeMobileMenuAtDesktop = (event) => {
+  if (event.matches && els.mobileMenu?.open) {
+    closeMobileMenu({ restoreFocus: false, immediate: true });
+  }
+};
+mobileMenuBreakpoint.addEventListener("change", closeMobileMenuAtDesktop);
+closeMobileMenuAtDesktop(mobileMenuBreakpoint);
 
 function openFilters() {
   closeMobileMenu({ restoreFocus: false, immediate: true });
@@ -794,7 +824,20 @@ function toggleFilter(group, value) {
 function scrollToSection(id) {
   const section = document.getElementById(id);
   if (section) {
-    section.scrollIntoView({ behavior: "smooth", block: "start" });
+    // `scrollIntoView()` ignora de forma inconsistente `scroll-margin-top` en
+    // secciones más altas que el viewport móvil. Calcular el destino conserva
+    // siempre el título debajo del anuncio + header sticky.
+    const scrollMarginTop = Number.parseFloat(window.getComputedStyle(section).scrollMarginTop) || 0;
+    let layoutTop = 0;
+    let offsetNode = section;
+    while (offsetNode instanceof HTMLElement) {
+      layoutTop += offsetNode.offsetTop;
+      offsetNode = offsetNode.offsetParent;
+    }
+    // `offsetTop` ignora el translate de entrada de `.reveal`; usar el rect
+    // animado aquí desplazaría el destino unos 60 px debajo del header.
+    const top = Math.max(0, layoutTop - scrollMarginTop);
+    window.scrollTo({ top, behavior: "smooth" });
   }
 }
 
@@ -872,7 +915,6 @@ document.addEventListener("click", (event) => {
 
   if (target.matches("[data-open-filters]")) openFilters();
   if (target.matches("[data-close-filters]")) closeFilters();
-  if (target.matches("[data-close-mobile-menu]")) closeMobileMenu();
 
   if (target.matches("[data-open-cart]")) openCart();
   if (target.matches("[data-close-cart]")) closeCart();
