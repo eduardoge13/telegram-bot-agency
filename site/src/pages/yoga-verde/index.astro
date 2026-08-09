@@ -214,6 +214,9 @@ const storeData = {
             </div>
           </nav>
         </header>
+        <div aria-hidden="true" class="scroll-progress">
+          <span data-scroll-progress></span>
+        </div>
       </div>
 
       <main>
@@ -258,7 +261,7 @@ const storeData = {
                           <h2 class="product-name hero-product-name">{product.name}</h2>
                           <p class="hero-benefit">{product.short}</p>
                         </div>
-                        <button aria-controls="detail-title" aria-haspopup="dialog" class="hero-link" data-open-detail={product.id} type="button">
+                        <button aria-controls="detail-title" aria-haspopup="dialog" class="hero-link" data-magnetic data-open-detail={product.id} type="button">
                           Ver producto
                           <svg aria-hidden="true" class="text-link__icon" fill="none" focusable="false" height="14" viewBox="0 0 24 24" width="14">
                             <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
@@ -289,7 +292,7 @@ const storeData = {
           <div class="ritual-section__header">
             <div class="max-w-md">
               <p class="specimen-label text-xs font-semibold uppercase tracking-[0.22em] text-secondary">Rituales esenciales</p>
-              <h2 class="mt-3 font-headline text-4xl leading-tight text-primary sm:text-5xl">Lo esencial para empezar.</h2>
+              <h2 class="motion-heading mt-3 font-headline text-4xl leading-tight text-primary sm:text-5xl" data-motion-heading>Lo esencial para empezar.</h2>
               <p class="mt-5 max-w-sm text-sm leading-7 text-on-surface-variant">
                 Tres fórmulas para construir una rutina sencilla, sensorial y honesta.
               </p>
@@ -302,9 +305,9 @@ const storeData = {
             </button>
           </div>
 
-          <div class="ritual-grid">
-            {essentialProducts.map((product) => (
-              <article class="ritual-card" style={`--accent: ${accentOf(product)}`}>
+          <div class="ritual-grid" data-ritual-rail>
+            {essentialProducts.map((product, index) => (
+              <article class="ritual-card" data-ritual-card={index} style={`--accent: ${accentOf(product)}`}>
                 <button aria-controls="detail-title" aria-haspopup="dialog" class="ritual-card__media" data-open-detail={product.id} type="button">
                   <img alt={`${product.name} ${product.scent}`} class="product-media" src={product.image} />
                 </button>
@@ -325,9 +328,26 @@ const storeData = {
               </article>
             ))}
           </div>
+          <div class="ritual-mobile-controls" data-ritual-controls>
+            <div class="ritual-mobile-count">
+              <span data-ritual-step>01</span>
+              <span>/ 03</span>
+            </div>
+            <div class="ritual-mobile-dots" aria-label="Navegar esenciales">
+              {essentialProducts.map((product, index) => (
+                <button
+                  aria-label={`Ver esencial ${index + 1}: ${product.name}`}
+                  class:list={["ritual-mobile-dot", index === 0 && "is-active"]}
+                  data-ritual-dot={index}
+                  type="button"
+                ></button>
+              ))}
+            </div>
+            <span class="ritual-mobile-hint">Desliza para explorar</span>
+          </div>
         </section>
 
-        <section class="editorial-stage reveal mx-auto max-w-screen-2xl px-4 py-8 sm:px-6 lg:px-8" data-wf-section="campaign">
+        <section class="editorial-stage reveal mx-auto max-w-screen-2xl px-4 py-8 sm:px-6 lg:px-8" data-story-stage data-wf-section="campaign">
           <div class="editorial-stage__visual">
             <img
               alt="Estudio editorial en tonos crema para una selección de productos Yoga Verde"
@@ -337,20 +357,31 @@ const storeData = {
               src="/yoga-verde/assets/campaign/editorial-studio-backdrop.webp"
             />
             <div class="editorial-stage__wash" aria-hidden="true"></div>
-            <div class="editorial-stage__products" aria-hidden="true">
-              {essentialProducts.map((product, index) => (
-                <img
-                  alt=""
-                  class:list={["product-media", index === 1 && "is-center", index === 2 && "is-back"]}
-                  loading="lazy"
-                  src={product.image}
-                />
+            <div class="editorial-stage__products">
+                {essentialProducts.map((product, index) => (
+                <button
+                  aria-controls="detail-title"
+                  aria-haspopup="dialog"
+                  aria-label={`Ver ${product.name}`}
+                  class:list={["editorial-stage__product", index === 1 && "is-center", index === 2 && "is-back"]}
+                  data-open-detail={product.id}
+                  data-story-product={index}
+                  type="button"
+                >
+                  <img alt="" class="product-media" loading="lazy" src={product.image} />
+                  <span class="editorial-stage__product-label">{String(index + 1).padStart(2, "0")}</span>
+                </button>
               ))}
             </div>
             <div class="editorial-stage__copy">
               <p class="product-eyebrow">El ritual se construye paso a paso</p>
-              <h2 class="font-headline">Tres esenciales. Una pausa para ti.</h2>
-              <button class="text-link" data-scroll-to="catalogo" type="button">
+              <h2 class="motion-heading font-headline" data-motion-heading>Tres esenciales. Una pausa para ti.</h2>
+              <div class="editorial-stage__status" aria-live="polite">
+                <span data-story-step>01</span>
+                <span class="editorial-stage__status-rule"></span>
+                <span>03 esenciales</span>
+              </div>
+              <button class="text-link" data-magnetic data-scroll-to="catalogo" type="button">
                 Explorar todos los productos
                 <svg aria-hidden="true" class="text-link__icon" fill="none" focusable="false" height="14" viewBox="0 0 24 24" width="14">
                   <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
@@ -364,7 +395,7 @@ const storeData = {
           <div class="relative mx-auto max-w-screen-2xl">
             <div class="catalog-heading">
               <div class="min-w-0">
-                <h2 class="font-headline text-3xl text-primary sm:text-4xl">Catálogo completo</h2>
+                <h2 class="motion-heading font-headline text-3xl text-primary sm:text-4xl" data-motion-heading>Catálogo completo</h2>
                 <p class="mt-2 text-sm text-on-surface-variant">
                   <span data-product-count>{displayProducts.length}</span> productos
                 </p>
@@ -477,13 +508,26 @@ const storeData = {
                     data-wf-hook="product-card"
                     style={`--accent: ${accentOf(product)}`}
                   >
-                    <div class="product-image-frame relative">
-                      {product.badge && <span class="product-badge absolute left-4 top-4 z-10">{product.badge}</span>}
-                      <img
+                      <div class="product-image-frame relative">
+                        {product.badge && <span class="product-badge absolute left-4 top-4 z-10">{product.badge}</span>}
+                        <img
                         alt={`${product.name} ${product.scent}`}
                         class="product-media aspect-square w-full transition duration-500 group-hover:scale-[1.02]"
-                        src={product.image}
-                      />
+                          src={product.image}
+                        />
+                        <button
+                          aria-controls="detail-title"
+                          aria-haspopup="dialog"
+                          aria-label={`Ver detalle de ${product.name}`}
+                          class="product-card__quick-view"
+                          data-open-detail={product.id}
+                          type="button"
+                        >
+                          Ver detalle
+                          <svg aria-hidden="true" class="text-link__icon" fill="none" focusable="false" height="14" viewBox="0 0 24 24" width="14">
+                            <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
+                          </svg>
+                        </button>
                     </div>
                     <div class="product-card__body">
                       <div class="flex items-start justify-between gap-4">
@@ -552,7 +596,7 @@ const storeData = {
             </div>
             <div class="kit-feature__content">
               <p class="specimen-label text-xs font-semibold uppercase tracking-[0.22em] text-secondary">Colección para empezar</p>
-              <h2 class="mt-4 font-headline text-4xl leading-tight text-primary sm:text-5xl">{featuredKit.name}</h2>
+              <h2 class="motion-heading mt-4 font-headline text-4xl leading-tight text-primary sm:text-5xl" data-motion-heading>{featuredKit.name}</h2>
               <p class="mt-5 max-w-md text-base leading-8 text-on-surface-variant">
                 Una rutina completa en tres pasos: limpiar, hidratar y cuidar la zona de ojos con fórmulas botánicas hechas en México.
               </p>
@@ -560,7 +604,7 @@ const storeData = {
                 <span class="price text-2xl">{formatMoney(featuredKit.price)}</span>
                 <span class="text-sm text-on-surface-variant">{kitItems(featuredKit).length} productos · precio especial</span>
               </div>
-              <button aria-controls="detail-title" aria-haspopup="dialog" class="primary-action mt-8" data-open-detail={featuredKit.id} type="button">
+              <button aria-controls="detail-title" aria-haspopup="dialog" class="primary-action mt-8" data-magnetic data-open-detail={featuredKit.id} type="button">
                 Explorar kit
                 <svg aria-hidden="true" class="text-link__icon" fill="none" focusable="false" height="14" viewBox="0 0 24 24" width="14">
                   <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
@@ -588,7 +632,7 @@ const storeData = {
                   <p class="specimen-label text-xs font-semibold uppercase tracking-[0.22em] text-secondary">
                     El lenguaje de la marca
                   </p>
-                  <h2 class="mt-3 font-headline text-4xl text-primary">Naturaleza con una estética clara</h2>
+                  <h2 class="motion-heading mt-3 font-headline text-4xl text-primary" data-motion-heading>Naturaleza con una estética clara</h2>
                   <blockquote class="mt-5 max-w-2xl font-headline text-xl italic leading-relaxed text-tertiary">
                     “Elegancia, minimalismo y naturalidad.”
                   </blockquote>
@@ -849,6 +893,92 @@ const storeData = {
         syncHeaderState();
         window.addEventListener("scroll", syncHeaderState, { passive: true });
 
+        // Editorial motion layer: the page now exposes its scroll state instead
+        // of hiding every transition behind a barely perceptible fade. This is
+        // intentionally native CSS/DOM so the Astro site keeps the same
+        // runtime contract as the Webflow prototype without adding a library
+        // to the commerce bundle.
+        var scrollProgress = document.querySelector("[data-scroll-progress]");
+        var storyStage = document.querySelector("[data-story-stage]");
+        var storyProducts = storyStage ? storyStage.querySelectorAll("[data-story-product]") : [];
+        var storyStep = storyStage ? storyStage.querySelector("[data-story-step]") : null;
+        var scrollMotionQueued = false;
+
+        var clamp = function (value, min, max) {
+          return Math.min(max, Math.max(min, value));
+        };
+
+        var syncEditorialMotion = function () {
+          scrollMotionQueued = false;
+          var documentHeight = document.documentElement.scrollHeight - window.innerHeight;
+          var pageProgress = documentHeight > 0 ? clamp(window.scrollY / documentHeight, 0, 1) : 0;
+
+          if (scrollProgress) {
+            scrollProgress.style.transform = "scaleX(" + pageProgress.toFixed(4) + ")";
+          }
+
+          if (storyStage && storyProducts.length) {
+            var bounds = storyStage.getBoundingClientRect();
+            var stageProgress = clamp(
+              (window.innerHeight * 0.74 - bounds.top) / Math.max(1, bounds.height + window.innerHeight * 0.18),
+              0,
+              0.9999,
+            );
+            var activeIndex = Math.min(storyProducts.length - 1, Math.floor(stageProgress * storyProducts.length));
+            storyStage.style.setProperty("--story-progress", stageProgress.toFixed(4));
+            storyProducts.forEach(function (product, index) {
+              product.classList.toggle("is-active", index === activeIndex);
+            });
+            if (storyStep) storyStep.textContent = String(activeIndex + 1).padStart(2, "0");
+          }
+        };
+
+        var requestEditorialMotion = function () {
+          if (scrollMotionQueued) return;
+          scrollMotionQueued = true;
+          window.requestAnimationFrame(syncEditorialMotion);
+        };
+
+        syncEditorialMotion();
+        window.addEventListener("scroll", requestEditorialMotion, { passive: true });
+        window.addEventListener("resize", requestEditorialMotion, { passive: true });
+
+        // SplitText-style editorial headings: words enter in a staggered line
+        // reveal, but the original sentence remains available to assistive
+        // technology through the heading's aria-label.
+        document.querySelectorAll("[data-motion-heading]").forEach(function (heading) {
+          if (heading.dataset.motionReady) return;
+          var label = heading.textContent.trim();
+          if (!label) return;
+          heading.dataset.motionReady = "true";
+          heading.setAttribute("aria-label", label);
+          heading.textContent = "";
+          label.split(/\s+/).forEach(function (word, index, words) {
+            var span = document.createElement("span");
+            span.className = "wf-word";
+            span.setAttribute("aria-hidden", "true");
+            span.textContent = word;
+            heading.appendChild(span);
+            if (index < words.length - 1) heading.appendChild(document.createTextNode(" "));
+          });
+        });
+
+        if (!prefersReduced && window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+          document.querySelectorAll("[data-magnetic]").forEach(function (target) {
+            target.addEventListener("pointermove", function (event) {
+              var bounds = target.getBoundingClientRect();
+              var x = ((event.clientX - bounds.left) / bounds.width - 0.5) * 8;
+              var y = ((event.clientY - bounds.top) / bounds.height - 0.5) * 5;
+              target.style.setProperty("--magnetic-x", x.toFixed(2) + "px");
+              target.style.setProperty("--magnetic-y", y.toFixed(2) + "px");
+            });
+            target.addEventListener("pointerleave", function () {
+              target.style.setProperty("--magnetic-x", "0px");
+              target.style.setProperty("--magnetic-y", "0px");
+            });
+          });
+        }
+
         // Hero product slider. The first frame stays fully visible; only
         // subsequent changes receive the editorial enter/leave choreography.
         var slides = document.querySelectorAll("[data-hero-slide]");
@@ -945,7 +1075,79 @@ const storeData = {
                 }
               });
             }
+
+            // Touch-first carousel: a horizontal swipe changes the hero slide
+            // while a tap still reaches the product CTA normally.
+            var swipeStartX = null;
+            slider.addEventListener("pointerdown", function (event) {
+              if (event.pointerType === "mouse") return;
+              swipeStartX = event.clientX;
+            });
+            slider.addEventListener("pointerup", function (event) {
+              if (swipeStartX === null || event.pointerType === "mouse") return;
+              var delta = event.clientX - swipeStartX;
+              swipeStartX = null;
+              if (Math.abs(delta) < 44) return;
+              stopAuto();
+              showSlide(current + (delta < 0 ? 1 : -1), delta < 0 ? "forward" : "backward", !prefersReduced);
+            });
+            slider.addEventListener("pointercancel", function () {
+              swipeStartX = null;
+            });
           }
+        }
+
+        // The first mobile product story is a real touch carousel. Cards remain
+        // full-width, snap cleanly and expose explicit progress so the visitor
+        // never sees a product cut in half or loses their place.
+        var ritualRail = document.querySelector("[data-ritual-rail]");
+        var ritualCards = ritualRail ? ritualRail.querySelectorAll("[data-ritual-card]") : [];
+        var ritualDots = document.querySelectorAll("[data-ritual-dot]");
+        var ritualStep = document.querySelector("[data-ritual-step]");
+        var ritualScrollQueued = false;
+
+        var syncRitualRail = function () {
+          ritualScrollQueued = false;
+          if (!ritualRail || !ritualCards.length || window.innerWidth >= 768) return;
+          var railBounds = ritualRail.getBoundingClientRect();
+          var center = railBounds.left + railBounds.width / 2;
+          var activeIndex = 0;
+          var closest = Infinity;
+          ritualCards.forEach(function (card, index) {
+            var bounds = card.getBoundingClientRect();
+            var distance = Math.abs(bounds.left + bounds.width / 2 - center);
+            if (distance < closest) {
+              closest = distance;
+              activeIndex = index;
+            }
+          });
+          ritualDots.forEach(function (dot, index) {
+            dot.classList.toggle("is-active", index === activeIndex);
+          });
+          if (ritualStep) ritualStep.textContent = String(activeIndex + 1).padStart(2, "0");
+        };
+
+        var requestRitualRail = function () {
+          if (ritualScrollQueued) return;
+          ritualScrollQueued = true;
+          window.requestAnimationFrame(syncRitualRail);
+        };
+
+        if (ritualRail && ritualCards.length) {
+          ritualRail.addEventListener("scroll", requestRitualRail, { passive: true });
+          window.addEventListener("resize", requestRitualRail, { passive: true });
+          ritualDots.forEach(function (dot) {
+            dot.addEventListener("click", function () {
+              var index = Number(dot.dataset.ritualDot);
+              if (!ritualCards[index]) return;
+              ritualCards[index].scrollIntoView({
+                behavior: prefersReduced ? "auto" : "smooth",
+                block: "nearest",
+                inline: "center",
+              });
+            });
+          });
+          syncRitualRail();
         }
 
         // Scrollspy.

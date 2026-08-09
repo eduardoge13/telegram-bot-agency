@@ -209,6 +209,12 @@ function catalogCardMarkup(product) {
       <div class="product-image-frame relative">
         ${product.badge ? `<span class="product-badge absolute left-4 top-4 z-10">${escapeHtml(product.badge)}</span>` : ""}
         <img alt="${escapeHtml(product.name)} ${escapeHtml(product.scent || "")}" class="product-media aspect-square w-full transition duration-500 group-hover:scale-[1.02]" src="${escapeHtml(product.image)}" />
+        <button aria-controls="detail-title" aria-haspopup="dialog" aria-label="Ver detalle de ${escapeHtml(product.name)}" class="product-card__quick-view" data-open-detail="${escapeHtml(product.id)}" type="button">
+          Ver detalle
+          <svg aria-hidden="true" class="text-link__icon" fill="none" focusable="false" height="14" viewBox="0 0 24 24" width="14">
+            <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
+          </svg>
+        </button>
       </div>
       <div class="product-card__body">
         <div class="flex items-start justify-between gap-4">

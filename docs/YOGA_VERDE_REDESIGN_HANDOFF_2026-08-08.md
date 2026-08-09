@@ -82,3 +82,25 @@ Cambiar a una referencia de e-commerce premium más limpia, cercana a
   `contain`, centrado y derivados normalizados.
 - No usar `rsync`, overlays de tarball ni deploy desde el worktree antiguo.
 - No desplegar antes de aprobación visual explícita.
+
+## Iteración móvil bold — 2026-08-09
+
+Se añadió una capa específica para celular, no una simple reducción del
+desktop:
+
+- hero con swipe táctil y CTA de producto conservada;
+- selección esencial como deck horizontal de una tarjeta completa, con
+  `scroll-snap`, contador y navegación por dots;
+- escena editorial con productos tocables, estado 01/03 y cambio de producto
+  según el avance del scroll;
+- quick view visible sobre la imagen en móvil y también en las tarjetas que
+  `shop.js` genera dinámicamente;
+- progreso de lectura, headings por palabras, entrada por clip y respuesta
+  magnética en desktop como capa complementaria;
+- `prefers-reduced-motion` mantiene estados estáticos y no bloquea compra,
+  detalle, carrito ni navegación.
+
+Validación de esta iteración: `npm run check` 0 errores/0 warnings, `npm run
+build` exitoso, 320×692 y 390×844 sin overflow horizontal, 27 quick views
+dinámicos, detalle abre/cierra con body lock y carrito abre desde el header.
+No se hizo push, merge ni despliegue.
