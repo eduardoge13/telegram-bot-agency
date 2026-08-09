@@ -77,7 +77,7 @@ ssh -p 2222 vps-n8n "sudo docker exec blueskytravel-site-bluesky-site-1 \
 | Extrae a staging y valida el paquete | Comprueba que existen el runtime, la página, los datos y `deploy-manifest.json` **antes** de tocar producción. |
 | Protege el root activo | Aborta si encuentra `.env`, llaves, bases de datos, overrides de Compose u otros archivos operativos que serían eliminados por el reemplazo completo. |
 | Intercambia el release completo | Mueve el release activo a un respaldo y coloca el staging en su lugar. Así también desaparecen archivos borrados del repositorio; no se usa un overlay aditivo. |
-| Reconstruye `--no-cache` y recrea | El contexto de build es la raíz, no `site/`. Si falla el build, restaura directorios sin reconstruir innecesariamente el contenedor viejo. |
+| Reconstruye `--no-cache` y escanea | El contexto de build es la raíz, no `site/`. Antes de recrear, Trivy debe reportar cero vulnerabilidades `HIGH`/`CRITICAL` con corrección disponible; si falla el build o la compuerta, restaura directorios sin reconstruir innecesariamente el contenedor viejo. |
 | Verifica en vivo con reintentos | Espera a que nginx acepte tráfico y confirma ambos dominios. Después valida el manifest con el ID exacto de esta ejecución. |
 
 ## Rollback y limpieza

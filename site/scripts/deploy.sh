@@ -239,7 +239,10 @@ REMOTE_PHASE="swapped"
 
 say "docker compose build --no-cache"
 if ! ssh_do "cd '$REMOTE_DIR' && sudo docker compose build --no-cache &&
-    sudo docker run --rm blueskytravel-site-bluesky-site:latest sh -c 'set -eu; test -f /usr/share/nginx/html/yoga-verde/deploy-manifest.json; test -f /usr/share/nginx/html/yoga-verde/assets/products/display/contorno-de-ojos-lavanda.webp; test -f /usr/share/nginx/html/yoga-verde/assets/products/display/crema-corporal-leche-de-coco.webp'"; then
+    sudo docker run --rm blueskytravel-site-bluesky-site:latest sh -c 'set -eu; test -f /usr/share/nginx/html/yoga-verde/deploy-manifest.json; test -f /usr/share/nginx/html/yoga-verde/assets/products/display/contorno-de-ojos-lavanda.webp; test -f /usr/share/nginx/html/yoga-verde/assets/products/display/crema-corporal-leche-de-coco.webp' &&
+    command -v trivy >/dev/null 2>&1 &&
+    sudo trivy image --quiet --scanners vuln --ignore-unfixed --severity HIGH,CRITICAL --exit-code 1 blueskytravel-site-bluesky-site:latest"; then
+  echo "ABORTADO: el build, los assets o la compuerta Trivy fallaron." >&2
   exit 1
 fi
 

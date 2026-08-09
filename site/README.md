@@ -69,8 +69,9 @@ directory instead of applying an additive overlay.
    It also aborts if the active server root contains secrets or operational
    files that the full-release replacement would delete.
 5. Replaces `/docker/blueskytravel-site` with the complete staging release,
-   keeping the previous release aside while Docker rebuilds with `--no-cache`
-   and recreates the container. This also removes files deleted from the repo;
+   keeping the previous release aside while Docker rebuilds with `--no-cache`.
+   Trivy must then report zero fixable `HIGH`/`CRITICAL` vulnerabilities before
+   the container is recreated. This also removes files deleted from the repo;
    it is not an additive tar overlay.
 6. Polls both live URLs until they answer 200, then verifies
    `/yoga-verde/deploy-manifest.json` against the current build ID. Build,

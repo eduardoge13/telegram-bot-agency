@@ -131,6 +131,9 @@ Compose service.
 - The script has a state-aware `EXIT`/`INT`/`TERM` rollback, verifies
   `/yoga-verde/deploy-manifest.json`, and refuses to replace a root containing
   secrets, databases or operational overrides.
+- The final nginx stage upgrades Alpine packages and the deployment fails
+  closed unless Trivy reports zero fixable `HIGH`/`CRITICAL` findings before
+  `docker compose up -d`; do not bypass this gate.
 - Deploy only from the checkout that contains the approved release commit. The
   preferred long-term source is the current `main` checkout; while a release
   is being reviewed, an explicitly named feature worktree is valid only after
