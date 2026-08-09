@@ -327,7 +327,38 @@ const storeData = {
           </div>
         </section>
 
-        
+        <section class="editorial-stage reveal mx-auto max-w-screen-2xl px-4 py-8 sm:px-6 lg:px-8" data-wf-section="campaign">
+          <div class="editorial-stage__visual">
+            <img
+              alt="Estudio editorial en tonos crema para una selección de productos Yoga Verde"
+              class="editorial-stage__backdrop"
+              decoding="async"
+              loading="lazy"
+              src="/yoga-verde/assets/campaign/editorial-studio-backdrop.webp"
+            />
+            <div class="editorial-stage__wash" aria-hidden="true"></div>
+            <div class="editorial-stage__products" aria-hidden="true">
+              {essentialProducts.map((product, index) => (
+                <img
+                  alt=""
+                  class:list={["product-media", index === 1 && "is-center", index === 2 && "is-back"]}
+                  loading="lazy"
+                  src={product.image}
+                />
+              ))}
+            </div>
+            <div class="editorial-stage__copy">
+              <p class="product-eyebrow">El ritual se construye paso a paso</p>
+              <h2 class="font-headline">Tres esenciales. Una pausa para ti.</h2>
+              <button class="text-link" data-scroll-to="catalogo" type="button">
+                Explorar todos los productos
+                <svg aria-hidden="true" class="text-link__icon" fill="none" focusable="false" height="14" viewBox="0 0 24 24" width="14">
+                  <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </section>
 
         <section class="catalog-editorial reveal editorial-section relative overflow-hidden px-4 py-14 sm:px-6 lg:px-8" data-wf-section="catalog" id="catalogo">
           <div class="relative mx-auto max-w-screen-2xl">
@@ -806,6 +837,18 @@ const storeData = {
           });
         }
 
+        // Compact the sticky commerce header after the first scroll gesture.
+        // The transition is intentionally small: it gives the page more room
+        // without hiding navigation or competing with the product imagery.
+        var siteHeader = document.querySelector(".site-header");
+        var syncHeaderState = function () {
+          if (siteHeader) {
+            siteHeader.classList.toggle("is-scrolled", window.scrollY > 28);
+          }
+        };
+        syncHeaderState();
+        window.addEventListener("scroll", syncHeaderState, { passive: true });
+
         // Hero product slider. The first frame stays fully visible; only
         // subsequent changes receive the editorial enter/leave choreography.
         var slides = document.querySelectorAll("[data-hero-slide]");
@@ -881,16 +924,25 @@ const storeData = {
             });
 
             if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+              var heroFrame = slider.closest(".hero-frame");
               slider.addEventListener("pointermove", function (event) {
                 var bounds = slider.getBoundingClientRect();
                 var x = ((event.clientX - bounds.left) / bounds.width - 0.5) * 10;
                 var y = ((event.clientY - bounds.top) / bounds.height - 0.5) * 6;
                 slider.style.setProperty("--hero-parallax-x", x.toFixed(2) + "px");
                 slider.style.setProperty("--hero-parallax-y", y.toFixed(2) + "px");
+                if (heroFrame) {
+                  heroFrame.style.setProperty("--hero-bg-x", (x * 0.35).toFixed(2) + "px");
+                  heroFrame.style.setProperty("--hero-bg-y", (y * 0.35).toFixed(2) + "px");
+                }
               });
               slider.addEventListener("pointerleave", function () {
                 slider.style.setProperty("--hero-parallax-x", "0px");
                 slider.style.setProperty("--hero-parallax-y", "0px");
+                if (heroFrame) {
+                  heroFrame.style.setProperty("--hero-bg-x", "0px");
+                  heroFrame.style.setProperty("--hero-bg-y", "0px");
+                }
               });
             }
           }

@@ -9,6 +9,10 @@ Base: `5306b9e feat(yoga-verde): refine premium identity layer`
 - No se tocó `main`, no se hizo push, merge ni despliegue.
 - La primera capa visual ya está implementada en el commit
   `4e3ea78 feat(yoga-verde): add editorial commerce visual layer`.
+- La segunda capa de motion y campaña está implementada localmente: fondo
+  editorial original, barrido de luz, header compacto al hacer scroll, parallax
+  del hero y bloque de ritual por capas. El manifiesto está en
+  `docs/YOGA_VERDE_MOTION_ASSETS.md`.
 - El sitio conserva la lógica actual de Astro: catálogo, búsqueda, filtros,
   carrito, detalle responsive, scrollspy y slider.
 - Se descartó la primera dirección de bodegón botánico generado porque no
