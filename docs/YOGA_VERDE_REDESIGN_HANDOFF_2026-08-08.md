@@ -1,12 +1,14 @@
 # Yoga Verde — handoff de rediseño visual
 
-Fecha: 2026-08-08
+Fecha: 2026-08-09
 Rama: `codex/yoga-verde-webflow-redesign`
 Base: `5306b9e feat(yoga-verde): refine premium identity layer`
 
 ## Estado actual
 
-- No se tocó `main`, no se hizo push, merge ni despliegue.
+- No se tocó `main` ni se hizo push o merge. El release aprobado sí quedó
+  desplegado desde esta rama mediante el flujo canónico por tarball; el commit
+  activo es `80b6746 fix(yoga-verde): harden runtime image deployment`.
 - La primera capa visual ya está implementada en el commit
   `4e3ea78 feat(yoga-verde): add editorial commerce visual layer`.
 - La segunda capa de motion y campaña está implementada localmente: fondo
@@ -65,11 +67,12 @@ Cambiar a una referencia de e-commerce premium más limpia, cercana a
 
 ## Siguiente bloque de trabajo
 
-1. Revisar la vista local con el usuario y ajustar únicamente lo que no apruebe.
-2. Revisar acceso a Webflow si se abre una nueva fase visual; el usuario debe
+1. Subir la rama y alinear `main` únicamente cuando el usuario pida push/merge;
+   producción ya sirve el commit `80b6746` desde el checkout aprobado.
+2. Actualizar las dependencias de Astro en un commit separado para resolver el
+   reporte de `npm audit`, con regresión funcional y visual antes de publicar.
+3. Revisar acceso a Webflow si se abre una nueva fase visual; el usuario debe
    introducir sus credenciales.
-3. Solo después de aprobación visual se considerará
-   commit final, push, merge y despliegue mediante `site/scripts/deploy.sh`.
 
 ## Restricciones que siguen vigentes
 
@@ -100,7 +103,31 @@ desktop:
 Validación de esta iteración: `npm run check` 0 errores/0 warnings, `npm run
 build` exitoso, 320×692 y 390×844 sin overflow horizontal, 27 quick views
 dinámicos, detalle abre/cierra con body lock y carrito abre desde el header.
-No se hizo push, merge ni despliegue.
+Ese estado visual quedó incluido en el despliegue seguro descrito abajo. No se
+hizo push ni merge.
+
+## Despliegue seguro — 2026-08-09
+
+- Claude CLI realizó una auditoría de solo lectura del checkout, del script de
+  despliegue y de los requisitos del VPS; emitió `GO` sin bloqueadores P0.
+- La primera verificación posterior al release visual detectó seis hallazgos
+  `HIGH` corregibles y cero `CRITICAL` en paquetes Alpine de la imagen final de
+  nginx. No se aceptaron como estado final.
+- El commit `80b6746` añade `apk upgrade --no-cache` al stage final y convierte
+  Trivy en una compuerta obligatoria antes de `docker compose up -d`.
+- El despliegue final usó exclusivamente `site/scripts/deploy.sh`: tarball,
+  SHA-256 verificado, staging en `/docker`, intercambio completo, rollback por
+  estado y manifest vivo. No se usó `rsync` ni `scp -r`.
+- Trivy del release final: `0 HIGH`, `0 CRITICAL` con `--ignore-unfixed`.
+- Manifest activo: `80b674614c93-20260809-153413-22556`.
+- `yoga-verde.srv1175749.hstgr.cloud`, `blueskytravelmx.com` y
+  `www.blueskytravelmx.com` respondieron `200`; Traefik conservó su contenedor
+  y siguen activos 20 contenedores en total.
+- No quedaron releases `stage`, `old` o `failed` del sitio en `/docker`.
+- `npm audit` todavía reporta vulnerabilidades en dependencias usadas durante
+  la compilación de Astro. No viajan en la imagen nginx multi-stage, pero deben
+  resolverse en una actualización separada de `package-lock.json`, con build y
+  regresión visual completos; no ejecutar `npm audit fix` a ciegas.
 
 ## Revisión crítica de hero y campaña — 2026-08-09
 
@@ -198,4 +225,4 @@ también quedaron resueltos (blend normal, hover solo en puntero fino, tokens de
 menú, cobertura 375 y limpieza de quick-view muerto). Queda únicamente CSS
 histórico de `.ritual-mobile-hint`, sin marcado ni impacto runtime.
 
-No se hizo push, merge ni despliegue.
+Este es el estado visual desplegado en `80b6746`. No se hizo push ni merge.
