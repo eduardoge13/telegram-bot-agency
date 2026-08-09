@@ -82,6 +82,7 @@ const els = {
   detailBenefitsBlock: document.querySelector("[data-detail-benefits-block]"),
   detailInstructionsBlock: document.querySelector("[data-detail-instructions-block]"),
   detailPrice: document.querySelector("[data-detail-price]"),
+  detailMedia: document.querySelector("[data-detail-media]"),
   detailImage: document.querySelector("[data-detail-image]"),
   detailAdd: document.querySelector("[data-detail-add]"),
 };
@@ -205,6 +206,60 @@ function detailTagMarkup(label) {
   return `<span class="detail-tag">${escapeHtml(label)}</span>`;
 }
 
+function detailPieces(item) {
+  if (!Array.isArray(item?.items)) return [item];
+
+  const pieces = item.items
+    .map((id) => ITEM_INDEX.get(id))
+    .filter((piece) => piece?.kind === "product");
+
+  return pieces.length > 0 ? pieces.slice(0, 3) : [item];
+}
+
+function detailMediaMarkup(item) {
+  const pieces = detailPieces(item);
+  const isKit = pieces.length > 1;
+
+  return pieces
+    .map((piece, index) => {
+      const separator =
+        index === 0
+          ? ""
+          : `<span aria-hidden="true" class="detail-kit-plus" style="--piece-index: ${index}">+</span>`;
+      const scent = clean(piece.scent);
+      const caption = isKit
+        ? `<figcaption class="detail-media__caption"><strong>${escapeHtml(piece.name)}</strong>${scent ? `<span>${escapeHtml(scent)}</span>` : ""}</figcaption>`
+        : "";
+
+      return `${separator}
+        <figure class="detail-media__item" style="--piece-index: ${index}">
+          <img
+            alt="${escapeHtml([piece.name, scent].filter(Boolean).join(" "))}"
+            class="product-media detail-media__image"
+            ${index === 0 ? "data-detail-image" : ""}
+            src="${escapeHtml(piece.image)}"
+          />
+          ${caption}
+        </figure>`;
+    })
+    .join("");
+}
+
+function renderDetailMedia(item) {
+  if (!els.detailMedia) return;
+
+  const pieces = detailPieces(item);
+  const isKit = pieces.length > 1;
+  els.detailMedia.innerHTML = detailMediaMarkup(item);
+  els.detailMedia.classList.toggle("is-kit", isKit);
+  els.detailMedia.style.setProperty("--detail-piece-count", String(pieces.length));
+  els.detailMedia.setAttribute(
+    "aria-label",
+    isKit ? `${clean(item.name)}: ${pieces.length} productos` : `Imagen de ${clean(item.name)}`,
+  );
+  els.detailImage = els.detailMedia.querySelector("[data-detail-image]");
+}
+
 function catalogCardMarkup(product) {
   const accent = accentOf(product);
   return `
@@ -282,11 +337,14 @@ function cartItemMarkup(entry) {
 function upsellMarkup(item) {
   return `
     <div class="flex items-start gap-4">
-      <img alt="${escapeHtml(item.name)}" class="h-24 w-24 rounded-[22px] bg-surface-container-lowest object-contain p-0.5" src="${escapeHtml(item.image)}" />
+      <button aria-controls="detail-title" aria-haspopup="dialog" aria-label="Ver detalle de ${escapeHtml(item.name)}" class="shrink-0" data-open-detail="${escapeHtml(item.id)}" type="button">
+        <img alt="${escapeHtml(item.name)}" class="h-24 w-24 rounded-[22px] bg-surface-container-lowest object-contain p-0.5" src="${escapeHtml(item.image)}" />
+      </button>
       <div class="flex-1">
         <p class="text-xs uppercase tracking-[0.22em] text-secondary">También te puede interesar</p>
         <h3 class="product-name mt-1.5 font-headline text-xl leading-snug text-primary">${escapeHtml(item.name)}</h3>
         <p class="mt-2 text-sm leading-7 text-on-surface-variant">${escapeHtml(item.short)}</p>
+        <button class="text-link mt-3" data-open-detail="${escapeHtml(item.id)}" type="button">Ver detalle</button>
         <div class="mt-4 flex items-center justify-between gap-4">
           <span class="price text-2xl">${formatMoney(item.price)}</span>
           <button class="inline-flex items-center gap-2 rounded-2xl bg-primary px-4 py-3 text-sm font-semibold text-on-primary transition hover:bg-primary-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35" data-add-item="${escapeHtml(item.id)}" type="button">
@@ -643,7 +701,7 @@ function withViewTransition(mutate, from, to) {
 
 // Foto de la tarjeta que disparó la apertura, para morfearla hacia el detalle.
 function triggerMedia(trigger) {
-  return trigger?.closest?.("article")?.querySelector("img") || null;
+  return trigger?.closest?.("article, .kit-feature")?.querySelector("img") || null;
 }
 
 function openDetail(itemId, trigger = document.activeElement) {
@@ -663,7 +721,11 @@ function openDetail(itemId, trigger = document.activeElement) {
       ? trigger
       : document.activeElement;
 
-  withViewTransition(() => applyDetail(item), triggerMedia(lastDetailTrigger), els.detailImage);
+  withViewTransition(
+    () => applyDetail(item),
+    triggerMedia(lastDetailTrigger),
+    els.detailMedia || els.detailImage,
+  );
 }
 
 function applyDetail(item) {
@@ -676,10 +738,7 @@ function applyDetail(item) {
   setText(els.detailPrice, formatMoney(item.price));
   setText(els.detailDescription, item.description);
 
-  if (els.detailImage) {
-    els.detailImage.src = clean(item.image);
-    els.detailImage.alt = clean(item.name);
-  }
+  renderDetailMedia(item);
 
   if (els.detailTags) {
     const tags = [clean(item.useLabel), clean(item.size)].filter(Boolean);
@@ -724,7 +783,11 @@ function closeDetail() {
     applyCloseDetail();
     return;
   }
-  withViewTransition(applyCloseDetail, els.detailImage, triggerMedia(lastDetailTrigger));
+  withViewTransition(
+    applyCloseDetail,
+    els.detailMedia || els.detailImage,
+    triggerMedia(lastDetailTrigger),
+  );
 }
 
 function applyCloseDetail() {
