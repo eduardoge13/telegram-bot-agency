@@ -6,9 +6,10 @@ Base: `5306b9e feat(yoga-verde): refine premium identity layer`
 
 ## Estado actual
 
-- No se tocó `main` ni se hizo push o merge. El release aprobado sí quedó
-  desplegado desde esta rama mediante el flujo canónico por tarball; el commit
-  activo es `80b6746 fix(yoga-verde): harden runtime image deployment`.
+- `origin/main` avanzó por fast-forward al release aprobado; el checkout local
+  sucio de `main` no se tocó. El sitio se desplegó desde esta rama mediante el
+  flujo canónico por tarball; el commit activo es `ee5ea3b` (`fix(yoga-verde):
+  show complete kit galleries in detail`).
 - La primera capa visual ya está implementada en el commit
   `4e3ea78 feat(yoga-verde): add editorial commerce visual layer`.
 - La segunda capa de motion y campaña está implementada localmente: fondo
@@ -67,8 +68,8 @@ Cambiar a una referencia de e-commerce premium más limpia, cercana a
 
 ## Siguiente bloque de trabajo
 
-1. Subir la rama y alinear `main` únicamente cuando el usuario pida push/merge;
-   producción ya sirve el commit `80b6746` desde el checkout aprobado.
+1. Mantener `origin/main` como fuente de verdad; el checkout local de `main`
+   sigue sucio y debe alinearse únicamente después de preservar esos cambios.
 2. Actualizar las dependencias de Astro en un commit separado para resolver el
    reporte de `npm audit`, con regresión funcional y visual antes de publicar.
 3. Revisar acceso a Webflow si se abre una nueva fase visual; el usuario debe
@@ -225,4 +226,21 @@ también quedaron resueltos (blend normal, hover solo en puntero fino, tokens de
 menú, cobertura 375 y limpieza de quick-view muerto). Queda únicamente CSS
 histórico de `.ritual-mobile-hint`, sin marcado ni impacto runtime.
 
-Este es el estado visual desplegado en `80b6746`. No se hizo push ni merge.
+Este estado visual forma parte del release desplegado en `ee5ea3b`; el código
+quedó incorporado a `origin/main` por fast-forward.
+
+## Detalle completo de kits — 2026-08-09
+
+- `Kit Ritual Facial` muestra sus tres fórmulas reales dentro del detalle, con
+  imágenes normalizadas, captions y separadores `+` animados.
+- Los demás kits muestran todos sus componentes reales; los kits dúo conservan
+  dos productos y no duplican fotografías para simular un tercero.
+- Los controles `+` de Beneficios y Cómo usarlo tienen transición de estado y
+  respetan `prefers-reduced-motion`.
+- Se verificaron 320×692, 390×844, 414×896 y 1280×900: detalle desplazable y
+  cerrable, CTA visible, producto individual con una sola imagen, cero overflow
+  horizontal y consola limpia.
+- Release activo: `ee5ea3b`; manifest
+  `ee5ea3baee64-20260809-162903-26112`; Yoga Verde y Blue Sky respondieron
+  `200`; Trivy de la imagen final reportó `0` HIGH/CRITICAL y no quedaron
+  releases temporales bajo `/docker`.
