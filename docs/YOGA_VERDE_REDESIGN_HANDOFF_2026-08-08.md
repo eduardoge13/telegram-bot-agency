@@ -131,3 +131,24 @@ Validación adicional: 320×692, 390×844, 414×896 y 1280×900 sin overflow;
 un solo caption activo durante el slider; detalle móvil abre con cierre visible;
 preview del build estático en puerto limpio con 0 errores, 0 warnings y ninguna
 petición al asset retirado.
+
+## Menú móvil editorial — 2026-08-09
+
+El menú superior izquierdo dejó de ser un drawer genérico y ahora funciona
+como una interacción móvil completa:
+
+- el icono de dos líneas se transforma en “X” al abrir;
+- el panel entra con máscara curva, desplazamiento y fondo desenfocado;
+- encabezado y seis destinos aparecen con stagger, numeración y estado activo;
+- el cierre conserva `<details open>` durante 740 ms para que la animación de
+  salida sí sea visible antes de desmontar el panel;
+- el fondo permanece bloqueado durante toda la transición y se libera al final;
+- Escape, backdrop y el mismo toggle cierran el menú y devuelven el foco;
+- el foco queda atrapado dentro de la interacción mientras está abierta;
+- elegir una sección espera el cierre y después navega, manteniendo scrollspy;
+- `prefers-reduced-motion` elimina las demoras sin romper la navegación.
+
+Validación: `npm run check` con 0 errores/0 warnings y `npm run build` exitoso;
+320×692, 390×844 y 414×896 sin overflow horizontal ni enlaces recortados; 0
+errores de consola; cierre animado, Escape, bloqueo de fondo, retorno de foco,
+Catálogo activo y detalle móvil verificados. No se hizo push, merge ni deploy.

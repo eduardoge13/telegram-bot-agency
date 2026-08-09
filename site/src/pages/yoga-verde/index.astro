@@ -141,27 +141,47 @@ const storeData = {
           <nav class="relative mx-auto flex h-16 max-w-screen-2xl items-center justify-between gap-4 px-4 sm:px-6 md:h-[4.75rem] md:px-6 lg:px-8" data-wf-hook="nav">
             <div class="flex flex-1 items-center gap-4">
               <details class="mobile-menu relative md:hidden" data-mobile-menu>
-                <summary aria-label="Abrir menú" class="header-action relative z-[93] inline-flex h-11 w-11 cursor-pointer list-none items-center justify-center border border-outline-variant/60 text-primary">
-                  <span aria-hidden="true" class="material-symbols-outlined">menu</span>
+                <summary
+                  aria-controls="yoga-verde-mobile-menu"
+                  aria-expanded="false"
+                  aria-label="Abrir menú"
+                  class="header-action mobile-menu-toggle relative z-[93] inline-flex h-11 w-11 cursor-pointer list-none items-center justify-center border border-outline-variant/60 text-primary"
+                  data-mobile-menu-toggle
+                >
+                  <span aria-hidden="true" class="mobile-menu-toggle__icon">
+                    <span></span>
+                    <span></span>
+                  </span>
                 </summary>
-                <button aria-label="Cerrar menú" class="mobile-menu-backdrop" data-close-mobile-menu type="button"></button>
-                <div class="mobile-menu-panel" aria-label="Navegación principal">
+                <button aria-label="Cerrar menú" class="mobile-menu-backdrop" data-close-mobile-menu tabindex="-1" type="button"></button>
+                <div
+                  aria-label="Navegación principal"
+                  aria-modal="true"
+                  class="mobile-menu-panel"
+                  id="yoga-verde-mobile-menu"
+                  role="dialog"
+                  tabindex="-1"
+                >
                   <div class="mobile-menu-panel__header">
                     <div>
                       <p class="product-eyebrow">Yoga Verde</p>
                       <p class="mt-1 font-headline text-3xl text-primary">Explorar</p>
                     </div>
-                    <button aria-label="Cerrar menú" class="icon-action" data-close-mobile-menu type="button">
-                      <span aria-hidden="true" class="material-symbols-outlined">close</span>
-                    </button>
+                    <p class="mobile-menu-panel__edition" aria-hidden="true">Cosmética natural · MX</p>
                   </div>
                   <div class="mobile-menu-panel__body">
-                    {NAV_ITEMS.map((item) => (
+                    {NAV_ITEMS.map((item, index) => (
                       <button class="mobile-menu-link" data-nav-link={item.id} data-scroll-to={item.id} type="button">
-                        {item.label}
+                        <span class="mobile-menu-link__number" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
+                        <span>{item.label}</span>
+                        <span class="mobile-menu-link__arrow" aria-hidden="true">&#8599;</span>
                       </button>
                     ))}
-                    <button class="mobile-menu-link" data-focus-search type="button">Buscar productos</button>
+                    <button class="mobile-menu-link" data-focus-search type="button">
+                      <span class="mobile-menu-link__number" aria-hidden="true">06</span>
+                      <span>Buscar productos</span>
+                      <span class="mobile-menu-link__arrow" aria-hidden="true">&#8599;</span>
+                    </button>
                   </div>
                 </div>
               </details>
@@ -1342,6 +1362,6 @@ const storeData = {
     </div>
 
     <!-- Versiona este entrypoint porque vive en public/ y no recibe hash de Astro. -->
-    <script defer is:inline src="/yoga-verde/shop.js?v=20260731-detail-modal"></script>
+    <script defer is:inline src="/yoga-verde/shop.js?v=20260809-mobile-menu"></script>
   </body>
 </html>
