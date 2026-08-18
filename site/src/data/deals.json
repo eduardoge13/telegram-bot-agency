@@ -1,28 +1,26 @@
 {
-	"generatedAt": "2026-08-18T19:15:14.377Z",
-	"lookbackDays": 45,
-	"minSample": 20,
-	"maxStaleDays": 21,
+	"generatedAt": "2026-08-18T20:15:24.770Z",
+	"windowDays": 21,
+	"minSample": 200,
+	"excludedSources": [
+		"amadeus"
+	],
 	"skipped": [
 		{
 			"code": "ACA",
-			"reason": "sample",
-			"sampleSize": 4
+			"reason": "no-data-in-window"
 		},
 		{
 			"code": "CUN",
-			"reason": "sample",
-			"sampleSize": 4
-		},
-		{
-			"code": "ROM",
-			"reason": "stale",
-			"lastSeen": "2026-07-08T04:37:40Z"
+			"reason": "no-data-in-window"
 		},
 		{
 			"code": "PAR",
-			"reason": "stale",
-			"lastSeen": "2026-07-08T04:37:30Z"
+			"reason": "no-data-in-window"
+		},
+		{
+			"code": "ROM",
+			"reason": "no-data-in-window"
 		}
 	],
 	"deals": [
@@ -38,29 +36,11 @@
 			},
 			"region": "europe",
 			"image": "madrid.jpg",
-			"priceFrom": 11000,
-			"priceTo": 21000,
+			"priceFrom": 16000,
+			"priceTo": 23000,
 			"currency": "MXN",
-			"sampleSize": 71,
-			"lastSeen": "2026-08-18T19:02:06Z"
-		},
-		{
-			"code": "BCN",
-			"city": {
-				"es": "Barcelona",
-				"en": "Barcelona"
-			},
-			"country": {
-				"es": "España",
-				"en": "Spain"
-			},
-			"region": "europe",
-			"image": "barcelona.jpg",
-			"priceFrom": 17000,
-			"priceTo": 22000,
-			"currency": "MXN",
-			"sampleSize": 68,
-			"lastSeen": "2026-08-18T19:01:32Z"
+			"sampleSize": 3108,
+			"lastSeen": "2026-08-18T20:14:57Z"
 		},
 		{
 			"code": "BRU",
@@ -74,11 +54,11 @@
 			},
 			"region": "europe",
 			"image": "brussels.jpg",
-			"priceFrom": 18500,
-			"priceTo": 24000,
+			"priceFrom": 18000,
+			"priceTo": 25000,
 			"currency": "MXN",
-			"sampleSize": 58,
-			"lastSeen": "2026-08-18T19:01:43Z"
+			"sampleSize": 2620,
+			"lastSeen": "2026-08-18T20:15:23Z"
 		},
 		{
 			"code": "AMS",
@@ -92,11 +72,11 @@
 			},
 			"region": "europe",
 			"image": "amsterdam.jpg",
-			"priceFrom": 19000,
+			"priceFrom": 18000,
 			"priceTo": 25000,
 			"currency": "MXN",
-			"sampleSize": 56,
-			"lastSeen": "2026-08-18T19:01:42Z"
+			"sampleSize": 2449,
+			"lastSeen": "2026-08-18T20:15:09Z"
 		},
 		{
 			"code": "FRA",
@@ -110,29 +90,29 @@
 			},
 			"region": "europe",
 			"image": "frankfurt.jpg",
-			"priceFrom": 20000,
-			"priceTo": 26000,
-			"currency": "MXN",
-			"sampleSize": 45,
-			"lastSeen": "2026-08-18T19:00:57Z"
-		},
-		{
-			"code": "MUC",
-			"city": {
-				"es": "Múnich",
-				"en": "Munich"
-			},
-			"country": {
-				"es": "Alemania",
-				"en": "Germany"
-			},
-			"region": "europe",
-			"image": "munich.jpg",
-			"priceFrom": 21000,
+			"priceFrom": 18000,
 			"priceTo": 27000,
 			"currency": "MXN",
-			"sampleSize": 57,
-			"lastSeen": "2026-08-18T19:01:08Z"
+			"sampleSize": 2058,
+			"lastSeen": "2026-08-18T20:14:54Z"
+		},
+		{
+			"code": "BCN",
+			"city": {
+				"es": "Barcelona",
+				"en": "Barcelona"
+			},
+			"country": {
+				"es": "España",
+				"en": "Spain"
+			},
+			"region": "europe",
+			"image": "barcelona.jpg",
+			"priceFrom": 19000,
+			"priceTo": 26000,
+			"currency": "MXN",
+			"sampleSize": 3185,
+			"lastSeen": "2026-08-18T20:14:56Z"
 		},
 		{
 			"code": "BER",
@@ -147,10 +127,28 @@
 			"region": "europe",
 			"image": "berlin.jpg",
 			"priceFrom": 21000,
-			"priceTo": 26000,
+			"priceTo": 27000,
 			"currency": "MXN",
-			"sampleSize": 55,
-			"lastSeen": "2026-08-18T19:01:30Z"
+			"sampleSize": 3134,
+			"lastSeen": "2026-08-18T20:14:53Z"
+		},
+		{
+			"code": "MUC",
+			"city": {
+				"es": "Múnich",
+				"en": "Munich"
+			},
+			"country": {
+				"es": "Alemania",
+				"en": "Germany"
+			},
+			"region": "europe",
+			"image": "munich.jpg",
+			"priceFrom": 21000,
+			"priceTo": 28000,
+			"currency": "MXN",
+			"sampleSize": 2880,
+			"lastSeen": "2026-08-18T20:14:55Z"
 		}
 	]
 }
