@@ -1,0 +1,49 @@
+---
+import ProductCard from "../../../components/yoga-verde/ProductCard.astro";
+import YogaVerdeLayout from "../../../components/yoga-verde/YogaVerdeLayout.astro";
+import { formatMoney, kitProducts, kitUrl, kits, type YogaKit } from "../../../lib/yoga-verde";
+
+export function getStaticPaths() {
+  return kits.map((kit) => ({ params: { id: kit.id }, props: { kit } }));
+}
+
+interface Props { kit: YogaKit }
+const { kit } = Astro.props;
+const pieces = kitProducts(kit);
+---
+
+<YogaVerdeLayout
+  activePage="kits"
+  canonicalPath={kitUrl(kit)}
+  description={`${kit.name} de Yoga Verde: ${kit.short} Incluye ${pieces.length} productos por ${formatMoney(kit.price)} MXN.`}
+  title={`${kit.name} | Yoga Verde`}
+>
+  <article class="yv-kit-page">
+    <div class="yv-kit-page__gallery" style={`--kit-count:${pieces.length}`}>
+      {pieces.map((piece, index) => (
+        <figure>
+          <img alt={`${piece.name} ${piece.scent}`} class="product-media" fetchpriority={index === 0 ? "high" : undefined} src={piece.image} />
+          <figcaption>{piece.name}<span>{piece.scent}</span></figcaption>
+        </figure>
+      ))}
+    </div>
+    <div class="yv-kit-page__content">
+      <nav aria-label="Migas de pan"><a href="/yoga-verde">Inicio</a><span>/</span><a href="/yoga-verde/kits">Kits</a><span>/</span><strong>{kit.name}</strong></nav>
+      <p class="yv-eyebrow">Kit · {pieces.length} productos</p>
+      <h1>{kit.name}</h1>
+      <p class="price yv-kit-page__price">{formatMoney(kit.price)}</p>
+      <p class="yv-kit-page__description">{kit.description}</p>
+      <button class="yv-primary-button" data-add-item={kit.id} type="button">Añadir el kit · {formatMoney(kit.price)}</button>
+      <section class="yv-product-page__details">
+        <h2>Qué incluye</h2>
+        <ul>{pieces.map((piece) => <li>{piece.name} · {piece.scent} · {piece.size}</li>)}</ul>
+      </section>
+      {kit.instructions ? <section class="yv-product-page__details"><h2>Cómo usarlo</h2><p>{kit.instructions}</p></section> : null}
+    </div>
+  </article>
+
+  <section class="yv-related-products">
+    <div class="yv-section-heading"><div><p class="yv-eyebrow">Dentro del kit</p><h2>Conoce cada producto</h2></div></div>
+    <div class="yv-product-grid">{pieces.map((piece) => <ProductCard product={piece} />)}</div>
+  </section>
+</YogaVerdeLayout>

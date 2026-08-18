@@ -1,0 +1,39 @@
+---
+import { formatMoney, productUrl, type YogaProduct } from "../../lib/yoga-verde";
+
+interface Props {
+  product: YogaProduct;
+  priority?: boolean;
+  imageSrc?: string;
+  editorial?: boolean;
+}
+
+const { product, priority = false, imageSrc = product.image, editorial = false } = Astro.props;
+---
+
+<article class:list={["yv-product-card", editorial && "is-editorial"]}>
+  <a aria-label={`Ver ${product.name}, ${product.scent}`} class="yv-product-card__media" href={productUrl(product)}>
+    <img
+      alt={`${product.name} ${product.scent}`}
+      class="product-media"
+      decoding={priority ? "sync" : "async"}
+      loading={priority ? "eager" : "lazy"}
+      src={imageSrc}
+    />
+  </a>
+  <div class="yv-product-card__body">
+    <div class="yv-product-card__heading">
+      <div>
+        <p class="yv-eyebrow">{product.typeLabel}</p>
+        <h2><a href={productUrl(product)}>{product.name}</a></h2>
+        <p class="yv-product-card__scent">{product.scent}</p>
+      </div>
+      <p class="price">{formatMoney(product.price)}</p>
+    </div>
+    <p class="yv-product-card__summary">{product.short}</p>
+    <div class="yv-product-card__actions">
+      <a class="yv-text-link" href={productUrl(product)}>Ver producto <span aria-hidden="true">→</span></a>
+      <button aria-label={`Añadir ${product.name} al carrito`} class="yv-add-button" data-add-item={product.id} type="button">Añadir</button>
+    </div>
+  </div>
+</article>

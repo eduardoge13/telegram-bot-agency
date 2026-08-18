@@ -32,6 +32,8 @@ eggs/
 .eggs/
 lib/
 lib64/
+!site/src/lib/
+!site/src/lib/**
 parts/
 sdist/
 var/
@@ -64,6 +66,7 @@ logs/
 
 # Local development files
 .python-version
+/tmp/
 venv/Lib/site-packages/google_auth_httplib2.py
 venv/Lib/site-packages/typing_extensions.py
 venv/Lib/site-packages/MarkupSafe-3.0.2.dist-info/INSTALLER

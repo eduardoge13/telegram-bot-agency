@@ -1,0 +1,29 @@
+---
+import { formatMoney, kitProducts, kitUrl, type YogaKit } from "../../lib/yoga-verde";
+
+interface Props {
+  kit: YogaKit;
+}
+
+const { kit } = Astro.props;
+const pieces = kitProducts(kit);
+---
+
+<article class="yv-kit-card">
+  <a aria-label={`Ver ${kit.name}`} class="yv-kit-card__media" href={kitUrl(kit)}>
+    <div class="yv-kit-card__pieces" style={`--kit-count:${pieces.length || 1}`}>
+      {(pieces.length ? pieces : [kit]).map((piece) => (
+        <img alt={piece.name} class="product-media" loading="lazy" src={piece.image} />
+      ))}
+    </div>
+  </a>
+  <div class="yv-kit-card__body">
+    <p class="yv-eyebrow">{pieces.length} productos</p>
+    <div class="yv-kit-card__heading"><h2><a href={kitUrl(kit)}>{kit.name}</a></h2><p class="price">{formatMoney(kit.price)}</p></div>
+    <p>{kit.short}</p>
+    <div class="yv-product-card__actions">
+      <a class="yv-text-link" href={kitUrl(kit)}>Ver kit <span aria-hidden="true">→</span></a>
+      <button aria-label={`Añadir ${kit.name} al carrito`} class="yv-add-button" data-add-item={kit.id} type="button">Añadir</button>
+    </div>
+  </div>
+</article>

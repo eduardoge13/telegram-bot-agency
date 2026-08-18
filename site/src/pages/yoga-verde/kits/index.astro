@@ -1,0 +1,32 @@
+---
+import KitCard from "../../../components/yoga-verde/KitCard.astro";
+import YogaVerdeLayout from "../../../components/yoga-verde/YogaVerdeLayout.astro";
+import { kits, productById } from "../../../lib/yoga-verde";
+
+const ritualPieces = ["agua-micelar-manzanilla", "crema-facial-chabacano", "contorno-de-ojos-lavanda"]
+  .map((id) => productById.get(id))
+  .filter(Boolean);
+---
+
+<YogaVerdeLayout
+  activePage="kits"
+  canonicalPath="/yoga-verde/kits"
+  description="Descubre los kits Yoga Verde para rostro, cabello, aromaterapia y cuidado diario. Consulta cada producto incluido y su precio especial."
+  title="Kits y regalos | Yoga Verde"
+>
+  <header class="yv-kits-hero">
+    <div>
+      <p class="yv-edition">Rutinas completas · Precio especial</p>
+      <h1>Kits y regalos</h1>
+      <p>Combinaciones claras, con todos sus productos visibles. Elige una rutina completa o una opción lista para regalar.</p>
+    </div>
+    <div class="yv-kits-hero__visual" aria-label="Tres productos del ritual facial">
+      {ritualPieces.map((piece) => <img alt={piece?.name} class="product-media" src={piece?.image} />)}
+    </div>
+  </header>
+
+  <section class="yv-kits-page">
+    <div class="yv-section-heading"><div><p class="yv-eyebrow">6 combinaciones</p><h2>Encuentra tu kit</h2></div><p>Cada ficha muestra todas las piezas incluidas antes de comprar.</p></div>
+    <div class="yv-kit-grid">{kits.map((kit) => <KitCard kit={kit} />)}</div>
+  </section>
+</YogaVerdeLayout>

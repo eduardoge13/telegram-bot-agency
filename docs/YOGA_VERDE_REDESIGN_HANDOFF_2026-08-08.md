@@ -362,3 +362,24 @@ quedó incorporado a `origin/main` por fast-forward.
 - El preflight siguió mostrando dos unidades fallidas ajenas a este sitio:
   `site-advisor.service` y `telegram-bot-sync.service`. No se modificaron en
   este release.
+
+## Rediseño multipágina para aprobación — 2026-08-18
+
+- Se eliminó la dependencia de una portada larga como tienda completa. Yoga
+  Verde ahora tiene home editorial, catálogo, cuatro colecciones, índice de
+  kits, seis detalles de kit y 27 páginas de producto con URLs propias.
+- La portada usa la campaña de cera con miel como protagonista y conserva los
+  visuales aprobados de mango, manzanilla y mango/coco para dirigir a compras
+  concretas. Los precios quedan visibles junto al nombre y antes de la CTA.
+- El catálogo mantiene búsqueda, filtros y 27 productos, pero cada tarjeta
+  conduce a una ficha completa. El carrito persiste entre páginas y su drawer
+  se corrigió para no recortar precio, cantidad ni “Eliminar” en móvil.
+- El Kit Ritual Facial muestra sus tres piezas en una composición responsive:
+  agua micelar, crema facial y contorno de ojos. Los productos incluidos también
+  conservan páginas y precios individuales.
+- QA local: `npm run check` sin diagnósticos, `npm run build` exitoso con 49
+  páginas, 42 rutas internas y 43 assets Yoga Verde respondiendo `200`; cero
+  overflow horizontal en 320, 390, 414 y 1440 px. Menú, búsqueda, filtros,
+  carrito persistente y CTA de producto verificados en navegador real.
+- Rama de trabajo: `codex/yoga-verde-multipage-redesign`. Esta iteración queda
+  solo para aprobación local; no se desplegó ni se modificó producción.
