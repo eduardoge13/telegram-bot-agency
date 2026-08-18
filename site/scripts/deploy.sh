@@ -256,7 +256,7 @@ fi
 # 6. Verificar contra el sitio en vivo, no contra el log del build.
 # ---------------------------------------------------------------------------
 say "Verificando en vivo"
-for url in "https://yoga-verde.srv1175749.hstgr.cloud/" "https://blueskytravelmx.com/"; do
+for url in "https://yoga-verde.srv1175749.hstgr.cloud/" "https://yoga-verde.srv1175749.hstgr.cloud/yoga-verde/" "https://blueskytravelmx.com/"; do
   code=""
   for _ in 1 2 3 4 5 6 7 8 9 10; do
     code="$(curl -s -o /dev/null -w '%{http_code}' "$url" || true)"
@@ -266,6 +266,15 @@ for url in "https://yoga-verde.srv1175749.hstgr.cloud/" "https://blueskytravelmx
   printf '  %-48s %s\n' "$url" "$code"
   [[ "$code" == "200" ]] || { echo "ABORTADO: $url respondió $code" >&2; exit 1; }
 done
+
+CANONICAL_URL="https://yoga-verde.srv1175749.hstgr.cloud/yoga-verde"
+CANONICAL_CODE="$(curl -s -o /dev/null -w '%{http_code}' "$CANONICAL_URL" || true)"
+CANONICAL_LOCATION="$(curl -sI "$CANONICAL_URL" | tr -d '\r' | awk 'tolower($1) == "location:" { print $2; exit }')"
+printf '  %-48s %s -> %s\n' "$CANONICAL_URL" "$CANONICAL_CODE" "$CANONICAL_LOCATION"
+if [[ "$CANONICAL_CODE" != "308" || "$CANONICAL_LOCATION" != "/yoga-verde/" ]]; then
+  echo "ABORTADO: la portada sin slash no redirige a /yoga-verde/." >&2
+  exit 1
+fi
 
 say "Confirmando manifest de build"
 MANIFEST_URL="https://yoga-verde.srv1175749.hstgr.cloud/yoga-verde/deploy-manifest.json"
