@@ -204,6 +204,7 @@ html {
 
 .yv-cart-item__actions {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 0.65rem;
@@ -212,7 +213,7 @@ html {
 
 .yv-cart-item__quantity {
   display: inline-grid;
-  grid-template-columns: repeat(3, 2.25rem);
+  grid-template-columns: 2.75rem 1.75rem 2.75rem;
   align-items: center;
   border: 1px solid var(--color-outline-variant);
   background: var(--color-surface-container-highest);
@@ -220,8 +221,8 @@ html {
 
 .yv-cart-item__quantity button {
   display: inline-flex;
-  min-width: 2.25rem;
-  min-height: 2.5rem;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
   align-items: center;
   justify-content: center;
 }
@@ -259,16 +260,15 @@ html {
     height: 5.5rem;
   }
 
-  .yv-cart-item__quantity {
-    grid-template-columns: repeat(3, 2rem);
-  }
-
-  .yv-cart-item__quantity button {
-    min-width: 2rem;
-  }
-
   .yv-cart-item__remove {
     letter-spacing: 0.06em;
+  }
+}
+
+@media (max-width: 767px) {
+  .site-logo {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
   }
 }
 
