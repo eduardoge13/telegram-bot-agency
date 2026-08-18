@@ -2275,6 +2275,11 @@ img {
   background: var(--color-secondary);
 }
 
+.hero-slide[hidden],
+.hero-dot[hidden] {
+  display: none !important;
+}
+
 /* Price: one consistent terracotta treatment everywhere a price appears, so
    the number is the thing the eye lands on. */
 .price {

@@ -280,3 +280,21 @@ quedó incorporado a `origin/main` por fast-forward.
   dependencias debe hacerse en una iteración separada con regresión visual.
 - El tarball ahora usa `--no-xattrs` además de `COPYFILE_DISABLE=1` para omitir
   `com.apple.provenance` y evitar ruido de libarchive en despliegues futuros.
+
+## Selección anónima del hero — 2026-08-18
+
+- El hero dispone de nueve productos con fotografía real y presenta seis por
+  navegador, en un orden aleatorio estable. Esto amplía la variedad sin llenar
+  el hero móvil con controles que provocarían saturación u overflow.
+- La única persistencia es una semilla aleatoria de 32 bits en
+  `localStorage`, bajo `yoga-verde:hero-seed:v1`. No identifica a la persona,
+  no registra navegación y no se transmite al servidor.
+- Cada slide expone internamente categoría y familia de aroma como contrato
+  para un ranking futuro. No existe todavía perfilado, analítica ni uso de
+  información pública.
+- Una fase futura de recomendaciones deberá definir consentimiento, aviso de
+  privacidad, retención, borrado y explicación de por qué se recomienda cada
+  producto antes de registrar un perfil de consumo.
+- QA local: dos contextos aislados recibieron selecciones distintas; un mismo
+  contexto conservó su orden al recargar; seis slides y seis controles quedaron
+  visibles, sin errores de consola ni overflow en 320, 390, 414 y 1280 px.
