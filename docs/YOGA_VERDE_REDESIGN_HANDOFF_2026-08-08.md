@@ -320,7 +320,7 @@ quedó incorporado a `origin/main` por fast-forward.
 
 ## Selección anónima del hero — 2026-08-18
 
-- El hero dispone de nueve productos con fotografía real y presenta seis por
+- El hero dispone de 13 productos con fotografía real y presenta seis por
   navegador, en un orden aleatorio estable. Esto amplía la variedad sin llenar
   el hero móvil con controles que provocarían saturación u overflow.
 - La única persistencia es una semilla aleatoria de 32 bits en
@@ -335,3 +335,30 @@ quedó incorporado a `origin/main` por fast-forward.
 - QA local: dos contextos aislados recibieron selecciones distintas; un mismo
   contexto conservó su orden al recargar; seis slides y seis controles quedaron
   visibles, sin errores de consola ni overflow en 320, 390, 414 y 1280 px.
+
+## Release de portada aleatoria y campaña refinada — 2026-08-18
+
+- PR `#4` pasó Site CI y se integró a `main` mediante merge commit `71d9103`.
+  El checkout local sucio de `main` permaneció intacto; el despliegue salió de
+  un worktree limpio creado desde `origin/main`.
+- El release se publicó únicamente con `site/scripts/deploy.sh`: tarball de
+  14 MB y 186 entradas, SHA-256
+  `0144f00aa676daaa1f240114e6f851c79aad8620c5cbe3839c480ff623c3be05`,
+  staging en el mismo volumen, intercambio completo, rollback por estado y
+  compuerta Trivy antes de recrear el contenedor. No se usó `rsync` ni copia
+  recursiva.
+- Manifest activo:
+  `71d9103d2024-20260818-143523-26030`. Yoga Verde, Blue Sky y `www` devolvieron
+  `200`; “El color nace del ingrediente”, los controles numerados y la nueva
+  escena de manteca se confirmaron desde contenido público. El asset de manteca
+  respondió `200` con 194,914 bytes.
+- La imagen final `alpine 3.23.5` reportó `0` HIGH/CRITICAL. El contenedor del
+  sitio quedó `running`, Traefik conservó su ID, continuaron 20 contenedores en
+  ejecución y no quedaron releases temporales bajo `/docker`.
+- `npm audit` reporta nueve avisos HIGH en la cadena de compilación de
+  Astro/Vite y dependencias transitivas. Esos paquetes no forman parte del
+  runtime Nginx estático, pero deben migrarse en una iteración separada con
+  regresión funcional y visual; no ejecutar `npm audit fix` a ciegas.
+- El preflight siguió mostrando dos unidades fallidas ajenas a este sitio:
+  `site-advisor.service` y `telegram-bot-sync.service`. No se modificaron en
+  este release.
