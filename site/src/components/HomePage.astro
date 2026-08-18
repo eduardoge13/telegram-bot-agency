@@ -33,7 +33,12 @@ const priceFormatter = new Intl.NumberFormat(locale === 'es' ? 'es-MX' : 'en-US'
 const dateFormatter = new Intl.DateTimeFormat(locale === 'es' ? 'es-MX' : 'en-US', {
 	dateStyle: 'medium',
 });
-const generatedAt = dealsData.generatedAt ? dateFormatter.format(new Date(dealsData.generatedAt)) : null;
+// Date the fares were last collected, not the date the snapshot was generated: running
+// the script while the scraper is down would otherwise stamp today over stale prices.
+const lastCollected = deals.length
+	? Math.max(...deals.map((deal) => new Date(deal.lastSeen).getTime()))
+	: null;
+const generatedAt = lastCollected ? dateFormatter.format(new Date(lastCollected)) : null;
 ---
 
 <main class="bg-white text-slate-900">
