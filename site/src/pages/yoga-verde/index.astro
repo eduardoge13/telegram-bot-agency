@@ -43,28 +43,34 @@ const essentialProducts = essentialIds
   .filter(Boolean) as typeof displayProducts;
 const featuredKit = displayKits.find((kit) => kit.id === "kit-ritual-facial") || displayKits[0];
 
-// Solo estos SKUs tienen fotografía real del envase; el resto de los assets son
-// la etiqueta plana renderizada, que en un banner se leería como arte, no como
-// producto. El hero se compone únicamente con los primeros.
-const REAL_PHOTO_IDS = [
-  "desmaquillante-almendra-dulce",
-  "crema-facial-chabacano",
-  "agua-micelar-manzanilla",
-  "crema-corporal-leche-de-coco",
-  "mousse-corporal-uva",
-  "vela-soya-vainilla",
-  "contorno-de-ojos-lavanda",
-  "balsamo-labial-coco-menta",
-  "vela-soya-bergamota",
-];
+// Fotografías editoriales extraídas a resolución nativa del catálogo oficial.
+// Cada visual corresponde al SKU real; se evita ampliar previews comprimidos
+// o inventar productos/etiquetas para el hero.
+const HERO_CAMPAIGN_MEDIA = {
+  "desmaquillante-almendra-dulce": { src: "/yoga-verde/assets/catalog/hero/desmaquillante.webp", width: 1568, height: 2351, position: "center 68%" },
+  "agua-micelar-manzanilla": { src: "/yoga-verde/assets/catalog/hero/agua-micelar.webp", width: 1624, height: 2166, position: "center 58%" },
+  "contorno-de-ojos-lavanda": { src: "/yoga-verde/assets/catalog/hero/contorno.webp", width: 1400, height: 1700, position: "center 58%" },
+  "mousse-corporal-uva": { src: "/yoga-verde/assets/catalog/hero/mousse.webp", width: 1400, height: 1700, position: "center 52%" },
+  "crema-manos-mango": { src: "/yoga-verde/assets/catalog/hero/crema-manos.webp", width: 1400, height: 1700, position: "center 50%" },
+  "manteca-mango-coco": { src: "/yoga-verde/assets/catalog/hero/manteca.webp", width: 1400, height: 1700, position: "center 52%" },
+  "desodorante-lavanda-toronja": { src: "/yoga-verde/assets/catalog/hero/desodorante-lavanda.webp", width: 1400, height: 1700, position: "center 50%" },
+  "aceite-cabello-seco-coco-argan": { src: "/yoga-verde/assets/catalog/hero/aceite-cabello-seco.webp", width: 1400, height: 1700, position: "center 50%" },
+  "aceite-cabello-graso-uva": { src: "/yoga-verde/assets/catalog/hero/aceite-cabello-graso.webp", width: 1400, height: 1700, position: "center 50%" },
+  "cera-cabello-ceja": { src: "/yoga-verde/assets/catalog/hero/cera-cabello.webp", width: 1400, height: 1700, position: "center 50%" },
+  "vela-soya-vainilla": { src: "/yoga-verde/assets/catalog/hero/vela-vainilla.webp", width: 1400, height: 1700, position: "center 50%" },
+  "vela-soya-coco": { src: "/yoga-verde/assets/catalog/hero/vela-coco.webp", width: 1400, height: 1700, position: "center 50%" },
+  "vela-soya-bergamota": { src: "/yoga-verde/assets/catalog/hero/vela-bergamota.webp", width: 1400, height: 1700, position: "center 50%" },
+} as const;
 
 // El navegador elige seis piezas de este conjunto mediante una semilla local
 // anónima. Así cada visitante recibe una selección distinta y estable sin
 // recopilar datos personales ni alterar la fuente de verdad del catálogo.
 const HERO_VISIBLE_COUNT = 6;
-const heroSlides = REAL_PHOTO_IDS.map((id) =>
-  displayProducts.find((product) => product.id === id),
-).filter(Boolean) as typeof displayProducts;
+type HeroCampaignMedia = (typeof HERO_CAMPAIGN_MEDIA)[keyof typeof HERO_CAMPAIGN_MEDIA];
+const heroSlides = Object.entries(HERO_CAMPAIGN_MEDIA).map(([id, heroMedia]) => {
+  const product = displayProducts.find((item) => item.id === id);
+  return product ? { ...product, heroMedia } : null;
+}).filter(Boolean) as Array<(typeof displayProducts)[number] & { heroMedia: HeroCampaignMedia }>;
 
 // Las piezas reales que componen cada kit (ver `items` en yoga-verde-store.js),
 // para poder mostrarlas todas en la tarjeta en vez de una sola foto.
@@ -255,54 +261,96 @@ const storeData = {
       </div>
 
       <main data-mobile-menu-background>
-        <section class="hero-editorial" data-wf-section="hero" id="inicio">
-          <div class="hero-editorial__inner" data-wf-hook="hero-inner">
-            <div class="hero-brand-lockup" data-wf-hook="hero-brand">
+        <section class="catalog-cover" data-wf-section="hero" id="inicio">
+          <div class="catalog-cover__inner" data-wf-hook="hero-inner">
+            <header class="catalog-cover__intro" data-wf-hook="hero-brand">
+              <div class="catalog-cover__edition">
+                <span>Catálogo Yoga Verde</span>
+                <span>Edición botánica · 2026</span>
+              </div>
               <img
-                alt="Yoga Verde"
-                class="hero-logo"
+                alt="Yoga Verde — Cosmética natural"
+                class="catalog-cover__logo"
                 height="1400"
                 src="/yoga-verde/assets/brand/logo-yoga-verde.svg"
                 width="1400"
               />
-            </div>
+              <h1 class="catalog-cover__title">El color nace del ingrediente.</h1>
+              <p class="catalog-cover__summary">
+                Manzanilla, lavanda, mango y uva construyen una identidad sensorial:
+                cada fórmula tiene su propio tono, textura y momento dentro del ritual.
+              </p>
+              <button class="catalog-cover__cta" data-scroll-to="catalogo" type="button">
+                Explorar el catálogo
+                <svg aria-hidden="true" fill="none" focusable="false" height="15" viewBox="0 0 24 24" width="15">
+                  <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
+                </svg>
+              </button>
+              <ul aria-label="Ingredientes protagonistas" class="catalog-cover__ingredients">
+                <li><span>01</span> Manzanilla</li>
+                <li><span>02</span> Lavanda</li>
+                <li><span>03</span> Mango</li>
+                <li><span>04</span> Uva</li>
+              </ul>
+            </header>
 
-            <div class="hero-gallery" data-wf-hook="hero-gallery">
-              <div class="hero-frame" data-wf-hook="hero-frame">
-                <div aria-label="Productos destacados" aria-live="polite" aria-roledescription="carousel" class="hero-slider" data-hero-slider data-hero-visible-count={HERO_VISIBLE_COUNT} data-wf-hook="hero-slider" role="region">
+            <div class="catalog-cover__carousel" data-wf-hook="hero-gallery">
+              <div class="catalog-cover__frame" data-wf-hook="hero-frame">
+                <div
+                  aria-label="Selección editorial de productos"
+                  aria-live="polite"
+                  aria-roledescription="carousel"
+                  class="catalog-cover__slider"
+                  data-hero-slider
+                  data-hero-visible-count={HERO_VISIBLE_COUNT}
+                  data-wf-hook="hero-slider"
+                  role="region"
+                >
                   {heroSlides.map((product, index) => (
                     <article
-                      class:list={["hero-slide", index === 0 && "is-active"]}
+                      class:list={["hero-slide", "catalog-cover__slide", index === 0 && "is-active"]}
                       data-hero-product={product.id}
                       data-hero-slide={index}
                       data-hero-type={product.type}
                       data-hero-use={product.use}
                     >
-                      <img
-                        alt={`${product.name}, ${product.scent}`}
-                        class="hero-product-image"
-                        decoding={index === 0 ? "sync" : "async"}
-                        loading={index === 0 ? "eager" : "lazy"}
-                        src={product.image}
-                      />
-                      <div class="hero-caption">
-                        <div class="min-w-0">
-                          <p class="hero-kicker">{product.typeLabel}</p>
-                          <h2 class="product-name hero-product-name">{product.name}</h2>
-                          <p class="hero-benefit">{product.short}</p>
+                      <figure class="catalog-cover__media">
+                        <img
+                          alt={`${product.name} Yoga Verde en fotografía editorial del catálogo`}
+                          class="catalog-cover__image"
+                          decoding={index === 0 ? "sync" : "async"}
+                          height={product.heroMedia.height}
+                          loading={index === 0 ? "eager" : "lazy"}
+                          sizes="(max-width: 767px) 100vw, (max-width: 1279px) 40vw, 640px"
+                          src={product.heroMedia.src}
+                          srcset={`${product.heroMedia.src.replace(".webp", "-800.webp")} 800w, ${product.heroMedia.src} ${product.heroMedia.width}w`}
+                          style={`--hero-object-position: ${product.heroMedia.position}`}
+                          width={product.heroMedia.width}
+                        />
+                        <span aria-hidden="true" class="catalog-cover__folio">{String(index + 1).padStart(2, "0")}</span>
+                      </figure>
+                      <div class="catalog-cover__caption">
+                        <div class="catalog-cover__product-copy">
+                          <p class="catalog-cover__kicker">{product.typeLabel}</p>
+                          <h2>{product.name}</h2>
+                          <p class="catalog-cover__scent">{product.scent}</p>
+                          <p class="catalog-cover__benefit">{product.short}</p>
                         </div>
-                        <button aria-controls="detail-title" aria-haspopup="dialog" class="hero-link" data-magnetic data-open-detail={product.id} type="button">
-                          Ver producto
-                          <svg aria-hidden="true" class="text-link__icon" fill="none" focusable="false" height="14" viewBox="0 0 24 24" width="14">
-                            <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
-                          </svg>
-                        </button>
+                        <div class="catalog-cover__purchase">
+                          <p class="price">{formatMoney(product.price)}</p>
+                          <button aria-controls="detail-title" aria-haspopup="dialog" class="catalog-cover__product-link" data-magnetic data-open-detail={product.id} type="button">
+                            Ver producto
+                            <svg aria-hidden="true" fill="none" focusable="false" height="14" viewBox="0 0 24 24" width="14">
+                              <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
+                            </svg>
+                          </button>
+                        </div>
                       </div>
                     </article>
                   ))}
                 </div>
 
-                <div class="hero-dots">
+                <div class="hero-dots catalog-cover__dots">
                   {heroSlides.map((product, index) => (
                     <button
                       aria-label={`Ver ${product.name}, ${product.scent}`}
@@ -314,51 +362,6 @@ const storeData = {
                   ))}
                 </div>
               </div>
-            </div>
-          </div>
-        </section>
-
-        <section class="catalog-campaign reveal" aria-labelledby="catalog-campaign-title" data-wf-section="catalog-campaign">
-          <div class="catalog-campaign__inner">
-            <div class="catalog-campaign__intro">
-              <p class="specimen-label">Del catálogo Yoga Verde</p>
-              <h2 class="motion-heading font-headline" data-motion-heading id="catalog-campaign-title">
-                El color nace del ingrediente.
-              </h2>
-              <p>
-                Manzanilla, lavanda, mango y uva construyen una identidad sensorial:
-                cada fórmula tiene su propio tono, textura y momento dentro del ritual.
-              </p>
-            </div>
-
-            <div class="catalog-campaign__gallery">
-              <figure class="catalog-campaign__scene catalog-campaign__scene--primary">
-                <img
-                  alt="Agua micelar, vela de bergamota y desmaquillante Yoga Verde entre hojas"
-                  decoding="async"
-                  loading="lazy"
-                  src="/yoga-verde/assets/catalog/ritual-botanico.webp"
-                />
-                <figcaption>Una colección botánica hecha en México.</figcaption>
-              </figure>
-              <figure class="catalog-campaign__scene catalog-campaign__scene--mango">
-                <img
-                  alt="Crema hidratante para manos Yoga Verde rodeada de mango"
-                  decoding="async"
-                  loading="lazy"
-                  src="/yoga-verde/assets/catalog/manos-mango.webp"
-                />
-                <figcaption>Mango · hidratación para manos</figcaption>
-              </figure>
-              <figure class="catalog-campaign__scene catalog-campaign__scene--chamomile">
-                <img
-                  alt="Agua micelar Yoga Verde entre flores de manzanilla"
-                  decoding="async"
-                  loading="lazy"
-                  src="/yoga-verde/assets/catalog/agua-micelar-manzanilla.webp"
-                />
-                <figcaption>Manzanilla · limpieza diaria</figcaption>
-              </figure>
             </div>
           </div>
         </section>
@@ -1141,7 +1144,9 @@ const storeData = {
           slides = selectedSlides;
           dots = selectedSlides.map(function (slide, index) {
             var dot = dotByProduct.get(slide.dataset.heroProduct);
+            var folio = slide.querySelector(".catalog-cover__folio");
             slide.dataset.heroSlide = String(index);
+            if (folio) folio.textContent = String(index + 1).padStart(2, "0");
             slider.appendChild(slide);
             if (dot) {
               dot.dataset.heroDot = String(index);
@@ -1228,12 +1233,12 @@ const storeData = {
             window.requestAnimationFrame(function () {
               window.requestAnimationFrame(function () {
                 slider.classList.add("is-ready");
-                slider.closest(".hero-frame")?.classList.add("is-ready");
+                slider.closest(".hero-frame, .catalog-cover__frame")?.classList.add("is-ready");
               });
             });
 
             if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
-              var heroFrame = slider.closest(".hero-frame");
+              var heroFrame = slider.closest(".hero-frame, .catalog-cover__frame");
               slider.addEventListener("pointermove", function (event) {
                 var bounds = slider.getBoundingClientRect();
                 var x = ((event.clientX - bounds.left) / bounds.width - 0.5) * 10;
