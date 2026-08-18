@@ -258,6 +258,43 @@ quedó incorporado a `origin/main` por fast-forward.
 - El hero móvil quedó dividido en tres regiones físicas —marca, fotografía y
   ficha—. Las mediciones en 320, 390 y 414 px reportaron cero intersección entre
   imagen y texto y cero overflow del documento.
+
+## Portada-catálogo y assets retina — 2026-08-18
+
+- “El color nace del ingrediente” y el hero se fusionaron en una sola portada
+  inspirada en el catálogo oficial: fondo crema continuo, jerarquía editorial,
+  logo real, acentos terracota y selección aleatoria de seis productos.
+- El conjunto disponible creció a 13 productos reales. La selección permanece
+  estable por navegador mediante una semilla local anónima; no se recopila PII
+  ni comportamiento del visitante.
+- Las imágenes se extrajeron de los originales embebidos en el PDF a 300 ppi,
+  no de screenshots. Los masters miden 1400–1624 px de ancho y hasta 2351 px
+  de alto; cada uno cuenta con un derivado de 800 px y entrega responsiva por
+  `srcset`/`sizes`.
+- En escritorio la fotografía vertical y la ficha viven en columnas separadas,
+  evitando que `cover` corte la etiqueta. En móvil la ficha empieza después de
+  la fotografía y el primer visual ya asoma dentro del viewport inicial.
+- QA desde build estático: `npm run check` sin diagnósticos, `npm run build`
+  exitoso, consola limpia y cero overflow horizontal en 320×692, 390×844,
+  414×896 y 1280×900. No se hizo merge ni despliegue en esta iteración.
+
+## Controles desktop y dirección de color — 2026-08-18
+
+- Los controles del hero ahora muestran explícitamente `01–06`, se numeran de
+  nuevo después del shuffle y exponen `aria-current` para la pieza activa.
+- En desktop el bloque se desplazó fuera del bisel orgánico: los seis objetivos
+  quedan completos, miden 44×44 y pasan hit-testing real en su centro.
+- Se añadió una gradación moderada por fotografía. Agua micelar usa mayor
+  saturación/contraste; cera y crema de manos, que ya eran referencias fuertes,
+  reciben el ajuste mínimo.
+- La manteca mango/coco usa `manteca-campana-v2.webp`, edición no destructiva
+  creada con la herramienta integrada de generación de imágenes. El original
+  sigue en el repositorio. La nueva escena corrige la percepción comprimida y
+  alinea mango, coco, tarro y fondo dentro de una composición vertical.
+- Verificación visual dirigida con semilla `22`: agua micelar, cera, manteca,
+  desmaquillante, desodorante y crema de manos; los seis controles fueron
+  accionables. En 390×844 la manteca no se superpone con la ficha y el documento
+  conserva cero overflow. Consola: cero errores y cero warnings.
 - Se incorporaron fotografías oficiales optimizadas bajo
   `site/public/yoga-verde/assets/catalog/` y una composición editorial sobre
   superficies crema. El PDF fuente no se versionó ni se despliega.
@@ -280,3 +317,21 @@ quedó incorporado a `origin/main` por fast-forward.
   dependencias debe hacerse en una iteración separada con regresión visual.
 - El tarball ahora usa `--no-xattrs` además de `COPYFILE_DISABLE=1` para omitir
   `com.apple.provenance` y evitar ruido de libarchive en despliegues futuros.
+
+## Selección anónima del hero — 2026-08-18
+
+- El hero dispone de nueve productos con fotografía real y presenta seis por
+  navegador, en un orden aleatorio estable. Esto amplía la variedad sin llenar
+  el hero móvil con controles que provocarían saturación u overflow.
+- La única persistencia es una semilla aleatoria de 32 bits en
+  `localStorage`, bajo `yoga-verde:hero-seed:v1`. No identifica a la persona,
+  no registra navegación y no se transmite al servidor.
+- Cada slide expone internamente categoría y familia de aroma como contrato
+  para un ranking futuro. No existe todavía perfilado, analítica ni uso de
+  información pública.
+- Una fase futura de recomendaciones deberá definir consentimiento, aviso de
+  privacidad, retención, borrado y explicación de por qué se recomienda cada
+  producto antes de registrar un perfil de consumo.
+- QA local: dos contextos aislados recibieron selecciones distintas; un mismo
+  contexto conservó su orden al recargar; seis slides y seis controles quedaron
+  visibles, sin errores de consola ni overflow en 320, 390, 414 y 1280 px.
