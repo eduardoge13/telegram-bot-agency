@@ -203,6 +203,30 @@ never use `git add .` when unrelated work is present, and never silently
 overwrite a dirty user checkout. If the visual result is in doubt, provide a
 desktop and mobile screenshot/checklist before proposing deployment.
 
+## Yoga Verde catalog and campaign handoff (2026-08-18)
+
+- The client catalog supplied as `Catalogo_YogaVerde_NP.pdf` is the source for
+  the current prices and benefit copy. The PDF itself is not committed or
+  shipped.
+- Seventeen existing storefront variants were matched to that catalog. Items
+  not present in the PDF keep their prior price; never infer a new price from a
+  similar product or kit.
+- The existing coconut-and-mint balm corresponds to the catalog's 50 g large
+  presentation at `$210`. Do not silently create the separate 10 g SKU without
+  a distinct approved photo and product record.
+- Catalog-derived WebP campaign assets live under
+  `site/public/yoga-verde/assets/catalog/`; their README records provenance.
+- The mobile hero deliberately separates brand, product media and product copy
+  into three stacked layout regions. Do not restore absolute text over the
+  product image. The accepted responsive invariant is zero intersection and
+  zero document overflow at 320, 390 and 414 px.
+- The editorial campaign section uses color inside the client photography
+  while keeping the surrounding UI cream/warm white. It is not permission to
+  restore large green interface surfaces.
+- Site CI is `.github/workflows/site-ci.yml`. It checks and builds pull requests
+  and `main`; deployment remains `site/scripts/deploy.sh` until GitHub has a
+  tested least-privilege SSH key and known-host secret.
+
 ## Response Format Specification
 
 All successful client lookups must return this **exact format**:

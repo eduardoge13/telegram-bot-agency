@@ -90,9 +90,12 @@ directory instead of applying an additive overlay.
 
 ### CI/CD
 
-There is none yet. If it is added later it must call this same script (or
-reproduce these steps exactly) so the deployment path stays single. A pipeline
-would need an SSH key with access to `vps-n8n:2222` stored as a secret.
+`.github/workflows/site-ci.yml` runs the locked install, Astro check and static
+build for site pull requests and pushes to `main`. Production deployment is
+still intentionally performed with this script: GitHub does not yet have the
+least-privilege SSH key and known-host secret required to call it safely. Any
+future CD job must invoke `site/scripts/deploy.sh`; it must not duplicate the
+tarball, rollback or live-verification logic.
 
 ## Routes
 

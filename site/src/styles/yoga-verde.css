@@ -4238,3 +4238,324 @@ body {
     transition: none;
   }
 }
+
+/* --------------------------------------------------------------------------
+   Catálogo 2026 — fotografía editorial proporcionada por la marca.
+   El color vive dentro de las escenas; las superficies de la interfaz siguen
+   siendo crema y blanco para que el producto conserve el protagonismo.
+   -------------------------------------------------------------------------- */
+.catalog-campaign {
+  overflow: hidden;
+  border-top: 1px solid var(--yv-line);
+  border-bottom: 1px solid var(--yv-line);
+  background:
+    radial-gradient(circle at 8% 12%, rgba(220, 176, 112, 0.16), transparent 30rem),
+    #f8f3ec;
+  padding: clamp(4rem, 8vw, 8rem) clamp(1.5rem, 5vw, 5rem);
+}
+
+.catalog-campaign__inner {
+  display: grid;
+  max-width: 90rem;
+  margin-inline: auto;
+  align-items: start;
+  gap: clamp(2.5rem, 6vw, 6rem);
+  grid-template-columns: minmax(16rem, 0.7fr) minmax(0, 1.45fr);
+}
+
+.catalog-campaign__intro {
+  position: sticky;
+  top: 8rem;
+  max-width: 29rem;
+}
+
+.catalog-campaign__intro h2 {
+  max-width: 9ch;
+  margin-top: 1rem;
+  color: var(--color-primary);
+  font-size: clamp(3.2rem, 6.2vw, 6.8rem);
+  line-height: 0.92;
+  letter-spacing: -0.045em;
+}
+
+.catalog-campaign__intro > p:last-child {
+  max-width: 29rem;
+  margin-top: 1.75rem;
+  color: var(--color-on-surface-variant);
+  font-size: clamp(0.95rem, 1.25vw, 1.1rem);
+  line-height: 1.8;
+}
+
+.catalog-campaign__gallery {
+  display: grid;
+  min-width: 0;
+  gap: clamp(1rem, 2.2vw, 2rem);
+  grid-template-columns: minmax(0, 1.25fr) minmax(12rem, 0.75fr);
+  grid-template-rows: repeat(2, minmax(17rem, 1fr));
+}
+
+.catalog-campaign__scene {
+  position: relative;
+  overflow: hidden;
+  min-width: 0;
+  margin: 0;
+  background: #eee3d8;
+}
+
+.catalog-campaign__scene--primary {
+  min-height: 48rem;
+  border-radius: 11rem 1.25rem 1.25rem 1.25rem;
+  grid-row: 1 / 3;
+}
+
+.catalog-campaign__scene--mango {
+  border-radius: 1.25rem 7rem 1.25rem 1.25rem;
+}
+
+.catalog-campaign__scene--chamomile {
+  border-radius: 1.25rem 1.25rem 7rem 1.25rem;
+}
+
+.catalog-campaign__scene img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 1.1s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.catalog-campaign__scene--primary img {
+  object-position: center 58%;
+}
+
+.catalog-campaign__scene--chamomile img {
+  object-position: 48% 48%;
+}
+
+.catalog-campaign__scene figcaption {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  left: 1rem;
+  width: fit-content;
+  max-width: calc(100% - 2rem);
+  border-radius: 999px;
+  background: rgba(255, 250, 245, 0.94);
+  padding: 0.65rem 0.9rem;
+  color: var(--color-primary);
+  font-size: 0.68rem;
+  font-weight: 750;
+  letter-spacing: 0.07em;
+  line-height: 1.35;
+  text-transform: uppercase;
+  backdrop-filter: blur(8px);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .catalog-campaign__scene:hover img {
+    transform: scale(1.025);
+  }
+}
+
+/* El hero móvil usa tres zonas independientes: marca, fotografía y texto.
+   Ningún texto comparte la misma caja visual con el producto. */
+@media (max-width: 767px) {
+  .hero-editorial,
+  .hero-editorial__inner {
+    overflow: hidden;
+  }
+
+  .hero-editorial__inner {
+    display: grid;
+    min-height: 0;
+    grid-template-rows: auto auto;
+    padding: 0;
+  }
+
+  .hero-brand-lockup {
+    position: relative;
+    top: auto;
+    left: auto;
+    z-index: 4;
+    min-height: 0;
+    justify-content: center;
+    align-items: center;
+    border-bottom: 1px solid var(--yv-line);
+    background: #faf8f4;
+    padding: 1.7rem 1.5rem 1.45rem;
+  }
+
+  .hero-logo {
+    width: min(42vw, 9.75rem);
+  }
+
+  .hero-gallery,
+  .hero-frame,
+  .hero-slider {
+    min-height: 0;
+  }
+
+  .hero-frame {
+    overflow: hidden;
+  }
+
+  .hero-slide {
+    display: grid;
+    height: auto;
+    min-height: 0;
+    grid-template-areas:
+      "media"
+      "caption";
+    grid-template-rows: minmax(25rem, 58svh) auto;
+  }
+
+  .hero-product-image {
+    grid-area: media;
+    width: calc(100% - 2rem);
+    height: calc(100% - 1.5rem);
+    margin: 1rem 1rem 0.5rem;
+    border-radius: 1.75rem 0.4rem 1.75rem 0.4rem;
+    background: linear-gradient(155deg, #fffdf9 0%, #f3e9df 100%);
+    object-fit: contain;
+    object-position: center;
+    padding: clamp(1rem, 5vw, 1.75rem);
+  }
+
+  .hero-caption {
+    position: relative;
+    top: auto;
+    right: auto;
+    bottom: auto;
+    left: auto;
+    z-index: 2;
+    display: grid;
+    width: auto;
+    min-height: 12rem;
+    margin: 0;
+    gap: 0.85rem;
+    grid-area: caption;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    border-top: 1px solid var(--yv-line);
+    background: #fffaf5;
+    padding: 1.4rem 1.5rem 5.2rem;
+  }
+
+  .hero-caption .hero-kicker {
+    font-size: 0.62rem;
+  }
+
+  .hero-caption .hero-product-name {
+    max-width: 12ch;
+    margin-top: 0.35rem;
+    font-size: clamp(2.15rem, 10.8vw, 3rem);
+    line-height: 0.98;
+  }
+
+  .hero-caption .hero-benefit {
+    display: block;
+    max-width: 27rem;
+    margin-top: 0.8rem;
+    overflow: visible;
+    color: var(--color-on-surface-variant);
+    font-size: 0.82rem;
+    line-height: 1.55;
+    -webkit-line-clamp: unset;
+  }
+
+  .hero-caption .hero-link {
+    margin: 0;
+    align-self: end;
+  }
+
+  .hero-dots {
+    right: auto;
+    bottom: 0.85rem;
+    left: 1.05rem;
+  }
+
+  .catalog-campaign {
+    padding: 4.5rem 1.5rem;
+  }
+
+  .catalog-campaign__inner {
+    display: block;
+  }
+
+  .catalog-campaign__intro {
+    position: static;
+    max-width: 100%;
+  }
+
+  .catalog-campaign__intro h2 {
+    max-width: 8ch;
+    font-size: clamp(3.2rem, 15vw, 4.7rem);
+  }
+
+  .catalog-campaign__intro > p:last-child {
+    margin-top: 1.25rem;
+    font-size: 0.9rem;
+    line-height: 1.7;
+  }
+
+  .catalog-campaign__gallery {
+    margin-top: 2.5rem;
+    gap: 1rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: auto auto;
+  }
+
+  .catalog-campaign__scene--primary {
+    min-height: 31rem;
+    border-radius: 6rem 1rem 1rem 1rem;
+    grid-column: 1 / -1;
+    grid-row: auto;
+  }
+
+  .catalog-campaign__scene--mango,
+  .catalog-campaign__scene--chamomile {
+    min-height: 18rem;
+  }
+
+  .catalog-campaign__scene--mango {
+    border-radius: 1rem 4rem 1rem 1rem;
+  }
+
+  .catalog-campaign__scene--chamomile {
+    border-radius: 1rem 1rem 4rem 1rem;
+  }
+
+  .catalog-campaign__scene figcaption {
+    right: 0.65rem;
+    bottom: 0.65rem;
+    left: 0.65rem;
+    max-width: calc(100% - 1.3rem);
+    border-radius: 0.65rem;
+    padding: 0.55rem 0.65rem;
+    font-size: 0.56rem;
+    line-height: 1.3;
+  }
+}
+
+@media (max-width: 340px) {
+  .hero-slide {
+    grid-template-rows: minmax(22rem, 55svh) auto;
+  }
+
+  .hero-caption {
+    grid-template-columns: 1fr;
+    padding-right: 1.25rem;
+    padding-left: 1.25rem;
+  }
+
+  .catalog-campaign {
+    padding-right: 1.25rem;
+    padding-left: 1.25rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .catalog-campaign__scene img {
+    transition: none;
+  }
+}
