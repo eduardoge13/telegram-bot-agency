@@ -244,3 +244,39 @@ quedó incorporado a `origin/main` por fast-forward.
   `ee5ea3baee64-20260809-162903-26112`; Yoga Verde y Blue Sky respondieron
   `200`; Trivy de la imagen final reportó `0` HIGH/CRITICAL y no quedaron
   releases temporales bajo `/docker`.
+
+## Catálogo vigente y campaña editorial — 2026-08-18
+
+- El PDF vigente proporcionado por el cliente se cruzó con los 27 productos de
+  la tienda. Se actualizaron 17 variantes existentes con sus precios oficiales
+  y se conservaron sin cambios los artículos ausentes del PDF; no se
+  inventaron tarifas para productos ni kits.
+- Beneficios y descripciones se adaptaron del catálogo con formulaciones
+  prudentes de “ayuda a” y “apariencia”. El bálsamo coco y menta existente se
+  identificó como la presentación grande de 50 g a `$210`; la presentación de
+  10 g no se creó sin fotografía y registro propios.
+- El hero móvil quedó dividido en tres regiones físicas —marca, fotografía y
+  ficha—. Las mediciones en 320, 390 y 414 px reportaron cero intersección entre
+  imagen y texto y cero overflow del documento.
+- Se incorporaron fotografías oficiales optimizadas bajo
+  `site/public/yoga-verde/assets/catalog/` y una composición editorial sobre
+  superficies crema. El PDF fuente no se versionó ni se despliega.
+- El detalle móvil fue verificado con scroll interno, cierre de 44 px, Escape,
+  retorno de foco y el precio actualizado; la consola quedó sin errores.
+- Se creó `.github/workflows/site-ci.yml`: instalación bloqueada, check y build
+  para PRs y `main`, permisos de solo lectura, acciones fijadas por SHA,
+  timeout y concurrencia cancelable. El primer run pasó en 38 segundos.
+- PR `#2` integrado a `main` mediante merge commit `0472a2f`. El release se
+  desplegó desde ese commit con `site/scripts/deploy.sh`; tarball de 8.2 MB,
+  SHA-256 verificado, staging completo, Trivy `0` y rollback disponible.
+- Manifest activo:
+  `0472a2f0204f-20260818-130157-1488`. Yoga Verde y Blue Sky respondieron `200`,
+  el asset editorial respondió `200` y los precios oficiales se confirmaron en
+  el HTML servido.
+- `npm audit` sigue señalando vulnerabilidades de la cadena de compilación. Una
+  actualización dentro de rango redujo el conteo, pero rompió la compatibilidad
+  Astro/Vite/Tailwind; se revirtió por completo. El runtime publicado es nginx
+  estático y la imagen final sí pasó la compuerta Trivy. La migración de
+  dependencias debe hacerse en una iteración separada con regresión visual.
+- El tarball ahora usa `--no-xattrs` además de `COPYFILE_DISABLE=1` para omitir
+  `com.apple.provenance` y evitar ruido de libarchive en despliegues futuros.

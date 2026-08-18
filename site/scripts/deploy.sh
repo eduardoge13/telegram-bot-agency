@@ -152,7 +152,7 @@ npm run build
 #    dependencias, git y cualquier credencial.
 # ---------------------------------------------------------------------------
 say "Empaquetando $SITE_DIR"
-COPYFILE_DISABLE=1 tar --exclude='node_modules' \
+COPYFILE_DISABLE=1 tar --no-xattrs --exclude='node_modules' \
     --exclude='.git' \
     --exclude='.astro' \
     --exclude='dist' \
