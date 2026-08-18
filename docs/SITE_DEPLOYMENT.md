@@ -110,20 +110,24 @@ release activo.
 
 ---
 
-## CI/CD
+## CI y CD
 
-**No existe todavía.** No hay `.github/workflows/` ni ningún otro pipeline en
-este repositorio.
+Existe CI para el sitio en `.github/workflows/site-ci.yml`. En cada pull
+request que toca `site/` y en cada push a `main` ejecuta `npm ci`,
+`npm run check` y `npm run build` con permisos de solo lectura, acciones
+fijadas por SHA, timeout y cancelación de ejecuciones obsoletas.
 
-Si se agrega, debe **invocar este mismo script** (o reproducir sus pasos
-exactamente) para que la ruta de despliegue siga siendo una sola. Requeriría:
+El CD remoto aún no corre dentro de GitHub Actions. La única ruta de producción
+sigue siendo este script canónico. Automatizar el CD requeriría:
 
 - una llave SSH con acceso a `vps-n8n:2222` como secreto del repositorio;
 - ejecutar únicamente cuando cambie `site/`;
-- conservar la validación de staging y la verificación de contenido en vivo.
+- conservar la validación de staging, Trivy, rollback y la verificación del
+  manifest en vivo llamando a `site/scripts/deploy.sh`.
 
-No se creó un workflow ahora porque sin el secreto configurado quedaría un
-pipeline que falla en cada ejecución, lo cual es peor que no tenerlo.
+No debe agregarse un job de despliegue que dependa de una llave inexistente:
+primero se configura y prueba el secreto con alcance mínimo; después el job de
+CD puede invocar el mismo script, sin crear una segunda implementación.
 
 ---
 
