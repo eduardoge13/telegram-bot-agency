@@ -9,7 +9,9 @@ interface Props {
 const { locale } = Astro.props;
 const copy = homeContent[locale];
 
-const HERO_CHIP_CODES = ['MAD', 'BCN', 'PAR', 'CUN', 'ROM', 'AMS'];
+// Cheapest first — deals.json is already sorted by floor price, and hard-coding codes
+// here would silently blank out chips whenever the scraper drops a route.
+const HERO_CHIP_LIMIT = 6;
 const deals = dealsData.deals as Array<{
 	code: string;
 	city: Record<Locale, string>;
@@ -17,14 +19,13 @@ const deals = dealsData.deals as Array<{
 	region: string;
 	image: string;
 	priceFrom: number;
+	priceTo: number;
 	currency: string;
 	sampleSize: number;
 	lastSeen: string;
 }>;
 
-const heroChips = HERO_CHIP_CODES.map((code) => deals.find((d) => d.code === code)).filter(
-	(d): d is (typeof deals)[number] => Boolean(d),
-);
+const heroChips = deals.slice(0, HERO_CHIP_LIMIT);
 
 const priceFormatter = new Intl.NumberFormat(locale === 'es' ? 'es-MX' : 'en-US', {
 	maximumFractionDigits: 0,
@@ -88,14 +89,14 @@ const generatedAt = dealsData.generatedAt ? dateFormatter.format(new Date(dealsD
 				<div class="mt-10 flex flex-wrap gap-2.5">
 					{heroChips.map((deal) => (
 						<a
-							href={dealWhatsappHref(locale, deal.city[locale], deal.priceFrom, deal.currency)}
+							href={dealWhatsappHref(locale, deal.city[locale], deal.priceFrom, deal.priceTo, deal.currency)}
 							target="_blank"
 							rel="noreferrer"
 							class="group inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-white ring-1 ring-white/20 backdrop-blur transition hover:bg-white hover:text-brand-navy"
 						>
 							{deal.city[locale]}
 							<span class="text-brand-sky group-hover:text-brand-blue">
-								${priceFormatter.format(deal.priceFrom)}
+								{locale === 'es' ? 'desde' : 'from'} ${priceFormatter.format(deal.priceFrom)}
 							</span>
 						</a>
 					))}
@@ -139,17 +140,20 @@ const generatedAt = dealsData.generatedAt ? dateFormatter.format(new Date(dealsD
 						<div class="flex flex-1 flex-col justify-between p-5">
 							<div>
 								<p class="text-xs uppercase tracking-wide text-slate-400">
-									{locale === 'es' ? 'Desde, por persona' : 'From, per person'}
+									{copy.dealsHeading.rangeLabel}
 								</p>
 								<p class="mt-1 font-[var(--font-display)] text-2xl font-extrabold text-brand-navy">
-									${priceFormatter.format(deal.priceFrom)} <span class="text-base font-semibold text-slate-500">{deal.currency}</span>
+									${priceFormatter.format(deal.priceFrom)}
+									<span class="text-slate-300">–</span>
+									${priceFormatter.format(deal.priceTo)}
+									<span class="text-base font-semibold text-slate-500">{deal.currency}</span>
 								</p>
 								<p class="mt-1 text-xs text-slate-400">
 									{deal.sampleSize} {copy.dealsHeading.sampleSuffix}
 								</p>
 							</div>
 							<a
-								href={dealWhatsappHref(locale, deal.city[locale], deal.priceFrom, deal.currency)}
+								href={dealWhatsappHref(locale, deal.city[locale], deal.priceFrom, deal.priceTo, deal.currency)}
 								target="_blank"
 								rel="noreferrer"
 								class="mt-4 inline-flex items-center justify-center gap-2 rounded-full bg-brand-navy px-4 py-2.5 text-sm font-bold text-white transition hover:bg-brand-blue"
@@ -173,6 +177,8 @@ const generatedAt = dealsData.generatedAt ? dateFormatter.format(new Date(dealsD
 					</a>
 				</article>
 			</div>
+
+			<p class="mt-8 text-sm text-slate-400">{copy.dealsHeading.rangeNote}</p>
 		</div>
 	</section>
 

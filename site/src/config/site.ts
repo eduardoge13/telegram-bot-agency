@@ -32,13 +32,16 @@ export const dealWhatsappHref = (
 	locale: Locale,
 	cityName: string,
 	priceFrom?: number,
+	priceTo?: number,
 	currency?: string,
 ) => {
+	// Carry the whole band into the chat, never the floor alone: a lead who opens
+	// WhatsApp with a single exact figure in writing expects that figure back.
 	const priceLine =
-		priceFrom && currency
+		priceFrom && priceTo && currency
 			? locale === 'es'
-				? ` Vi que hay tarifas desde $${priceFrom.toLocaleString('es-MX')} ${currency} por persona.`
-				: ` I saw fares from $${priceFrom.toLocaleString('en-US')} ${currency} per person.`
+				? ` Vi el rango de referencia de $${priceFrom.toLocaleString('es-MX')} a $${priceTo.toLocaleString('es-MX')} ${currency} por persona.`
+				: ` I saw the reference range of $${priceFrom.toLocaleString('en-US')} to $${priceTo.toLocaleString('en-US')} ${currency} per person.`
 			: '';
 	const text =
 		locale === 'es'
@@ -96,10 +99,12 @@ export const homeContent = {
 		dealsHeading: {
 			eyebrow: 'Destinos con buen precio ahora',
 			title: 'Tarifas reales, monitoreadas todos los días.',
-			body: 'Estas son las tarifas mínimas que hemos visto por persona en las últimas semanas. Elige un destino y te cotizamos tu fecha exacta por WhatsApp.',
+			body: 'Estos son los rangos por persona que hemos visto en las últimas semanas: del vuelo más barato al precio típico. Elige un destino y te cotizamos tu fecha exacta por WhatsApp.',
 			ctaLabel: 'Cotizar este destino',
 			updatedPrefix: 'Precios actualizados el',
 			sampleSuffix: 'tarifas monitoreadas',
+			rangeLabel: 'Por persona, rango de referencia',
+			rangeNote: 'Rango de referencia sujeto a disponibilidad y fechas.',
 			fallbackTitle: '¿No ves tu destino?',
 			fallbackBody: 'Cotizamos cualquier ruta, no solo las que están en la lista.',
 			fallbackCta: 'Preguntar por otro destino',
@@ -182,7 +187,7 @@ export const homeContent = {
 			{
 				question: '¿Los precios que veo en el sitio son reales?',
 				answer:
-					'Sí. Son las tarifas mínimas por persona que hemos detectado en las últimas semanas para esa ruta. El precio final depende de tu fecha exacta, por eso confirmamos todo por WhatsApp antes de cobrar cualquier cosa.',
+					'Sí. Cada rango sale de las tarifas por persona que detectamos para esa ruta en las últimas semanas: el primer número es el vuelo más barato que vimos y el segundo es el precio típico. Tu precio final depende de tu fecha exacta, por eso confirmamos todo por WhatsApp antes de cobrar cualquier cosa.',
 			},
 			{
 				question: '¿Atienden en inglés?',
@@ -236,10 +241,12 @@ export const homeContent = {
 		dealsHeading: {
 			eyebrow: 'Destinations with a good price right now',
 			title: 'Real fares, monitored every day.',
-			body: 'These are the lowest per-person fares we have seen in recent weeks. Pick a destination and we will quote your exact dates over WhatsApp.',
+			body: 'These are the per-person ranges we have seen in recent weeks, from the cheapest flight to the typical price. Pick a destination and we will quote your exact dates over WhatsApp.',
 			ctaLabel: 'Quote this destination',
 			updatedPrefix: 'Prices updated on',
 			sampleSuffix: 'fares monitored',
+			rangeLabel: 'Per person, reference range',
+			rangeNote: 'Reference range, subject to availability and dates.',
 			fallbackTitle: "Don't see your destination?",
 			fallbackBody: 'We quote any route, not just the ones listed here.',
 			fallbackCta: 'Ask about another destination',
@@ -322,7 +329,7 @@ export const homeContent = {
 			{
 				question: 'Are the prices shown on the site real?',
 				answer:
-					'Yes. They are the lowest per-person fares we have detected for that route in recent weeks. The final price depends on your exact dates, which is why we confirm everything over WhatsApp before charging anything.',
+					'Yes. Each range comes from the per-person fares we detected for that route in recent weeks: the first number is the cheapest flight we saw, the second is the typical price. Your final price depends on your exact dates, which is why we confirm everything over WhatsApp before charging anything.',
 			},
 			{
 				question: 'Do you support English speakers?',

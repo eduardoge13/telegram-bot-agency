@@ -1,41 +1,31 @@
 {
-	"generatedAt": "2026-07-10T03:30:50.469Z",
+	"generatedAt": "2026-08-18T19:15:14.377Z",
 	"lookbackDays": 45,
-	"deals": [
+	"minSample": 20,
+	"maxStaleDays": 21,
+	"skipped": [
 		{
 			"code": "ACA",
-			"city": {
-				"es": "Acapulco",
-				"en": "Acapulco"
-			},
-			"country": {
-				"es": "México",
-				"en": "Mexico"
-			},
-			"region": "domestic",
-			"image": "acapulco.jpg",
-			"priceFrom": 2634,
-			"currency": "MXN",
-			"sampleSize": 4,
-			"lastSeen": "2026-07-10T03:13:23Z"
+			"reason": "sample",
+			"sampleSize": 4
 		},
 		{
 			"code": "CUN",
-			"city": {
-				"es": "Cancún",
-				"en": "Cancún"
-			},
-			"country": {
-				"es": "México",
-				"en": "Mexico"
-			},
-			"region": "domestic",
-			"image": "cancun.jpg",
-			"priceFrom": 3164,
-			"currency": "MXN",
-			"sampleSize": 4,
-			"lastSeen": "2026-07-10T03:17:02Z"
+			"reason": "sample",
+			"sampleSize": 4
 		},
+		{
+			"code": "ROM",
+			"reason": "stale",
+			"lastSeen": "2026-07-08T04:37:40Z"
+		},
+		{
+			"code": "PAR",
+			"reason": "stale",
+			"lastSeen": "2026-07-08T04:37:30Z"
+		}
+	],
+	"deals": [
 		{
 			"code": "MAD",
 			"city": {
@@ -48,10 +38,11 @@
 			},
 			"region": "europe",
 			"image": "madrid.jpg",
-			"priceFrom": 11208,
+			"priceFrom": 11000,
+			"priceTo": 21000,
 			"currency": "MXN",
-			"sampleSize": 88,
-			"lastSeen": "2026-07-10T03:30:11Z"
+			"sampleSize": 71,
+			"lastSeen": "2026-08-18T19:02:06Z"
 		},
 		{
 			"code": "BCN",
@@ -65,10 +56,11 @@
 			},
 			"region": "europe",
 			"image": "barcelona.jpg",
-			"priceFrom": 17151,
+			"priceFrom": 17000,
+			"priceTo": 22000,
 			"currency": "MXN",
-			"sampleSize": 76,
-			"lastSeen": "2026-07-10T03:29:44Z"
+			"sampleSize": 68,
+			"lastSeen": "2026-08-18T19:01:32Z"
 		},
 		{
 			"code": "BRU",
@@ -82,44 +74,11 @@
 			},
 			"region": "europe",
 			"image": "brussels.jpg",
-			"priceFrom": 18059,
+			"priceFrom": 18500,
+			"priceTo": 24000,
 			"currency": "MXN",
-			"sampleSize": 76,
-			"lastSeen": "2026-07-10T03:29:45Z"
-		},
-		{
-			"code": "ROM",
-			"city": {
-				"es": "Roma",
-				"en": "Rome"
-			},
-			"country": {
-				"es": "Italia",
-				"en": "Italy"
-			},
-			"region": "europe",
-			"image": "rome.jpg",
-			"priceFrom": 18222,
-			"currency": "MXN",
-			"sampleSize": 56,
-			"lastSeen": "2026-07-08T04:37:40Z"
-		},
-		{
-			"code": "PAR",
-			"city": {
-				"es": "París",
-				"en": "Paris"
-			},
-			"country": {
-				"es": "Francia",
-				"en": "France"
-			},
-			"region": "europe",
-			"image": "paris.jpg",
-			"priceFrom": 18684,
-			"currency": "MXN",
-			"sampleSize": 55,
-			"lastSeen": "2026-07-08T04:37:30Z"
+			"sampleSize": 58,
+			"lastSeen": "2026-08-18T19:01:43Z"
 		},
 		{
 			"code": "AMS",
@@ -133,10 +92,11 @@
 			},
 			"region": "europe",
 			"image": "amsterdam.jpg",
-			"priceFrom": 19226,
+			"priceFrom": 19000,
+			"priceTo": 25000,
 			"currency": "MXN",
-			"sampleSize": 72,
-			"lastSeen": "2026-07-10T03:29:42Z"
+			"sampleSize": 56,
+			"lastSeen": "2026-08-18T19:01:42Z"
 		},
 		{
 			"code": "FRA",
@@ -150,27 +110,11 @@
 			},
 			"region": "europe",
 			"image": "frankfurt.jpg",
-			"priceFrom": 20982,
+			"priceFrom": 20000,
+			"priceTo": 26000,
 			"currency": "MXN",
-			"sampleSize": 52,
-			"lastSeen": "2026-07-10T03:29:31Z"
-		},
-		{
-			"code": "BER",
-			"city": {
-				"es": "Berlín",
-				"en": "Berlin"
-			},
-			"country": {
-				"es": "Alemania",
-				"en": "Germany"
-			},
-			"region": "europe",
-			"image": "berlin.jpg",
-			"priceFrom": 21158,
-			"currency": "MXN",
-			"sampleSize": 57,
-			"lastSeen": "2026-07-10T03:30:08Z"
+			"sampleSize": 45,
+			"lastSeen": "2026-08-18T19:00:57Z"
 		},
 		{
 			"code": "MUC",
@@ -184,10 +128,29 @@
 			},
 			"region": "europe",
 			"image": "munich.jpg",
-			"priceFrom": 21361,
+			"priceFrom": 21000,
+			"priceTo": 27000,
 			"currency": "MXN",
-			"sampleSize": 59,
-			"lastSeen": "2026-07-10T03:30:09Z"
+			"sampleSize": 57,
+			"lastSeen": "2026-08-18T19:01:08Z"
+		},
+		{
+			"code": "BER",
+			"city": {
+				"es": "Berlín",
+				"en": "Berlin"
+			},
+			"country": {
+				"es": "Alemania",
+				"en": "Germany"
+			},
+			"region": "europe",
+			"image": "berlin.jpg",
+			"priceFrom": 21000,
+			"priceTo": 26000,
+			"currency": "MXN",
+			"sampleSize": 55,
+			"lastSeen": "2026-08-18T19:01:30Z"
 		}
 	]
 }
