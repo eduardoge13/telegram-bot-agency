@@ -383,3 +383,40 @@ quedó incorporado a `origin/main` por fast-forward.
   carrito persistente y CTA de producto verificados en navegador real.
 - Rama de trabajo: `codex/yoga-verde-multipage-redesign`. Esta iteración queda
   solo para aprobación local; no se desplegó ni se modificó producción.
+
+## Release multipágina y ruta canónica — 2026-08-18
+
+- El rediseño se integró mediante PR `#6` y merge commit `e3708b0`; los hotfixes
+  de URL canónica pasaron por PR `#7` y `#8`. El release final corresponde al
+  merge commit `e8f9fbe` de `origin/main`.
+- La auditoría previa cubrió 48 rutas publicables y 97 recursos enlazados. En
+  navegador real se validaron 320, 390, 414 y 1280 px sin overflow, consola
+  limpia, 27 productos, seis kits, búsqueda/filtros, menú, detalle, imágenes y
+  carrito. El carrito añade, incrementa, reduce, elimina y conserva estado al
+  cambiar de página; sus controles y el logo cumplen 44 px en móvil.
+- Ritual Facial sirve sus tres imágenes reales: agua micelar, crema facial y
+  contorno de ojos. La ficha de contorno confirma `$350` y `10 mL`; el kit
+  confirma `$749`.
+- La verificación independiente del primer release detectó un `404` exclusivo
+  de `/yoga-verde` sin slash. El siguiente deploy rechazó correctamente un
+  `Location: http://...` generado detrás de Traefik y ejecutó rollback completo.
+  El hotfix final usa redirección relativa `308 /yoga-verde/` y el script
+  canónico ahora la exige en cada despliegue.
+- El release final se publicó solo mediante `site/scripts/deploy.sh`: tarball de
+  14 MB y 201 entradas, SHA-256
+  `891702e116a4d19b13f3887420693761825cf7c62482fdf17a0ae215cd29c759`,
+  staging en el mismo volumen, swap completo, rollback por estado y compuerta
+  Trivy antes de recrear el contenedor. No se usó `rsync` ni copia recursiva.
+- Manifest vivo:
+  `e8f9fbec3741-20260818-160413-40220`. Yoga Verde, Blue Sky y `www`
+  respondieron `200`; el contenedor quedó `running`, con `RestartCount=0`, y la
+  imagen final Alpine 3.23.5 reportó `0` HIGH/CRITICAL en Trivy.
+- Límite comercial vigente: el carrito funciona, pero
+  `/api/yoga-verde/checkout` responde `404` porque el shell de Stripe no está
+  conectado al Compose productivo. No presentar el sitio como capaz de cobrar
+  hasta desplegar la API con cuenta, secretos y pruebas propias de Yoga Verde.
+- `npm ci` continúa reportando 14 avisos en dependencias de compilación, nueve
+  HIGH. No forman parte del runtime Nginx estático; migrarlos en una iteración
+  separada con regresión funcional/visual, sin ejecutar `npm audit fix` a
+  ciegas. GitHub Actions también avisa que los SHA actuales de checkout/setup
+  usan runtime Node 20 forzado a Node 24; actualizar esas actions por separado.
