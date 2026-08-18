@@ -1,0 +1,193 @@
+{
+	"generatedAt": "2026-07-10T03:30:50.469Z",
+	"lookbackDays": 45,
+	"deals": [
+		{
+			"code": "ACA",
+			"city": {
+				"es": "Acapulco",
+				"en": "Acapulco"
+			},
+			"country": {
+				"es": "México",
+				"en": "Mexico"
+			},
+			"region": "domestic",
+			"image": "acapulco.jpg",
+			"priceFrom": 2634,
+			"currency": "MXN",
+			"sampleSize": 4,
+			"lastSeen": "2026-07-10T03:13:23Z"
+		},
+		{
+			"code": "CUN",
+			"city": {
+				"es": "Cancún",
+				"en": "Cancún"
+			},
+			"country": {
+				"es": "México",
+				"en": "Mexico"
+			},
+			"region": "domestic",
+			"image": "cancun.jpg",
+			"priceFrom": 3164,
+			"currency": "MXN",
+			"sampleSize": 4,
+			"lastSeen": "2026-07-10T03:17:02Z"
+		},
+		{
+			"code": "MAD",
+			"city": {
+				"es": "Madrid",
+				"en": "Madrid"
+			},
+			"country": {
+				"es": "España",
+				"en": "Spain"
+			},
+			"region": "europe",
+			"image": "madrid.jpg",
+			"priceFrom": 11208,
+			"currency": "MXN",
+			"sampleSize": 88,
+			"lastSeen": "2026-07-10T03:30:11Z"
+		},
+		{
+			"code": "BCN",
+			"city": {
+				"es": "Barcelona",
+				"en": "Barcelona"
+			},
+			"country": {
+				"es": "España",
+				"en": "Spain"
+			},
+			"region": "europe",
+			"image": "barcelona.jpg",
+			"priceFrom": 17151,
+			"currency": "MXN",
+			"sampleSize": 76,
+			"lastSeen": "2026-07-10T03:29:44Z"
+		},
+		{
+			"code": "BRU",
+			"city": {
+				"es": "Bruselas",
+				"en": "Brussels"
+			},
+			"country": {
+				"es": "Bélgica",
+				"en": "Belgium"
+			},
+			"region": "europe",
+			"image": "brussels.jpg",
+			"priceFrom": 18059,
+			"currency": "MXN",
+			"sampleSize": 76,
+			"lastSeen": "2026-07-10T03:29:45Z"
+		},
+		{
+			"code": "ROM",
+			"city": {
+				"es": "Roma",
+				"en": "Rome"
+			},
+			"country": {
+				"es": "Italia",
+				"en": "Italy"
+			},
+			"region": "europe",
+			"image": "rome.jpg",
+			"priceFrom": 18222,
+			"currency": "MXN",
+			"sampleSize": 56,
+			"lastSeen": "2026-07-08T04:37:40Z"
+		},
+		{
+			"code": "PAR",
+			"city": {
+				"es": "París",
+				"en": "Paris"
+			},
+			"country": {
+				"es": "Francia",
+				"en": "France"
+			},
+			"region": "europe",
+			"image": "paris.jpg",
+			"priceFrom": 18684,
+			"currency": "MXN",
+			"sampleSize": 55,
+			"lastSeen": "2026-07-08T04:37:30Z"
+		},
+		{
+			"code": "AMS",
+			"city": {
+				"es": "Ámsterdam",
+				"en": "Amsterdam"
+			},
+			"country": {
+				"es": "Países Bajos",
+				"en": "Netherlands"
+			},
+			"region": "europe",
+			"image": "amsterdam.jpg",
+			"priceFrom": 19226,
+			"currency": "MXN",
+			"sampleSize": 72,
+			"lastSeen": "2026-07-10T03:29:42Z"
+		},
+		{
+			"code": "FRA",
+			"city": {
+				"es": "Fráncfort",
+				"en": "Frankfurt"
+			},
+			"country": {
+				"es": "Alemania",
+				"en": "Germany"
+			},
+			"region": "europe",
+			"image": "frankfurt.jpg",
+			"priceFrom": 20982,
+			"currency": "MXN",
+			"sampleSize": 52,
+			"lastSeen": "2026-07-10T03:29:31Z"
+		},
+		{
+			"code": "BER",
+			"city": {
+				"es": "Berlín",
+				"en": "Berlin"
+			},
+			"country": {
+				"es": "Alemania",
+				"en": "Germany"
+			},
+			"region": "europe",
+			"image": "berlin.jpg",
+			"priceFrom": 21158,
+			"currency": "MXN",
+			"sampleSize": 57,
+			"lastSeen": "2026-07-10T03:30:08Z"
+		},
+		{
+			"code": "MUC",
+			"city": {
+				"es": "Múnich",
+				"en": "Munich"
+			},
+			"country": {
+				"es": "Alemania",
+				"en": "Germany"
+			},
+			"region": "europe",
+			"image": "munich.jpg",
+			"priceFrom": 21361,
+			"currency": "MXN",
+			"sampleSize": 59,
+			"lastSeen": "2026-07-10T03:30:09Z"
+		}
+	]
+}

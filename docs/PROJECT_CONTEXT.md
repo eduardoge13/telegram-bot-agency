@@ -1,3 +1,19 @@
+# Current VPS Context Override
+
+As of `2026-06-15`, the operational production footprint for this project is on the VPS `root@72.60.228.135` (`srv1175749`), not only Cloud Run.
+
+Before changing infrastructure, read:
+
+- `docs/VPS_SERVICE_INVENTORY.md`
+- `docs/VPS_CLIENT_ONE_PAGER_2026-06-15.md`
+
+Key current facts:
+
+- `telegram-bot-agency.service` is active on the VPS for the existing Telegram client lookup bot.
+- `sales-commissions-bot.service` is active for the new Sales/Commissions bot.
+- n8n, WhatsApp bot, Traefik, Punto Clave shop, Bluesky/Yoga site, Clinica backend/Postgres, and NTL visualization also run on the same VPS.
+- Do not persist or print secrets from `.env`, tokens, service-account JSON, or OAuth credentials.
+
 # 📋 Project Context - Telegram Client Data Bot
 
 ## Project Identity

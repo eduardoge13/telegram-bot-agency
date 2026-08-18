@@ -16,26 +16,39 @@ const navItems = copy.nav.map((item) => ({
 }));
 ---
 
-<header class="topbar">
-	<div class="container topbar__inner">
-		<a class="brand-mark" href={homePath}>
-			<span class="brand-mark__star" aria-hidden="true"></span>
-			<span>{copy.title.split('|')[0].trim()}</span>
+<header class="sticky top-0 z-30 border-b border-white/10 bg-brand-navy/90 backdrop-blur">
+	<div class="mx-auto flex min-h-[4.5rem] max-w-6xl items-center justify-between gap-4 px-6">
+		<a class="flex items-center gap-2 text-lg font-extrabold text-white" href={homePath}>
+			<span class="h-2.5 w-2.5 rounded-full bg-brand-coral" aria-hidden="true"></span>
+			{copy.title.split('|')[0].trim()}
 		</a>
 
-		<nav class="topbar__nav" aria-label={locale === 'es' ? 'Principal' : 'Primary'}>
+		<nav
+			class="hidden items-center gap-6 text-sm font-semibold text-white/75 lg:flex"
+			aria-label={locale === 'es' ? 'Principal' : 'Primary'}
+		>
 			{navItems.map((item) => (
-				<a href={item.href}>{item.label}</a>
+				<a class="transition hover:text-white" href={item.href}>{item.label}</a>
 			))}
-			<a href={localizedPaths.privacy[locale]}>{locale === 'es' ? 'Privacidad' : 'Privacy'}</a>
+			<a class="transition hover:text-white" href={localizedPaths.privacy[locale]}>
+				{locale === 'es' ? 'Privacidad' : 'Privacy'}
+			</a>
 		</nav>
 
-		<div class="topbar__actions">
-			<a class="language-switch" href={alternatePath}>
+		<div class="flex items-center gap-3">
+			<a
+				class="rounded-full border border-white/25 px-3 py-1.5 text-sm font-semibold text-white/80 transition hover:border-white/50 hover:text-white"
+				href={alternatePath}
+			>
 				{copy.languageLabel}
 			</a>
-			<a class="button button--ghost button--small" href={whatsappHref(locale)} target="_blank" rel="noreferrer">
-				{locale === 'es' ? 'WhatsApp' : 'WhatsApp'}
+			<a
+				class="inline-flex items-center gap-2 rounded-full bg-brand-coral px-4 py-2 text-sm font-bold text-white transition hover:bg-brand-coral-deep"
+				href={whatsappHref(locale)}
+				target="_blank"
+				rel="noreferrer"
+			>
+				WhatsApp
 			</a>
 		</div>
 	</div>

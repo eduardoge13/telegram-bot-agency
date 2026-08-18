@@ -28,6 +28,25 @@ const whatsappMessages: Record<Locale, string> = {
 export const whatsappHref = (locale: Locale) =>
 	`https://wa.me/${brand.whatsappE164}?text=${encodeURIComponent(whatsappMessages[locale])}`;
 
+export const dealWhatsappHref = (
+	locale: Locale,
+	cityName: string,
+	priceFrom?: number,
+	currency?: string,
+) => {
+	const priceLine =
+		priceFrom && currency
+			? locale === 'es'
+				? ` Vi que hay tarifas desde $${priceFrom.toLocaleString('es-MX')} ${currency} por persona.`
+				: ` I saw fares from $${priceFrom.toLocaleString('en-US')} ${currency} per person.`
+			: '';
+	const text =
+		locale === 'es'
+			? `Hola, quiero cotizar un viaje a ${cityName}.${priceLine} ¿Me ayudan?`
+			: `Hi, I want to get a quote for a trip to ${cityName}.${priceLine} Can you help me?`;
+	return `https://wa.me/${brand.whatsappE164}?text=${encodeURIComponent(text)}`;
+};
+
 export const localizedPaths = {
 	home: {
 		es: '/',
@@ -54,208 +73,139 @@ export const legalWarning = {
 
 export const homeContent = {
 	es: {
-		title: 'Blue Sky Travel | Viajes premium coordinados por WhatsApp',
+		title: 'Blue Sky Travel | Vuelos y viajes premium por WhatsApp',
 		description:
-			'Landing page bilingüe para Blue Sky Travel. Planeación de viajes premium, coordinación clara y una experiencia lista para vender por WhatsApp.',
+			'Encuentra las mejores tarifas a Europa y destinos de playa, y arma tu viaje directo por WhatsApp con un agente bilingüe. Precios verificados a diario.',
 		nav: [
+			{ label: 'Destinos', href: '#deals' },
 			{ label: 'Servicios', href: '#services' },
-			{ label: 'Proceso', href: '#process' },
+			{ label: 'Cómo funciona', href: '#process' },
 			{ label: 'FAQ', href: '#faq' },
 		],
 		languageLabel: 'EN',
 		languageHref: localizedPaths.home.en,
 		hero: {
-			eyebrow: 'Travel design for a faster sales funnel',
-			headline:
-				'Una experiencia de viajes premium que se siente sólida desde el primer clic.',
+			eyebrow: 'Vuelos y viajes a tu medida, sin escalas de por medio',
+			headline: '¿A dónde te llevamos? Elige un destino y cotiza por WhatsApp en segundos.',
 			body:
-				'Blue Sky Travel convierte mejor cuando la marca, la claridad y el acceso por WhatsApp trabajan juntos. Esta fase crea la base visual, legal y comercial para vender con autoridad.',
-			primaryCta: 'Planear por WhatsApp',
-			secondaryCta: 'Ver proceso',
-			badges: ['Bilingüe', 'WhatsApp-first', 'Sin fricción en el primer contacto'],
-			spotlightLabel: 'Vista previa de experiencia',
-			spotlightTitle: 'Itinerarios claros, handoff directo y CTA lista para vender.',
-			spotlightBody:
-				'La homepage organiza discovery, confianza y acción. El cliente entiende el valor, sabe qué esperar y encuentra el siguiente paso sin ruido.',
-			spotlightStats: [
-				{ label: 'Canal principal', value: 'WhatsApp' },
-				{ label: 'Idiomas', value: 'ES / EN' },
-				{ label: 'Fase 1', value: 'Homepage + legal' },
-			],
-			journeyCards: [
-				{
-					kicker: 'Corporate travel',
-					title: 'Coordina viajes ejecutivos sin perder tiempo en explicaciones innecesarias.',
-				},
-				{
-					kicker: 'Celebration travel',
-					title: 'Escapadas premium, luna de miel y fechas clave con un tono más elevado.',
-				},
-				{
-					kicker: 'Family planning',
-					title: 'Requisitos, ritmo del viaje y decisiones más claras desde el inicio.',
-				},
-			],
+				'Monitoreamos tarifas de aerolíneas todos los días para que tu viaje a Europa, el Caribe o donde sea salga a buen precio. Elige un destino, te armamos la ruta y cerramos todo por WhatsApp.',
+			primaryCta: 'Cotizar por WhatsApp',
+			secondaryCta: 'Ver destinos y precios',
+			trustBadges: ['Precios revisados a diario', 'Atención bilingüe', 'Respuesta en minutos por WhatsApp'],
 		},
-		proof: [
-			{
-				title: 'Claridad comercial',
-				body: 'La propuesta, el proceso y la acción principal se entienden de inmediato.',
-			},
-			{
-				title: 'Tono premium',
-				body: 'Visuales, tipografía y mensajes alineados a una marca de viajes de mayor valor.',
-			},
-			{
-				title: 'Salida directa',
-				body: 'El sitio prepara la conversación y empuja al canal donde ya operas: WhatsApp.',
-			},
-		],
+		dealsHeading: {
+			eyebrow: 'Destinos con buen precio ahora',
+			title: 'Tarifas reales, monitoreadas todos los días.',
+			body: 'Estas son las tarifas mínimas que hemos visto por persona en las últimas semanas. Elige un destino y te cotizamos tu fecha exacta por WhatsApp.',
+			ctaLabel: 'Cotizar este destino',
+			updatedPrefix: 'Precios actualizados el',
+			sampleSuffix: 'tarifas monitoreadas',
+			fallbackTitle: '¿No ves tu destino?',
+			fallbackBody: 'Cotizamos cualquier ruta, no solo las que están en la lista.',
+			fallbackCta: 'Preguntar por otro destino',
+		},
 		servicesHeading: {
-			eyebrow: 'Servicios clave',
-			title: 'La página vende mejor cuando el cliente entiende dónde encaja.',
-			body:
-				'La estructura muestra escenarios concretos de compra para que el usuario se identifique rápido y llegue a WhatsApp con una necesidad mejor definida.',
+			eyebrow: 'En qué te ayudamos',
+			title: 'Un viaje, muchas formas de necesitarlo.',
+			body: 'Así sea trabajo, luna de miel o vacaciones familiares, coordinamos vuelos, hospedaje y el ritmo del viaje contigo.',
 		},
 		services: [
 			{
-				title: 'Escapadas premium',
-				body: 'Curaduría de hoteles, vuelos y ritmo de viaje para clientes que quieren una experiencia más pulida.',
+				title: 'Escapadas y vacaciones',
+				body: 'Playa, ciudad o Europa: armamos vuelos y hospedaje con buen precio y sin perder comodidad.',
 			},
 			{
-				title: 'Viaje corporativo',
-				body: 'Coordinación más clara para ejecutivos, equipos y agendas donde el tiempo importa.',
+				title: 'Viaje de negocios',
+				body: 'Itinerarios rápidos de coordinar, con horarios que respetan tu agenda de trabajo.',
 			},
 			{
-				title: 'Celebraciones y ocasiones especiales',
-				body: 'Luna de miel, aniversarios y viajes importantes con una narrativa más emocional y ordenada.',
+				title: 'Bodas, aniversarios y celebraciones',
+				body: 'Fechas importantes con más cuidado en el detalle: hospedaje, transporte y ocasiones especiales.',
 			},
 			{
-				title: 'Planeación bilingüe',
-				body: 'Comunicación en español o inglés para viajeros internacionales, clientes mixtos y soporte más flexible.',
-			},
-		],
-		differentiatorsHeading: {
-			eyebrow: 'Por qué funciona',
-			title: 'No es solo una página bonita. Es una página que organiza la venta.',
-			body:
-				'Cada bloque reduce fricción: posicionamiento claro, prueba de proceso, rutas de decisión simples y una salida directa al canal de cierre.',
-		},
-		differentiators: [
-			{
-				title: 'Discovery mejor guiado',
-				body: 'El usuario entiende desde la homepage qué tipo de viaje puede resolver contigo y qué datos conviene llevar a WhatsApp.',
-			},
-			{
-				title: 'Confianza legal visible',
-				body: 'Privacy policy, terms y data deletion disponibles desde el footer para pasar Meta y operar con una base más seria.',
-			},
-			{
-				title: 'Arquitectura lista para crecer',
-				body: 'La implementación queda preparada para sumar formularios, tracking y entry points más sofisticados en la siguiente fase.',
+				title: 'Atención en español e inglés',
+				body: 'Coordinamos tu viaje en el idioma que prefieras, ideal para grupos o familias mixtas.',
 			},
 		],
 		processHeading: {
-			eyebrow: 'Proceso',
-			title: 'Cuatro pasos para mover la conversación desde interés hasta cotización.',
-			body:
-				'La narrativa de proceso reduce dudas y ayuda a que el primer mensaje por WhatsApp sea más útil para tu equipo o para el agente.',
+			eyebrow: 'Cómo funciona',
+			title: 'De la idea al boleto, en cuatro pasos por WhatsApp.',
+			body: 'Sin formularios largos ni portales confusos. Todo se resuelve en la conversación.',
 		},
 		process: [
 			{
 				step: '01',
-				title: 'El cliente aterriza en la oferta correcta',
-				body: 'La homepage segmenta por necesidad y comunica el valor sin pedir demasiado esfuerzo.',
+				title: 'Nos escribes por WhatsApp',
+				body: 'Cuéntanos destino, fechas aproximadas y cuántos viajan. Con un clic en cualquier destino de arriba ya lo hicimos por ti.',
 			},
 			{
 				step: '02',
-				title: 'WhatsApp concentra el discovery',
-				body: 'El CTA principal lleva directo al canal donde ya vive la conversación comercial.',
+				title: 'Te mandamos opciones reales',
+				body: 'Buscamos tarifas vigentes con aerolíneas y te mandamos las mejores combinaciones de precio y horario.',
 			},
 			{
 				step: '03',
-				title: 'La solicitud llega mas clara',
-				body: 'Destino, tono del viaje y contexto se entienden mejor desde el primer intercambio.',
+				title: 'Confirmas y coordinamos el resto',
+				body: 'Hospedaje, traslados y cualquier detalle extra se acomoda a tu presupuesto y prioridad.',
 			},
 			{
 				step: '04',
-				title: 'El handoff queda listo para crecer',
-				body: 'La base visual y legal queda preparada para conectar formularios, tracking o automatización más adelante.',
+				title: 'Viajas con el itinerario en la mano',
+				body: 'Te dejamos toda la información clara antes de salir, y seguimos disponibles por si algo cambia.',
 			},
 		],
-		showcaseHeading: {
-			eyebrow: 'Escenarios de compra',
-			title: 'La página habla con distintos tipos de viaje sin perder coherencia.',
-			body:
-				'Esto ayuda a vender más de una clase de experiencia sin que el sitio se sienta disperso.',
+		trustHeading: {
+			eyebrow: 'Por qué reservar con nosotros',
+			title: 'Lo que puedes verificar tú mismo antes de escribirnos.',
+			body: 'Nada de promesas vacías: esto es lo que realmente hacemos distinto.',
 		},
-		showcase: [
+		trust: [
 			{
-				title: 'Corporate itinerary',
-				body: 'Viajes ejecutivos con velocidad, claridad y una imagen más seria frente al cliente.',
+				title: 'Monitoreo diario de tarifas',
+				body: 'Revisamos precios de vuelo constantemente para avisarte cuando conviene comprar.',
 			},
 			{
-				title: 'Luxury getaway',
-				body: 'Estancias, upgrade de experiencia y tono editorial para tickets más altos.',
+				title: 'Todo por WhatsApp, sin vueltas',
+				body: 'Nada de portales ni cuentas que crear. Cotizas, confirmas y viajas desde el chat.',
 			},
 			{
-				title: 'Family coordination',
-				body: 'Viajes con más variables, pero con una estructura de decisión que sigue siendo clara.',
+				title: 'Transparencia legal desde el sitio',
+				body: 'Aviso de privacidad, términos y contacto directo disponibles siempre en el pie de página.',
 			},
-			{
-				title: 'Special occasion',
-				body: 'Momentos donde el viaje importa emocionalmente y la marca debe verse a la altura.',
-			},
-		],
-		briefHeading: {
-			eyebrow: 'Primer mensaje ideal',
-			title: 'Qué conviene enviar por WhatsApp para acelerar la cotización.',
-			body:
-				'La página no obliga formularios en fase 1, pero sí prepara al cliente para llegar mejor orientado.',
-		},
-		brief: [
-			'Destino o idea de viaje.',
-			'Fechas o ventana aproximada.',
-			'Número de viajeros.',
-			'Prioridad principal: lujo, velocidad, presupuesto o celebración.',
 		],
 		faqHeading: {
-			eyebrow: 'FAQ',
-			title: 'Dudas que la página debe resolver antes del clic.',
-			body: 'Un FAQ corto y directo ayuda a sostener la conversión sin empujar al usuario fuera del flujo.',
+			eyebrow: 'Preguntas frecuentes',
+			title: 'Antes de escribirnos, esto puede ayudarte.',
+			body: '',
 		},
 		faq: [
 			{
-				question: '¿Qué pasa cuando escribo por WhatsApp?',
+				question: '¿Los precios que veo en el sitio son reales?',
 				answer:
-					'La conversación se enfoca en entender el tipo de viaje, fechas, destino y contexto para avanzar hacia una cotización o un siguiente paso más claro.',
+					'Sí. Son las tarifas mínimas por persona que hemos detectado en las últimas semanas para esa ruta. El precio final depende de tu fecha exacta, por eso confirmamos todo por WhatsApp antes de cobrar cualquier cosa.',
 			},
 			{
-				question: '¿Puedo atender clientes en inglés?',
-				answer:
-					'Sí. La homepage y el flujo de marca ya consideran una experiencia bilingüe para sostener conversaciones en español o inglés.',
+				question: '¿Atienden en inglés?',
+				answer: 'Sí, coordinamos tu viaje en español o inglés, lo que te sea más cómodo.',
 			},
 			{
-				question: '¿Esta fase ya incluye un motor de reservas?',
-				answer:
-					'No. En fase 1 la salida principal es WhatsApp. La estructura queda preparada para integrar formularios, tracking o automatización adicional más adelante.',
+				question: '¿Puedo cotizar un destino que no está en la lista?',
+				answer: 'Claro. La lista muestra los destinos con mejor precio ahora mismo, pero cotizamos cualquier ruta que necesites.',
 			},
 			{
-				question: '¿La privacy policy ya es suficiente para Meta?',
-				answer:
-					'La estructura queda lista, pero antes de producción debes sustituir los datos legales pendientes por los definitivos de la empresa.',
+				question: '¿Cómo sé que mis datos están protegidos?',
+				answer: 'Nuestro aviso de privacidad explica qué información usamos y para qué. Puedes consultarlo desde el pie de página en cualquier momento.',
 			},
 		],
 		cta: {
-			title: 'Si el sitio ya comunica mejor, el siguiente paso debe ser igual de simple.',
-			body:
-				'Abre WhatsApp y lleva la conversación al canal donde ya estás construyendo el agente y el proceso comercial.',
-			primary: 'Abrir WhatsApp',
-			secondary: 'Leer privacidad',
+			title: '¿Ya sabes a dónde quieres ir?',
+			body: 'Escríbenos por WhatsApp y en minutos tienes opciones reales de vuelo para tu próximo viaje.',
+			primary: 'Cotizar mi viaje',
+			secondary: 'Leer aviso de privacidad',
 		},
 		footer: {
 			blurb:
-				'Planeación de viajes bilingüe diseñada para sostener ventas premium, claridad legal y un handoff más limpio hacia WhatsApp.',
+				'Planeación de viajes bilingüe con tarifas monitoreadas a diario y coordinación directa por WhatsApp.',
 			legal: 'Legal',
 			privacy: 'Privacidad',
 			terms: 'Términos',
@@ -263,208 +213,139 @@ export const homeContent = {
 		},
 	},
 	en: {
-		title: 'Blue Sky Travel | Premium travel planning built for WhatsApp sales',
+		title: 'Blue Sky Travel | Flights and premium trips over WhatsApp',
 		description:
-			'Bilingual landing page for Blue Sky Travel. Premium travel planning, clear coordination, and a stronger WhatsApp-first conversion experience.',
+			'Find the best fares to Europe and beach destinations, and plan your trip directly over WhatsApp with a bilingual agent. Prices checked daily.',
 		nav: [
+			{ label: 'Destinations', href: '#deals' },
 			{ label: 'Services', href: '#services' },
-			{ label: 'Process', href: '#process' },
+			{ label: 'How it works', href: '#process' },
 			{ label: 'FAQ', href: '#faq' },
 		],
 		languageLabel: 'ES',
 		languageHref: localizedPaths.home.es,
 		hero: {
-			eyebrow: 'Travel design for a faster sales funnel',
-			headline:
-				'A premium travel experience that feels credible from the very first click.',
+			eyebrow: 'Flights and trips built around you, no middlemen',
+			headline: 'Where to? Pick a destination and get a quote on WhatsApp in seconds.',
 			body:
-				'Blue Sky Travel converts better when brand, clarity, and WhatsApp access work together. This phase builds the visual, legal, and commercial foundation needed to sell with confidence.',
-			primaryCta: 'Plan on WhatsApp',
-			secondaryCta: 'View process',
-			badges: ['Bilingual', 'WhatsApp-first', 'Low-friction first contact'],
-			spotlightLabel: 'Experience preview',
-			spotlightTitle: 'Clear itineraries, direct handoff, and a CTA that is ready to sell.',
-			spotlightBody:
-				'The homepage organizes discovery, trust, and action. Visitors understand the offer, know what happens next, and can move into WhatsApp without noise.',
-			spotlightStats: [
-				{ label: 'Primary channel', value: 'WhatsApp' },
-				{ label: 'Languages', value: 'ES / EN' },
-				{ label: 'Phase 1', value: 'Homepage + legal' },
-			],
-			journeyCards: [
-				{
-					kicker: 'Corporate travel',
-					title: 'Coordinate executive travel without losing time in preventable back-and-forth.',
-				},
-				{
-					kicker: 'Celebration travel',
-					title: 'Premium escapes, honeymoons, and milestone trips with a more elevated tone.',
-				},
-				{
-					kicker: 'Family planning',
-					title: 'Handle more variables while keeping the decision path easier to follow.',
-				},
-			],
+				'We track airline fares every day so your trip to Europe, the Caribbean, or anywhere else lands at a fair price. Pick a destination, we build the route, and we close everything over WhatsApp.',
+			primaryCta: 'Get a quote on WhatsApp',
+			secondaryCta: 'See destinations and prices',
+			trustBadges: ['Prices checked daily', 'Bilingual support', 'Replies in minutes on WhatsApp'],
 		},
-		proof: [
-			{
-				title: 'Commercial clarity',
-				body: 'The value proposition, process, and primary action are legible immediately.',
-			},
-			{
-				title: 'Premium tone',
-				body: 'Visuals, typography, and messaging support a more valuable travel brand.',
-			},
-			{
-				title: 'Direct handoff',
-				body: 'The site prepares the conversation and drives visitors into the channel where you already operate: WhatsApp.',
-			},
-		],
+		dealsHeading: {
+			eyebrow: 'Destinations with a good price right now',
+			title: 'Real fares, monitored every day.',
+			body: 'These are the lowest per-person fares we have seen in recent weeks. Pick a destination and we will quote your exact dates over WhatsApp.',
+			ctaLabel: 'Quote this destination',
+			updatedPrefix: 'Prices updated on',
+			sampleSuffix: 'fares monitored',
+			fallbackTitle: "Don't see your destination?",
+			fallbackBody: 'We quote any route, not just the ones listed here.',
+			fallbackCta: 'Ask about another destination',
+		},
 		servicesHeading: {
-			eyebrow: 'Core services',
-			title: 'The page sells better when the visitor understands where they fit.',
-			body:
-				'The structure shows concrete purchase scenarios so visitors can identify themselves quickly and enter WhatsApp with a better-defined need.',
+			eyebrow: 'What we help with',
+			title: 'One trip, many reasons to need it.',
+			body: 'Whether it is work, a honeymoon, or a family vacation, we coordinate flights, stays, and pacing with you.',
 		},
 		services: [
 			{
-				title: 'Premium getaways',
-				body: 'Hotel, flight, and pacing curation for clients who want a more polished experience.',
+				title: 'Getaways and vacations',
+				body: 'Beach, city, or Europe: we put together flights and stays at a fair price without cutting comfort.',
 			},
 			{
-				title: 'Corporate travel',
-				body: 'Clearer coordination for executives, teams, and schedules where time matters.',
+				title: 'Business travel',
+				body: 'Itineraries that are quick to coordinate, built around your work schedule.',
 			},
 			{
-				title: 'Celebrations and special occasions',
-				body: 'Honeymoons, anniversaries, and milestone trips with a more emotional and elevated narrative.',
+				title: 'Weddings, anniversaries, and celebrations',
+				body: 'Milestone dates handled with more care in the details: stays, transport, and special touches.',
 			},
 			{
-				title: 'Bilingual planning',
-				body: 'Spanish or English communication for international travelers, mixed teams, and more flexible support.',
-			},
-		],
-		differentiatorsHeading: {
-			eyebrow: 'Why it works',
-			title: 'This is not just a nicer homepage. It is a page that organizes the sale.',
-			body:
-				'Each block reduces friction: clear positioning, visible process proof, simpler decision paths, and a direct handoff to the closing channel.',
-		},
-		differentiators: [
-			{
-				title: 'Better-guided discovery',
-				body: 'Visitors understand what kind of trip they can solve with you and what details they should bring into WhatsApp.',
-			},
-			{
-				title: 'Visible legal trust',
-				body: 'Privacy policy, terms, and data-deletion pages live in the footer so the stack is ready for Meta and more serious operations.',
-			},
-			{
-				title: 'Ready to scale',
-				body: 'The implementation stays ready for forms, tracking, and more advanced entry points in the next phase.',
+				title: 'Support in Spanish and English',
+				body: 'We coordinate your trip in whichever language works best, ideal for mixed families or groups.',
 			},
 		],
 		processHeading: {
-			eyebrow: 'Process',
-			title: 'Four steps to move the conversation from interest to quote.',
-			body:
-				'The process narrative reduces uncertainty and helps the first WhatsApp message arrive with better context for your team or the agent.',
+			eyebrow: 'How it works',
+			title: 'From idea to ticket, in four steps over WhatsApp.',
+			body: 'No long forms and no confusing portals. Everything gets resolved in the conversation.',
 		},
 		process: [
 			{
 				step: '01',
-				title: 'The visitor lands on the right offer',
-				body: 'The homepage segments by need and communicates value without asking for too much effort.',
+				title: 'You message us on WhatsApp',
+				body: 'Tell us the destination, rough dates, and how many are traveling. One tap on any destination above does this for you already.',
 			},
 			{
 				step: '02',
-				title: 'WhatsApp concentrates discovery',
-				body: 'The primary CTA moves directly into the commercial channel you already use.',
+				title: 'We send you real options',
+				body: 'We check live airline fares and send you the best combinations of price and schedule.',
 			},
 			{
 				step: '03',
-				title: 'The request arrives with more context',
-				body: 'Destination, trip tone, and business context are easier to understand from the first exchange.',
+				title: 'You confirm and we handle the rest',
+				body: 'Stays, transfers, and any extra detail get arranged around your budget and priority.',
 			},
 			{
 				step: '04',
-				title: 'The handoff is ready to grow',
-				body: 'The visual and legal foundation is now ready for forms, tracking, or deeper automation later.',
+				title: 'You travel with the itinerary in hand',
+				body: 'We hand you everything clearly before you leave, and stay available in case anything changes.',
 			},
 		],
-		showcaseHeading: {
-			eyebrow: 'Purchase scenarios',
-			title: 'The site can speak to different trip types without losing coherence.',
-			body:
-				'That helps sell more than one class of experience without making the brand feel scattered.',
+		trustHeading: {
+			eyebrow: 'Why book with us',
+			title: 'Things you can verify yourself before writing to us.',
+			body: 'No empty promises: this is what we actually do differently.',
 		},
-		showcase: [
+		trust: [
 			{
-				title: 'Corporate itinerary',
-				body: 'Executive travel with more speed, clarity, and a more credible client-facing image.',
+				title: 'Daily fare monitoring',
+				body: 'We check flight prices constantly so we can tell you when it is actually worth buying.',
 			},
 			{
-				title: 'Luxury getaway',
-				body: 'Stays, experience upgrades, and editorial tone for higher-ticket opportunities.',
+				title: 'Everything over WhatsApp, no detours',
+				body: 'No portals, no accounts to create. Quote, confirm, and travel straight from the chat.',
 			},
 			{
-				title: 'Family coordination',
-				body: 'Trips with more moving parts, while still keeping the decision path clear.',
+				title: 'Legal transparency on the site',
+				body: 'Privacy notice, terms, and direct contact are always available in the footer.',
 			},
-			{
-				title: 'Special occasion',
-				body: 'Moments where the trip carries emotional weight and the brand needs to look the part.',
-			},
-		],
-		briefHeading: {
-			eyebrow: 'Best first message',
-			title: 'What a visitor should send on WhatsApp to speed up the quote.',
-			body:
-				'Phase 1 avoids form friction, but it still prepares the visitor to arrive better oriented.',
-		},
-		brief: [
-			'Destination or travel idea.',
-			'Dates or an approximate travel window.',
-			'Number of travelers.',
-			'Primary priority: luxury, speed, budget, or celebration.',
 		],
 		faqHeading: {
-			eyebrow: 'FAQ',
-			title: 'Questions the site should answer before the click.',
-			body: 'A short and direct FAQ helps hold conversion without pushing the visitor out of the flow.',
+			eyebrow: 'Frequently asked questions',
+			title: 'Before you write to us, this might help.',
+			body: '',
 		},
 		faq: [
 			{
-				question: 'What happens after I message on WhatsApp?',
+				question: 'Are the prices shown on the site real?',
 				answer:
-					'The conversation focuses on understanding the trip type, dates, destination, and context so the next step toward a quote is clearer.',
+					'Yes. They are the lowest per-person fares we have detected for that route in recent weeks. The final price depends on your exact dates, which is why we confirm everything over WhatsApp before charging anything.',
 			},
 			{
-				question: 'Can you handle English-speaking travelers?',
-				answer:
-					'Yes. The homepage and brand flow are already structured to support conversations in Spanish or English.',
+				question: 'Do you support English speakers?',
+				answer: 'Yes, we coordinate your trip in Spanish or English, whichever is more comfortable for you.',
 			},
 			{
-				question: 'Does phase 1 include a booking engine?',
-				answer:
-					'No. In phase 1 the primary path is WhatsApp. The architecture stays ready for forms, tracking, and deeper automation later.',
+				question: "Can I get a quote for a destination that isn't listed?",
+				answer: 'Of course. The list shows destinations with the best price right now, but we quote any route you need.',
 			},
 			{
-				question: 'Is the privacy policy enough for Meta already?',
-				answer:
-					'The structure is ready, but before production you still need to replace the pending legal details with the final business information.',
+				question: 'How do I know my data is protected?',
+				answer: 'Our privacy notice explains what information we use and why. You can check it from the footer at any time.',
 			},
 		],
 		cta: {
-			title: 'If the site explains the offer better, the next step should be just as simple.',
-			body:
-				'Open WhatsApp and move the conversation into the channel where your sales flow and agent strategy already live.',
-			primary: 'Open WhatsApp',
-			secondary: 'Read privacy policy',
+			title: 'Already know where you want to go?',
+			body: 'Message us on WhatsApp and get real flight options for your next trip in minutes.',
+			primary: 'Get my quote',
+			secondary: 'Read privacy notice',
 		},
 		footer: {
 			blurb:
-				'Bilingual travel planning designed to support premium sales, legal clarity, and a cleaner WhatsApp handoff.',
+				'Bilingual travel planning with fares monitored daily and direct coordination over WhatsApp.',
 			legal: 'Legal',
 			privacy: 'Privacy',
 			terms: 'Terms',

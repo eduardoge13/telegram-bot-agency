@@ -1,5 +1,6 @@
 ---
-import { homeContent, localizedPaths, whatsappHref, type Locale } from '../config/site';
+import { homeContent, whatsappHref, dealWhatsappHref, type Locale } from '../config/site';
+import dealsData from '../data/deals.json';
 
 interface Props {
 	locale: Locale;
@@ -7,235 +8,279 @@ interface Props {
 
 const { locale } = Astro.props;
 const copy = homeContent[locale];
+
+const HERO_CHIP_CODES = ['MAD', 'BCN', 'PAR', 'CUN', 'ROM', 'AMS'];
+const deals = dealsData.deals as Array<{
+	code: string;
+	city: Record<Locale, string>;
+	country: Record<Locale, string>;
+	region: string;
+	image: string;
+	priceFrom: number;
+	currency: string;
+	sampleSize: number;
+	lastSeen: string;
+}>;
+
+const heroChips = HERO_CHIP_CODES.map((code) => deals.find((d) => d.code === code)).filter(
+	(d): d is (typeof deals)[number] => Boolean(d),
+);
+
+const priceFormatter = new Intl.NumberFormat(locale === 'es' ? 'es-MX' : 'en-US', {
+	maximumFractionDigits: 0,
+});
+const dateFormatter = new Intl.DateTimeFormat(locale === 'es' ? 'es-MX' : 'en-US', {
+	dateStyle: 'medium',
+});
+const generatedAt = dealsData.generatedAt ? dateFormatter.format(new Date(dealsData.generatedAt)) : null;
 ---
 
-<main>
-	<section class="hero-section">
-		<div class="container hero-grid">
-			<div class="hero-copy">
-				<p class="eyebrow">{copy.hero.eyebrow}</p>
-				<h1>{copy.hero.headline}</h1>
-				<p class="lead">{copy.hero.body}</p>
-
-				<div class="cta-row">
-					<a class="button button--primary" href={whatsappHref(locale)} target="_blank" rel="noreferrer">
-						{copy.hero.primaryCta}
-					</a>
-					<a class="button button--secondary" href="#process">
-						{copy.hero.secondaryCta}
-					</a>
-				</div>
-
-				<ul class="badge-list">
-					{copy.hero.badges.map((badge) => (
-						<li>{badge}</li>
-					))}
-				</ul>
-			</div>
-
-			<div class="hero-media">
-				<figure class="hero-image-frame">
-					<img
-						src="/images/hero-summit.jpg"
-						alt={locale === 'es'
-							? 'Cordillera nevada utilizada como imagen editorial principal de Blue Sky Travel.'
-							: 'Snow-capped mountain range used as Blue Sky Travel’s main editorial image.'}
-						loading="eager"
-					/>
-				</figure>
-
-				<div class="hero-editorial-card">
-					<p class="eyebrow eyebrow--soft">{copy.hero.spotlightLabel}</p>
-					<h2>{copy.hero.spotlightTitle}</h2>
-					<p>{copy.hero.spotlightBody}</p>
-				</div>
-
-				<div class="hero-panel__stats">
-					{copy.hero.spotlightStats.map((item) => (
-						<article class="stat-card">
-							<span>{item.label}</span>
-							<strong>{item.value}</strong>
-						</article>
-					))}
-				</div>
-
-				<div class="journey-strip">
-					{copy.hero.journeyCards.map((card) => (
-						<article class="journey-card">
-							<p>{card.kicker}</p>
-							<h3>{card.title}</h3>
-						</article>
-					))}
-				</div>
-			</div>
+<main class="bg-white text-slate-900">
+	<!-- Hero -->
+	<section class="relative overflow-hidden bg-brand-navy text-white">
+		<div class="absolute inset-0">
+			<img
+				src="/images/hero-flight.jpg"
+				alt={locale === 'es'
+					? 'Ala de avión sobre las nubes al atardecer'
+					: 'Airplane wing over the clouds at sunset'}
+				class="h-full w-full object-cover opacity-40"
+				loading="eager"
+			/>
+			<div class="absolute inset-0 bg-gradient-to-t from-brand-navy via-brand-navy/80 to-brand-navy-deep/60"></div>
 		</div>
-	</section>
 
-	<section class="proof-section">
-		<div class="container">
-			<div class="proof-ribbon">
-				{copy.proof.map((item) => (
-					<article class="proof-chip">
-						<p class="eyebrow eyebrow--soft">{locale === 'es' ? 'Señal de confianza' : 'Trust signal'}</p>
-						<h2>{item.title}</h2>
-						<p>{item.body}</p>
-					</article>
+		<div class="relative mx-auto max-w-6xl px-6 pb-16 pt-28 sm:pt-32 lg:pt-40">
+			<p class="text-sm font-bold uppercase tracking-wider text-brand-sky">{copy.hero.eyebrow}</p>
+			<h1 class="mt-4 max-w-3xl font-[var(--font-display)] text-4xl font-extrabold leading-[1.05] sm:text-5xl lg:text-6xl">
+				{copy.hero.headline}
+			</h1>
+			<p class="mt-5 max-w-2xl text-lg text-white/80">{copy.hero.body}</p>
+
+			<div class="mt-8 flex flex-wrap gap-3">
+				<a
+					class="inline-flex items-center gap-2 rounded-full bg-brand-coral px-6 py-3.5 font-bold text-white shadow-lg shadow-brand-coral/30 transition hover:-translate-y-0.5 hover:bg-brand-coral-deep"
+					href={whatsappHref(locale)}
+					target="_blank"
+					rel="noreferrer"
+				>
+					{copy.hero.primaryCta}
+				</a>
+				<a
+					class="inline-flex items-center gap-2 rounded-full border border-white/30 px-6 py-3.5 font-bold text-white transition hover:bg-white/10"
+					href="#deals"
+				>
+					{copy.hero.secondaryCta}
+				</a>
+			</div>
+
+			<ul class="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-sm text-white/70">
+				{copy.hero.trustBadges.map((badge) => (
+					<li class="flex items-center gap-2">
+						<span class="h-1.5 w-1.5 rounded-full bg-brand-sky"></span>
+						{badge}
+					</li>
 				))}
-			</div>
-		</div>
-	</section>
+			</ul>
 
-	<section class="section" id="services">
-		<div class="container">
-			<div class="section-heading">
-				<p class="eyebrow">{copy.servicesHeading.eyebrow}</p>
-				<h2>{copy.servicesHeading.title}</h2>
-				<p>{copy.servicesHeading.body}</p>
-			</div>
-			<div class="services-editorial">
-				{copy.services.map((item, index) => (
-					<article class:list={['service-card', index === 0 && 'service-card--feature']}>
-						{index === 0 && (
-							<p class="eyebrow eyebrow--soft">
-								{locale === 'es' ? 'Entrada principal' : 'Primary entry point'}
-							</p>
-						)}
-						<h3>{item.title}</h3>
-						<p>{item.body}</p>
-					</article>
-				))}
-			</div>
-		</div>
-	</section>
-
-	<section class="section section--contrast">
-		<div class="container split-story">
-			<div>
-				<div class="section-heading">
-					<p class="eyebrow">{copy.differentiatorsHeading.eyebrow}</p>
-					<h2>{copy.differentiatorsHeading.title}</h2>
-					<p>{copy.differentiatorsHeading.body}</p>
+			<!-- Destination selector -->
+			{heroChips.length > 0 && (
+				<div class="mt-10 flex flex-wrap gap-2.5">
+					{heroChips.map((deal) => (
+						<a
+							href={dealWhatsappHref(locale, deal.city[locale], deal.priceFrom, deal.currency)}
+							target="_blank"
+							rel="noreferrer"
+							class="group inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-white ring-1 ring-white/20 backdrop-blur transition hover:bg-white hover:text-brand-navy"
+						>
+							{deal.city[locale]}
+							<span class="text-brand-sky group-hover:text-brand-blue">
+								${priceFormatter.format(deal.priceFrom)}
+							</span>
+						</a>
+					))}
 				</div>
-				<div class="value-rail">
-					{copy.differentiators.map((item, index) => (
-						<article class="value-row">
-							<span class="value-index">{String(index + 1).padStart(2, '0')}</span>
-							<div>
-								<h3>{item.title}</h3>
-								<p>{item.body}</p>
+			)}
+		</div>
+	</section>
+
+	<!-- Deals grid -->
+	<section id="deals" class="bg-slate-50 py-20">
+		<div class="mx-auto max-w-6xl px-6">
+			<div class="max-w-2xl">
+				<p class="text-sm font-bold uppercase tracking-wider text-brand-blue">{copy.dealsHeading.eyebrow}</p>
+				<h2 class="mt-3 font-[var(--font-display)] text-3xl font-extrabold text-brand-navy sm:text-4xl">
+					{copy.dealsHeading.title}
+				</h2>
+				<p class="mt-3 text-slate-600">{copy.dealsHeading.body}</p>
+				{generatedAt && (
+					<p class="mt-2 text-sm text-slate-400">
+						{copy.dealsHeading.updatedPrefix} {generatedAt}
+					</p>
+				)}
+			</div>
+
+			<div class="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+				{deals.map((deal) => (
+					<article class="group flex flex-col overflow-hidden rounded-2xl bg-white shadow-md ring-1 ring-slate-100 transition hover:-translate-y-1 hover:shadow-xl">
+						<div class="relative h-44 overflow-hidden">
+							<img
+								src={`/images/destinations/${deal.image}`}
+								alt={`${deal.city[locale]}, ${deal.country[locale]}`}
+								class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+								loading="lazy"
+							/>
+							<div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
+							<div class="absolute bottom-3 left-4 text-white">
+								<p class="font-[var(--font-display)] text-xl font-bold leading-none">{deal.city[locale]}</p>
+								<p class="text-sm text-white/80">{deal.country[locale]}</p>
 							</div>
-						</article>
-					))}
-				</div>
-			</div>
-			<aside class="story-card">
-				<p class="eyebrow eyebrow--soft">
-					{locale === 'es' ? 'Criterio visual' : 'Visual criteria'}
-				</p>
-				<h3>
-					{locale === 'es'
-						? 'El sitio debe sentirse concreto, humano y listo para vender.'
-						: 'The site needs to feel concrete, human, and ready to sell.'}
-				</h3>
-				<p>
-					{locale === 'es'
-						? 'La combinación correcta no es más efectos. Es una promesa clara, una imagen real, señales de legitimidad y una salida rápida a WhatsApp.'
-						: 'The right mix is not more effects. It is a clear promise, a real image, legitimacy signals, and a fast path into WhatsApp.'}
-				</p>
-			</aside>
-		</div>
-	</section>
-
-	<section class="section" id="process">
-		<div class="container process-layout">
-			<div class="section-heading section-heading--compact">
-				<p class="eyebrow">{copy.processHeading.eyebrow}</p>
-				<h2>{copy.processHeading.title}</h2>
-				<p>{copy.processHeading.body}</p>
-			</div>
-			<div class="process-timeline">
-				{copy.process.map((item) => (
-					<article class="process-step-card">
-						<span class="process-step">{item.step}</span>
-						<div>
-							<h3>{item.title}</h3>
-							<p>{item.body}</p>
+						</div>
+						<div class="flex flex-1 flex-col justify-between p-5">
+							<div>
+								<p class="text-xs uppercase tracking-wide text-slate-400">
+									{locale === 'es' ? 'Desde, por persona' : 'From, per person'}
+								</p>
+								<p class="mt-1 font-[var(--font-display)] text-2xl font-extrabold text-brand-navy">
+									${priceFormatter.format(deal.priceFrom)} <span class="text-base font-semibold text-slate-500">{deal.currency}</span>
+								</p>
+								<p class="mt-1 text-xs text-slate-400">
+									{deal.sampleSize} {copy.dealsHeading.sampleSuffix}
+								</p>
+							</div>
+							<a
+								href={dealWhatsappHref(locale, deal.city[locale], deal.priceFrom, deal.currency)}
+								target="_blank"
+								rel="noreferrer"
+								class="mt-4 inline-flex items-center justify-center gap-2 rounded-full bg-brand-navy px-4 py-2.5 text-sm font-bold text-white transition hover:bg-brand-blue"
+							>
+								{copy.dealsHeading.ctaLabel}
+							</a>
 						</div>
 					</article>
 				))}
+
+				<article class="flex flex-col items-start justify-center rounded-2xl border-2 border-dashed border-slate-200 p-6 text-left">
+					<p class="font-[var(--font-display)] text-lg font-bold text-brand-navy">{copy.dealsHeading.fallbackTitle}</p>
+					<p class="mt-2 text-sm text-slate-500">{copy.dealsHeading.fallbackBody}</p>
+					<a
+						href={whatsappHref(locale)}
+						target="_blank"
+						rel="noreferrer"
+						class="mt-4 inline-flex items-center gap-2 rounded-full bg-brand-coral px-4 py-2.5 text-sm font-bold text-white transition hover:bg-brand-coral-deep"
+					>
+						{copy.dealsHeading.fallbackCta}
+					</a>
+				</article>
 			</div>
 		</div>
 	</section>
 
-	<section class="section">
-		<div class="container">
-			<div class="section-heading">
-				<p class="eyebrow">{copy.showcaseHeading.eyebrow}</p>
-				<h2>{copy.showcaseHeading.title}</h2>
-				<p>{copy.showcaseHeading.body}</p>
+	<!-- Services -->
+	<section id="services" class="py-20">
+		<div class="mx-auto max-w-6xl px-6">
+			<div class="max-w-2xl">
+				<p class="text-sm font-bold uppercase tracking-wider text-brand-blue">{copy.servicesHeading.eyebrow}</p>
+				<h2 class="mt-3 font-[var(--font-display)] text-3xl font-extrabold text-brand-navy sm:text-4xl">
+					{copy.servicesHeading.title}
+				</h2>
+				<p class="mt-3 text-slate-600">{copy.servicesHeading.body}</p>
 			</div>
-			<div class="showcase-mosaic">
-				{copy.showcase.map((item, index) => (
-					<article class:list={['showcase-card', (index === 0 || index === 3) && 'showcase-card--wide']}>
-						<p class="eyebrow eyebrow--soft">
-							{locale === 'es' ? 'Escenario' : 'Scenario'} {String(index + 1).padStart(2, '0')}
-						</p>
-						<h3>{item.title}</h3>
-						<p>{item.body}</p>
+
+			<div class="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+				{copy.services.map((item, index) => (
+					<article class="rounded-2xl bg-slate-50 p-6 ring-1 ring-slate-100">
+						<span class="flex h-9 w-9 items-center justify-center rounded-full bg-brand-navy text-sm font-bold text-white">
+							{String(index + 1).padStart(2, '0')}
+						</span>
+						<h3 class="mt-4 font-[var(--font-display)] text-lg font-bold text-brand-navy">{item.title}</h3>
+						<p class="mt-2 text-sm text-slate-600">{item.body}</p>
 					</article>
 				))}
 			</div>
 		</div>
 	</section>
 
-	<section class="section section--contrast">
-		<div class="container split-panel">
-			<div class="section-heading section-heading--compact">
-				<p class="eyebrow">{copy.briefHeading.eyebrow}</p>
-				<h2>{copy.briefHeading.title}</h2>
-				<p>{copy.briefHeading.body}</p>
+	<!-- How it works -->
+	<section id="process" class="bg-brand-navy py-20 text-white">
+		<div class="mx-auto max-w-6xl px-6">
+			<div class="max-w-2xl">
+				<p class="text-sm font-bold uppercase tracking-wider text-brand-sky">{copy.processHeading.eyebrow}</p>
+				<h2 class="mt-3 font-[var(--font-display)] text-3xl font-extrabold sm:text-4xl">{copy.processHeading.title}</h2>
+				<p class="mt-3 text-white/70">{copy.processHeading.body}</p>
 			</div>
-			<div class="checklist-card">
-				<ul class="checklist">
-					{copy.brief.map((item) => (
-						<li>{item}</li>
-					))}
-				</ul>
+
+			<div class="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+				{copy.process.map((item) => (
+					<div class="rounded-2xl bg-white/5 p-6 ring-1 ring-white/10">
+						<span class="font-[var(--font-display)] text-3xl font-extrabold text-brand-sky">{item.step}</span>
+						<h3 class="mt-3 text-lg font-bold">{item.title}</h3>
+						<p class="mt-2 text-sm text-white/70">{item.body}</p>
+					</div>
+				))}
 			</div>
 		</div>
 	</section>
 
-	<section class="section" id="faq">
-		<div class="container">
-			<div class="section-heading">
-				<p class="eyebrow">{copy.faqHeading.eyebrow}</p>
-				<h2>{copy.faqHeading.title}</h2>
-				<p>{copy.faqHeading.body}</p>
+	<!-- Trust -->
+	<section class="py-20">
+		<div class="mx-auto max-w-6xl px-6">
+			<div class="max-w-2xl">
+				<p class="text-sm font-bold uppercase tracking-wider text-brand-blue">{copy.trustHeading.eyebrow}</p>
+				<h2 class="mt-3 font-[var(--font-display)] text-3xl font-extrabold text-brand-navy sm:text-4xl">
+					{copy.trustHeading.title}
+				</h2>
+				<p class="mt-3 text-slate-600">{copy.trustHeading.body}</p>
 			</div>
-			<div class="faq-list">
+
+			<div class="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-3">
+				{copy.trust.map((item) => (
+					<article class="rounded-2xl border border-slate-100 p-6">
+						<h3 class="font-[var(--font-display)] text-lg font-bold text-brand-navy">{item.title}</h3>
+						<p class="mt-2 text-sm text-slate-600">{item.body}</p>
+					</article>
+				))}
+			</div>
+		</div>
+	</section>
+
+	<!-- FAQ -->
+	<section id="faq" class="bg-slate-50 py-20">
+		<div class="mx-auto max-w-3xl px-6">
+			<p class="text-sm font-bold uppercase tracking-wider text-brand-blue">{copy.faqHeading.eyebrow}</p>
+			<h2 class="mt-3 font-[var(--font-display)] text-3xl font-extrabold text-brand-navy sm:text-4xl">
+				{copy.faqHeading.title}
+			</h2>
+
+			<div class="mt-8 divide-y divide-slate-200 rounded-2xl bg-white ring-1 ring-slate-100">
 				{copy.faq.map((item) => (
-					<details class="faq-item">
-						<summary>{item.question}</summary>
-						<p>{item.answer}</p>
+					<details class="group p-5 open:bg-slate-50">
+						<summary class="flex cursor-pointer list-none items-center justify-between font-semibold text-brand-navy">
+							{item.question}
+							<span class="ml-4 text-brand-blue transition group-open:rotate-45">+</span>
+						</summary>
+						<p class="mt-3 text-sm text-slate-600">{item.answer}</p>
 					</details>
 				))}
 			</div>
 		</div>
 	</section>
 
-	<section class="cta-banner">
-		<div class="container cta-banner__inner">
+	<!-- Final CTA -->
+	<section class="bg-brand-coral py-16">
+		<div class="mx-auto flex max-w-6xl flex-col items-start justify-between gap-6 px-6 sm:flex-row sm:items-center">
 			<div>
-				<p class="eyebrow eyebrow--soft">{locale === 'es' ? 'Siguiente paso' : 'Next step'}</p>
-				<h2>{copy.cta.title}</h2>
-				<p>{copy.cta.body}</p>
+				<h2 class="font-[var(--font-display)] text-2xl font-extrabold text-white sm:text-3xl">{copy.cta.title}</h2>
+				<p class="mt-2 max-w-xl text-white/90">{copy.cta.body}</p>
 			</div>
-			<div class="cta-row">
-				<a class="button button--primary" href={whatsappHref(locale)} target="_blank" rel="noreferrer">
+			<div class="flex flex-shrink-0 gap-3">
+				<a
+					class="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3.5 font-bold text-brand-coral-deep shadow-lg transition hover:-translate-y-0.5"
+					href={whatsappHref(locale)}
+					target="_blank"
+					rel="noreferrer"
+				>
 					{copy.cta.primary}
-				</a>
-				<a class="button button--secondary" href={localizedPaths.privacy[locale]}>
-					{copy.cta.secondary}
 				</a>
 			</div>
 		</div>
