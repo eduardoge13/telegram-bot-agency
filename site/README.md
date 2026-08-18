@@ -133,3 +133,11 @@ Before Meta Live and production cutover, replace the legal placeholders in `src/
   for text, active states and actions.
 - Validate mobile detail scroll/close behavior and horizontal overflow before
   publishing.
+- Yoga Verde is a multipage storefront. The home is a visual entry point;
+  catalog, collections, kits and every product have dedicated URLs under
+  `/yoga-verde/`. Do not collapse them back into one scroll-driven page.
+- Keep product and price data centralized in
+  `src/data/yoga-verde-store.js`; shared route helpers and visual curation live
+  in `src/lib/yoga-verde.ts`.
+- Product and kit cards must link to their dedicated pages. `shop.js` owns the
+  shared cart and catalog filters, and the cart must persist across navigation.

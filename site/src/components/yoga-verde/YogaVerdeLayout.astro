@@ -1,0 +1,208 @@
+---
+import {
+  ANNOUNCEMENT,
+  FREE_SHIPPING_THRESHOLD,
+  formatMoney,
+  storeData,
+} from "../../lib/yoga-verde";
+import "../../styles/yoga-verde.css";
+
+interface Props {
+  title: string;
+  description: string;
+  activePage?: string;
+  canonicalPath?: string;
+}
+
+const {
+  title,
+  description,
+  activePage = "inicio",
+  canonicalPath = "/yoga-verde",
+} = Astro.props;
+
+const navItems = [
+  { id: "inicio", label: "Inicio", href: "/yoga-verde" },
+  { id: "catalogo", label: "Catálogo", href: "/yoga-verde/catalogo" },
+  { id: "rostro", label: "Rostro", href: "/yoga-verde/colecciones/rostro" },
+  { id: "cuerpo", label: "Cuerpo", href: "/yoga-verde/colecciones/cuerpo" },
+  { id: "cabello", label: "Cabello", href: "/yoga-verde/colecciones/cabello" },
+  { id: "kits", label: "Kits", href: "/yoga-verde/kits" },
+];
+
+const canonical = new URL(canonicalPath, "https://yoga-verde.srv1175749.hstgr.cloud").toString();
+---
+
+<html class="light" lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>{title}</title>
+    <meta content={description} name="description" />
+    <meta content={title} property="og:title" />
+    <meta content={description} property="og:description" />
+    <meta content="website" property="og:type" />
+    <meta content={canonical} property="og:url" />
+    <meta content="https://yoga-verde.srv1175749.hstgr.cloud/yoga-verde/assets/brand/og-image.png" property="og:image" />
+    <meta content="1200" property="og:image:width" />
+    <meta content="630" property="og:image:height" />
+    <link href="/yoga-verde/assets/brand/favicon-32.png" rel="icon" sizes="32x32" type="image/png" />
+    <link href="/yoga-verde/assets/brand/favicon-180.png" rel="apple-touch-icon" />
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
+    <link href={canonical} rel="canonical" />
+  </head>
+  <body class="bg-surface text-on-surface selection:bg-secondary/20 selection:text-primary">
+    <script id="yoga-verde-data" is:inline set:html={JSON.stringify(storeData)} type="application/json"></script>
+
+    <div class="yv-page-shell" data-page-content>
+      <div class="sticky top-0 z-[70]">
+        <div class="site-announcement px-4 py-2 text-center text-[10px] font-semibold uppercase tracking-[0.2em] sm:text-[11px]">
+          {ANNOUNCEMENT}
+        </div>
+        <header class="site-header border-b border-outline-variant/35 bg-surface/95">
+          <nav class="relative mx-auto flex h-16 max-w-screen-2xl items-center justify-between gap-4 px-4 sm:px-6 md:h-[4.75rem] lg:px-8" aria-label="Navegación principal">
+            <div class="flex flex-1 items-center">
+              <details class="mobile-menu relative md:hidden" data-mobile-menu>
+                <summary
+                  aria-controls="yoga-verde-mobile-menu"
+                  aria-expanded="false"
+                  aria-label="Abrir menú"
+                  class="header-action mobile-menu-toggle relative z-[93] inline-flex h-11 w-11 cursor-pointer list-none items-center justify-center border border-outline-variant/60 text-primary"
+                  data-mobile-menu-toggle
+                >
+                  <span aria-hidden="true" class="mobile-menu-toggle__icon"><span></span><span></span></span>
+                </summary>
+                <div aria-label="Navegación principal" aria-modal="true" class="mobile-menu-panel" id="yoga-verde-mobile-menu" role="dialog" tabindex="-1">
+                  <div class="mobile-menu-panel__header">
+                    <img alt="" aria-hidden="true" class="mobile-menu-panel__mark" height="1400" src="/yoga-verde/assets/brand/logo-monogram.png" width="1400" />
+                  </div>
+                  <div class="mobile-menu-panel__body">
+                    <div class="mobile-menu-panel__nav">
+                      {navItems.map((item) => (
+                        <a aria-current={activePage === item.id ? "page" : undefined} class="mobile-menu-link" href={item.href}>
+                          <span>{item.label}</span>
+                        </a>
+                      ))}
+                    </div>
+                    <a class="mobile-menu-search" href="/yoga-verde/catalogo#buscar">
+                      <span aria-hidden="true" class="material-symbols-outlined">search</span>
+                      <span>Buscar productos</span>
+                    </a>
+                  </div>
+                  <div class="mobile-menu-panel__footer">
+                    <p>Envío gratis desde $999 MXN</p>
+                    <div>
+                      <span>Hecho en México</span>
+                      <button data-open-cart type="button">Carrito (<span data-cart-count>0</span>)</button>
+                    </div>
+                  </div>
+                </div>
+              </details>
+
+              <div class="hidden items-center gap-5 md:flex xl:gap-7">
+                {navItems.map((item) => (
+                  <a aria-current={activePage === item.id ? "page" : undefined} class="nav-link" href={item.href}>{item.label}</a>
+                ))}
+              </div>
+            </div>
+
+            <a class="site-logo absolute left-1/2 top-1/2 inline-flex -translate-x-1/2 -translate-y-1/2 items-center justify-center" href="/yoga-verde">
+              <picture>
+                <source media="(max-width: 767px)" srcset="/yoga-verde/assets/brand/logo-monogram.png" />
+                <img alt="Yoga Verde — Cosmética natural" class="site-logo-image h-11 w-11 object-contain md:h-[5.5rem] md:w-[5.5rem]" height="1400" src="/yoga-verde/assets/brand/logo-yoga-verde.svg" width="1400" />
+              </picture>
+            </a>
+
+            <div class="flex flex-1 items-center justify-end gap-2 sm:gap-3">
+              <a aria-label="Buscar en el catálogo" class="header-action header-search inline-flex h-11 w-11 items-center justify-center border border-outline-variant/60 text-primary transition hover:border-secondary hover:text-secondary lg:h-auto lg:w-auto lg:gap-2 lg:px-4 lg:py-2 lg:text-sm" href="/yoga-verde/catalogo#buscar">
+                <span class="material-symbols-outlined text-base">search</span>
+                <span class="hidden lg:inline">Buscar</span>
+              </a>
+              <button aria-label="Abrir carrito" class="header-action group relative inline-flex h-11 w-11 items-center justify-center border border-outline-variant/60 text-primary transition hover:border-secondary hover:text-secondary" data-open-cart type="button">
+                <span class="material-symbols-outlined">shopping_cart</span>
+                <span class="absolute -right-1 -top-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-secondary px-1 text-[10px] font-bold text-white" data-cart-count>0</span>
+              </button>
+            </div>
+          </nav>
+        </header>
+      </div>
+
+      <main data-mobile-menu-background>
+        <slot />
+      </main>
+
+      <footer class="site-footer yv-multipage-footer" data-mobile-menu-background id="contacto">
+        <div class="mx-auto grid max-w-screen-2xl gap-10 px-6 py-12 lg:grid-cols-[1.15fr_1fr_1fr] lg:px-8">
+          <div>
+            <img alt="Yoga Verde — Cosmética natural" class="h-16 w-auto" height="1400" src="/yoga-verde/assets/brand/logo-yoga-verde.svg" width="1400" />
+            <p class="mt-5 max-w-sm leading-7 text-on-surface-variant">Cosmética natural formulada en México para rostro, cuerpo, cabello y hogar.</p>
+          </div>
+          <div>
+            <h2 class="font-headline text-2xl text-primary">Comprar</h2>
+            <nav class="mt-4 grid grid-cols-2 gap-x-5 gap-y-3 text-sm text-on-surface-variant" aria-label="Navegación del pie">
+              {navItems.slice(1).map((item) => <a class="transition hover:text-secondary" href={item.href}>{item.label}</a>)}
+              <button class="text-left transition hover:text-secondary" data-open-cart type="button">Carrito</button>
+            </nav>
+          </div>
+          <div>
+            <h2 class="font-headline text-2xl text-primary">Nuestra fórmula</h2>
+            <div class="mt-4 grid gap-2 text-sm text-on-surface-variant">
+              <span>Activos de origen natural</span>
+              <span>Libre de parabenos y sulfatos</span>
+              <span>Sin testeo animal</span>
+              <span>Hecho en México</span>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <div aria-hidden="true" class="pointer-events-none fixed inset-0 z-[82] bg-primary/35 opacity-0 transition-opacity" data-cart-overlay></div>
+    <aside aria-hidden="true" aria-labelledby="yoga-verde-cart-title" aria-modal="true" class="fixed right-0 top-0 z-[83] flex h-full w-full max-w-[460px] translate-x-full flex-col bg-surface-container-lowest shadow-[0_24px_80px_rgba(23,48,32,0.22)] transition-transform duration-300" data-cart-drawer inert role="dialog" tabindex="-1">
+      <div class="flex items-center justify-between border-b border-outline-variant/40 px-6 py-5">
+        <div>
+          <p class="text-xs uppercase tracking-[0.22em] text-on-surface-variant">Tu selección</p>
+          <h2 class="font-headline text-4xl text-primary" id="yoga-verde-cart-title">Carrito</h2>
+        </div>
+        <button aria-label="Cerrar carrito" class="inline-flex h-11 w-11 items-center justify-center rounded-full border border-outline-variant/50 text-primary" data-close-cart type="button">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div class="hide-scrollbar flex-1 overflow-y-auto px-6 py-6">
+        <div class="border border-outline-variant/50 bg-surface-container-low p-5">
+          <div class="flex items-center justify-between gap-3">
+            <p class="text-sm font-semibold text-primary">Envío gratis</p>
+            <p class="text-xs uppercase tracking-[0.18em] text-on-surface-variant">Meta {formatMoney(FREE_SHIPPING_THRESHOLD)}</p>
+          </div>
+          <div class="mt-4 h-2 overflow-hidden rounded-full bg-surface-container-highest"><div class="h-full rounded-full bg-secondary transition-all duration-300" data-shipping-progress style="width: 0%"></div></div>
+          <p class="mt-3 text-sm leading-6 text-on-surface-variant" data-shipping-message>Te faltan {formatMoney(FREE_SHIPPING_THRESHOLD)} para envío gratis.</p>
+        </div>
+        <div class="mt-6 space-y-4" data-cart-items></div>
+        <div class="mt-6 hidden border border-outline-variant/50 bg-surface-container-low p-6 text-center" data-cart-empty>
+          <span class="material-symbols-outlined text-5xl text-on-surface-variant/40">shopping_bag</span>
+          <p class="mt-4 font-headline text-3xl text-primary">Tu carrito está vacío</p>
+          <a class="mt-4 inline-flex text-sm font-bold uppercase tracking-[0.16em] text-secondary" href="/yoga-verde/catalogo">Ver catálogo</a>
+        </div>
+        <div class="mt-6 border border-outline-variant/50 bg-surface-container-low p-5" data-cart-upsell></div>
+      </div>
+      <div class="border-t border-outline-variant/40 bg-surface px-6 py-6">
+        <div class="space-y-2 text-sm text-on-surface-variant">
+          <div class="flex justify-between"><span>Subtotal</span><span data-subtotal>{formatMoney(0)}</span></div>
+          <div class="flex justify-between"><span>Envío</span><span data-shipping>{formatMoney(0)}</span></div>
+          <div class="flex justify-between"><span>Impuestos</span><span data-tax>{formatMoney(0)}</span></div>
+        </div>
+        <div class="mt-5 flex items-end justify-between gap-4 border-t border-outline-variant/50 pt-5">
+          <div><p class="text-xs uppercase tracking-[0.18em] text-on-surface-variant">Total</p><p class="price text-3xl" data-total>{formatMoney(0)}</p></div>
+          <button class="inline-flex min-h-12 items-center gap-2 rounded-2xl bg-primary px-5 font-semibold text-on-primary disabled:opacity-50" data-checkout disabled type="button">Pagar <span class="material-symbols-outlined text-lg">lock</span></button>
+        </div>
+      </div>
+    </aside>
+
+    <script defer is:inline src="/yoga-verde/shop.js?v=20260818-multipage-v1"></script>
+  </body>
+</html>

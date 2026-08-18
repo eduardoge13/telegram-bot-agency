@@ -1,0 +1,58 @@
+---
+import ProductCard from "../../../components/yoga-verde/ProductCard.astro";
+import YogaVerdeLayout from "../../../components/yoga-verde/YogaVerdeLayout.astro";
+import {
+  campaignMedia,
+  collections,
+  productById,
+  productsForCollection,
+  type YogaCollection,
+} from "../../../lib/yoga-verde";
+
+export function getStaticPaths() {
+  return collections.map((collection) => ({ params: { slug: collection.slug }, props: { collection } }));
+}
+
+interface Props { collection: YogaCollection }
+const { collection } = Astro.props;
+const collectionProducts = productsForCollection(collection);
+const coverProduct = productById.get(collection.imageId)!;
+const coverMedia = campaignMedia[collection.imageId];
+---
+
+<YogaVerdeLayout
+  activePage={collection.slug}
+  canonicalPath={`/yoga-verde/colecciones/${collection.slug}`}
+  description={`${collection.copy} Consulta productos, beneficios y precios de la colección ${collection.label} de Yoga Verde.`}
+  title={`${collection.label} | Yoga Verde`}
+>
+  <header class={`yv-collection-hero is-${collection.accent}`}>
+    <div class="yv-collection-hero__copy">
+      <nav aria-label="Migas de pan"><a href="/yoga-verde">Inicio</a><span>/</span><a href="/yoga-verde/catalogo">Catálogo</a><span>/</span><strong>{collection.label}</strong></nav>
+      <p class="yv-eyebrow">Colección {collection.label}</p>
+      <h1>{collection.title}</h1>
+      <p>{collection.copy}</p>
+      <span>{collectionProducts.length} productos</span>
+    </div>
+    <figure class="yv-collection-hero__visual">
+      <img
+        alt={`${coverProduct.name}, producto protagonista de ${collection.label}`}
+        fetchpriority="high"
+        height={coverMedia?.height || 1200}
+        src={coverMedia?.src || coverProduct.image}
+        width={coverMedia?.width || 1200}
+      />
+      <figcaption>{coverProduct.name} · {coverProduct.scent}</figcaption>
+    </figure>
+  </header>
+
+  <section class="yv-collection-products">
+    <div class="yv-section-heading">
+      <div><p class="yv-eyebrow">Precios claros</p><h2>Todos los productos de {collection.label.toLowerCase()}</h2></div>
+      <a class="yv-text-link" href="/yoga-verde/catalogo">Ir al catálogo completo →</a>
+    </div>
+    <div class="yv-product-grid">
+      {collectionProducts.map((product, index) => <ProductCard product={product} priority={index < 3} />)}
+    </div>
+  </section>
+</YogaVerdeLayout>
