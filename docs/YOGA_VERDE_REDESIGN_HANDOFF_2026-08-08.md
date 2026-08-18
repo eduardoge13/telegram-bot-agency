@@ -277,6 +277,24 @@ quedó incorporado a `origin/main` por fast-forward.
 - QA desde build estático: `npm run check` sin diagnósticos, `npm run build`
   exitoso, consola limpia y cero overflow horizontal en 320×692, 390×844,
   414×896 y 1280×900. No se hizo merge ni despliegue en esta iteración.
+
+## Controles desktop y dirección de color — 2026-08-18
+
+- Los controles del hero ahora muestran explícitamente `01–06`, se numeran de
+  nuevo después del shuffle y exponen `aria-current` para la pieza activa.
+- En desktop el bloque se desplazó fuera del bisel orgánico: los seis objetivos
+  quedan completos, miden 44×44 y pasan hit-testing real en su centro.
+- Se añadió una gradación moderada por fotografía. Agua micelar usa mayor
+  saturación/contraste; cera y crema de manos, que ya eran referencias fuertes,
+  reciben el ajuste mínimo.
+- La manteca mango/coco usa `manteca-campana-v2.webp`, edición no destructiva
+  creada con la herramienta integrada de generación de imágenes. El original
+  sigue en el repositorio. La nueva escena corrige la percepción comprimida y
+  alinea mango, coco, tarro y fondo dentro de una composición vertical.
+- Verificación visual dirigida con semilla `22`: agua micelar, cera, manteca,
+  desmaquillante, desodorante y crema de manos; los seis controles fueron
+  accionables. En 390×844 la manteca no se superpone con la ficha y el documento
+  conserva cero overflow. Consola: cero errores y cero warnings.
 - Se incorporaron fotografías oficiales optimizadas bajo
   `site/public/yoga-verde/assets/catalog/` y una composición editorial sobre
   superficies crema. El PDF fuente no se versionó ni se despliega.

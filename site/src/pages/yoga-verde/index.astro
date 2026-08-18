@@ -47,19 +47,19 @@ const featuredKit = displayKits.find((kit) => kit.id === "kit-ritual-facial") ||
 // Cada visual corresponde al SKU real; se evita ampliar previews comprimidos
 // o inventar productos/etiquetas para el hero.
 const HERO_CAMPAIGN_MEDIA = {
-  "desmaquillante-almendra-dulce": { src: "/yoga-verde/assets/catalog/hero/desmaquillante.webp", width: 1568, height: 2351, position: "center 68%" },
-  "agua-micelar-manzanilla": { src: "/yoga-verde/assets/catalog/hero/agua-micelar.webp", width: 1624, height: 2166, position: "center 58%" },
-  "contorno-de-ojos-lavanda": { src: "/yoga-verde/assets/catalog/hero/contorno.webp", width: 1400, height: 1700, position: "center 58%" },
-  "mousse-corporal-uva": { src: "/yoga-verde/assets/catalog/hero/mousse.webp", width: 1400, height: 1700, position: "center 52%" },
-  "crema-manos-mango": { src: "/yoga-verde/assets/catalog/hero/crema-manos.webp", width: 1400, height: 1700, position: "center 50%" },
-  "manteca-mango-coco": { src: "/yoga-verde/assets/catalog/hero/manteca.webp", width: 1400, height: 1700, position: "center 52%" },
-  "desodorante-lavanda-toronja": { src: "/yoga-verde/assets/catalog/hero/desodorante-lavanda.webp", width: 1400, height: 1700, position: "center 50%" },
-  "aceite-cabello-seco-coco-argan": { src: "/yoga-verde/assets/catalog/hero/aceite-cabello-seco.webp", width: 1400, height: 1700, position: "center 50%" },
-  "aceite-cabello-graso-uva": { src: "/yoga-verde/assets/catalog/hero/aceite-cabello-graso.webp", width: 1400, height: 1700, position: "center 50%" },
-  "cera-cabello-ceja": { src: "/yoga-verde/assets/catalog/hero/cera-cabello.webp", width: 1400, height: 1700, position: "center 50%" },
-  "vela-soya-vainilla": { src: "/yoga-verde/assets/catalog/hero/vela-vainilla.webp", width: 1400, height: 1700, position: "center 50%" },
-  "vela-soya-coco": { src: "/yoga-verde/assets/catalog/hero/vela-coco.webp", width: 1400, height: 1700, position: "center 50%" },
-  "vela-soya-bergamota": { src: "/yoga-verde/assets/catalog/hero/vela-bergamota.webp", width: 1400, height: 1700, position: "center 50%" },
+  "desmaquillante-almendra-dulce": { src: "/yoga-verde/assets/catalog/hero/desmaquillante.webp", width: 1568, height: 2351, position: "center 68%", saturation: 1.08, contrast: 1.03 },
+  "agua-micelar-manzanilla": { src: "/yoga-verde/assets/catalog/hero/agua-micelar.webp", width: 1624, height: 2166, position: "center 58%", saturation: 1.14, contrast: 1.04 },
+  "contorno-de-ojos-lavanda": { src: "/yoga-verde/assets/catalog/hero/contorno.webp", width: 1400, height: 1700, position: "center 58%", saturation: 1.1, contrast: 1.03 },
+  "mousse-corporal-uva": { src: "/yoga-verde/assets/catalog/hero/mousse.webp", width: 1400, height: 1700, position: "center 52%", saturation: 1.08, contrast: 1.03 },
+  "crema-manos-mango": { src: "/yoga-verde/assets/catalog/hero/crema-manos.webp", width: 1400, height: 1700, position: "center 50%", saturation: 1.02, contrast: 1.02 },
+  "manteca-mango-coco": { src: "/yoga-verde/assets/catalog/hero/manteca-campana-v2.webp", width: 1138, height: 1382, position: "center 50%", saturation: 1.04, contrast: 1.02 },
+  "desodorante-lavanda-toronja": { src: "/yoga-verde/assets/catalog/hero/desodorante-lavanda.webp", width: 1400, height: 1700, position: "center 50%", saturation: 1.08, contrast: 1.03 },
+  "aceite-cabello-seco-coco-argan": { src: "/yoga-verde/assets/catalog/hero/aceite-cabello-seco.webp", width: 1400, height: 1700, position: "center 50%", saturation: 1.08, contrast: 1.03 },
+  "aceite-cabello-graso-uva": { src: "/yoga-verde/assets/catalog/hero/aceite-cabello-graso.webp", width: 1400, height: 1700, position: "center 50%", saturation: 1.06, contrast: 1.03 },
+  "cera-cabello-ceja": { src: "/yoga-verde/assets/catalog/hero/cera-cabello.webp", width: 1400, height: 1700, position: "center 50%", saturation: 1.02, contrast: 1.02 },
+  "vela-soya-vainilla": { src: "/yoga-verde/assets/catalog/hero/vela-vainilla.webp", width: 1400, height: 1700, position: "center 50%", saturation: 1.08, contrast: 1.03 },
+  "vela-soya-coco": { src: "/yoga-verde/assets/catalog/hero/vela-coco.webp", width: 1400, height: 1700, position: "center 50%", saturation: 1.08, contrast: 1.03 },
+  "vela-soya-bergamota": { src: "/yoga-verde/assets/catalog/hero/vela-bergamota.webp", width: 1400, height: 1700, position: "center 50%", saturation: 1.08, contrast: 1.03 },
 } as const;
 
 // El navegador elige seis piezas de este conjunto mediante una semilla local
@@ -324,7 +324,7 @@ const storeData = {
                           sizes="(max-width: 767px) 100vw, (max-width: 1279px) 40vw, 640px"
                           src={product.heroMedia.src}
                           srcset={`${product.heroMedia.src.replace(".webp", "-800.webp")} 800w, ${product.heroMedia.src} ${product.heroMedia.width}w`}
-                          style={`--hero-object-position: ${product.heroMedia.position}`}
+                          style={`--hero-object-position: ${product.heroMedia.position}; --hero-saturation: ${product.heroMedia.saturation}; --hero-contrast: ${product.heroMedia.contrast}`}
                           width={product.heroMedia.width}
                         />
                         <span aria-hidden="true" class="catalog-cover__folio">{String(index + 1).padStart(2, "0")}</span>
@@ -358,7 +358,9 @@ const storeData = {
                       data-hero-dot={index}
                       data-hero-product={product.id}
                       type="button"
-                    />
+                    >
+                      <span aria-hidden="true" class="catalog-cover__dot-number">{String(index + 1).padStart(2, "0")}</span>
+                    </button>
                   ))}
                 </div>
               </div>
@@ -1150,6 +1152,8 @@ const storeData = {
             slider.appendChild(slide);
             if (dot) {
               dot.dataset.heroDot = String(index);
+              var dotNumber = dot.querySelector(".catalog-cover__dot-number");
+              if (dotNumber) dotNumber.textContent = String(index + 1).padStart(2, "0");
               dot.parentElement?.appendChild(dot);
             }
             return dot;
@@ -1162,7 +1166,10 @@ const storeData = {
             firstHeroImage.loading = "eager";
             firstHeroImage.fetchPriority = "high";
           }
-          if (dots[0]) dots[0].classList.add("is-active");
+          if (dots[0]) {
+            dots[0].classList.add("is-active");
+            dots[0].setAttribute("aria-current", "true");
+          }
           slider.dataset.heroSelection = slides.map(function (slide) {
             return slide.dataset.heroProduct;
           }).join(",");
@@ -1201,6 +1208,8 @@ const storeData = {
             current = next;
             dots.forEach(function (dot, i) {
               dot.classList.toggle("is-active", i === current);
+              if (i === current) dot.setAttribute("aria-current", "true");
+              else dot.removeAttribute("aria-current");
             });
           };
 

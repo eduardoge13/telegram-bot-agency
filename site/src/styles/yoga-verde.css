@@ -4770,6 +4770,7 @@ body {
   width: 100%;
   height: 100%;
   background: #eee3d9;
+  filter: saturate(var(--hero-saturation, 1.08)) contrast(var(--hero-contrast, 1.03));
   image-rendering: auto;
   object-fit: cover;
   object-position: var(--hero-object-position, center);
@@ -4864,7 +4865,7 @@ body {
   top: 1rem;
   right: auto;
   bottom: auto;
-  left: 1rem;
+  left: clamp(6.5rem, 9vw, 9rem);
   z-index: 8;
   display: flex;
   align-items: center;
@@ -4885,21 +4886,37 @@ body {
   padding: 0;
 }
 
+.catalog-cover__dot-number {
+  display: block;
+  color: var(--color-on-surface-variant);
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  transform: translateY(-0.25rem);
+  transition: color 0.24s ease;
+}
+
 .catalog-cover__dots .hero-dot::before {
   position: absolute;
-  top: 50%;
+  top: auto;
+  bottom: 0.55rem;
   left: 50%;
-  width: 1rem;
+  width: 0.8rem;
   height: 2px;
   background: var(--yv-line);
   content: "";
-  transform: translate(-50%, -50%);
+  transform: translateX(-50%);
   transition: width 0.24s ease, background 0.24s ease;
 }
 
 .catalog-cover__dots .hero-dot.is-active::before {
-  width: 1.75rem;
+  width: 1.5rem;
   background: var(--color-secondary);
+}
+
+.catalog-cover__dots .hero-dot.is-active .catalog-cover__dot-number {
+  color: var(--color-secondary);
 }
 
 .catalog-cover__slider.is-ready .catalog-cover__slide.is-active .catalog-cover__image {
@@ -4926,13 +4943,13 @@ body {
 
 @keyframes catalog-cover-image-in {
   from {
-    filter: saturate(0.82);
+    filter: saturate(0.92) contrast(var(--hero-contrast, 1.03));
     opacity: 0.42;
     transform: scale(1.025);
   }
 
   to {
-    filter: saturate(1);
+    filter: saturate(var(--hero-saturation, 1.08)) contrast(var(--hero-contrast, 1.03));
     opacity: 1;
     transform: scale(1);
   }
