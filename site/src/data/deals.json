@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-08-18T20:15:24.770Z",
+	"generatedAt": "2026-08-19T02:06:19.545Z",
 	"windowDays": 21,
 	"minSample": 200,
 	"excludedSources": [
@@ -39,8 +39,8 @@
 			"priceFrom": 16000,
 			"priceTo": 23000,
 			"currency": "MXN",
-			"sampleSize": 3108,
-			"lastSeen": "2026-08-18T20:14:57Z"
+			"sampleSize": 3772,
+			"lastSeen": "2026-08-19T02:05:25Z"
 		},
 		{
 			"code": "BRU",
@@ -57,8 +57,8 @@
 			"priceFrom": 18000,
 			"priceTo": 25000,
 			"currency": "MXN",
-			"sampleSize": 2620,
-			"lastSeen": "2026-08-18T20:15:23Z"
+			"sampleSize": 3188,
+			"lastSeen": "2026-08-19T02:05:58Z"
 		},
 		{
 			"code": "AMS",
@@ -75,8 +75,8 @@
 			"priceFrom": 18000,
 			"priceTo": 25000,
 			"currency": "MXN",
-			"sampleSize": 2449,
-			"lastSeen": "2026-08-18T20:15:09Z"
+			"sampleSize": 2972,
+			"lastSeen": "2026-08-19T02:06:10Z"
 		},
 		{
 			"code": "FRA",
@@ -93,8 +93,8 @@
 			"priceFrom": 18000,
 			"priceTo": 27000,
 			"currency": "MXN",
-			"sampleSize": 2058,
-			"lastSeen": "2026-08-18T20:14:54Z"
+			"sampleSize": 2467,
+			"lastSeen": "2026-08-19T02:05:21Z"
 		},
 		{
 			"code": "BCN",
@@ -111,8 +111,8 @@
 			"priceFrom": 19000,
 			"priceTo": 26000,
 			"currency": "MXN",
-			"sampleSize": 3185,
-			"lastSeen": "2026-08-18T20:14:56Z"
+			"sampleSize": 3830,
+			"lastSeen": "2026-08-19T02:06:11Z"
 		},
 		{
 			"code": "BER",
@@ -129,8 +129,8 @@
 			"priceFrom": 21000,
 			"priceTo": 27000,
 			"currency": "MXN",
-			"sampleSize": 3134,
-			"lastSeen": "2026-08-18T20:14:53Z"
+			"sampleSize": 3793,
+			"lastSeen": "2026-08-19T02:05:20Z"
 		},
 		{
 			"code": "MUC",
@@ -144,11 +144,11 @@
 			},
 			"region": "europe",
 			"image": "munich.jpg",
-			"priceFrom": 21000,
+			"priceFrom": 22000,
 			"priceTo": 28000,
 			"currency": "MXN",
-			"sampleSize": 2880,
-			"lastSeen": "2026-08-18T20:14:55Z"
+			"sampleSize": 3484,
+			"lastSeen": "2026-08-19T02:05:22Z"
 		}
 	]
 }
