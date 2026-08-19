@@ -31,6 +31,7 @@ const useLabelMap = new Map(PRODUCTS.map((product) => [product.use, product.useL
 const typeLabelMap = new Map(PRODUCTS.map((product) => [product.type, product.typeLabel]));
 
 let lastDetailTrigger = null;
+let lastCartTrigger = null;
 
 const state = {
   search: "",
@@ -114,6 +115,12 @@ function saveCart() {
 
 function formatMoney(value) {
   return MONEY.format(value);
+}
+
+function itemUrl(item) {
+  return item?.kind === "kit"
+    ? `/yoga-verde/kits/${encodeURIComponent(item.id)}`
+    : `/yoga-verde/productos/${encodeURIComponent(item.id)}`;
 }
 
 function normalizeText(value) {
@@ -261,37 +268,24 @@ function renderDetailMedia(item) {
 }
 
 function catalogCardMarkup(product) {
-  const accent = accentOf(product);
   return `
-    <article class="product-card group" style="--accent: ${escapeHtml(accent)}">
-      <button aria-controls="detail-title" aria-haspopup="dialog" aria-label="Ver detalle de ${escapeHtml(product.name)}, ${escapeHtml(product.scent || "")}${product.badge ? `, ${escapeHtml(product.badge)}` : ""}" class="product-image-frame relative" data-open-detail="${escapeHtml(product.id)}" type="button">
-        ${product.badge ? `<span class="product-badge absolute left-4 top-4 z-10">${escapeHtml(product.badge)}</span>` : ""}
-        <img alt="${escapeHtml(product.name)} ${escapeHtml(product.scent || "")}" class="product-media aspect-square w-full transition duration-500 group-hover:scale-[1.02]" src="${escapeHtml(product.image)}" />
-      </button>
-      <div class="product-card__body">
-        <div class="flex items-start justify-between gap-4">
-          <div class="min-w-0">
-            <p class="product-eyebrow">${escapeHtml(product.typeLabel)}</p>
-            <h3 class="product-name product-card__title">${escapeHtml(product.name)}</h3>
-            <p class="product-card__scent">${escapeHtml(product.scent || "")}</p>
+    <article class="yv-product-card">
+      <a aria-label="Ver ${escapeHtml(product.name)}, ${escapeHtml(product.scent || "")}" class="yv-product-card__media" href="${escapeHtml(itemUrl(product))}">
+        <img alt="${escapeHtml(product.name)} ${escapeHtml(product.scent || "")}" class="product-media" src="${escapeHtml(product.image)}" />
+      </a>
+      <div class="yv-product-card__body">
+        <div class="yv-product-card__heading">
+          <div>
+            <p class="yv-eyebrow">${escapeHtml(product.typeLabel)}</p>
+            <h2><a href="${escapeHtml(itemUrl(product))}">${escapeHtml(product.name)}</a></h2>
+            <p class="yv-product-card__scent">${escapeHtml(product.scent || "")}</p>
           </div>
-          <span class="price shrink-0 text-lg">${formatMoney(product.price)}</span>
+          <p class="price">${formatMoney(product.price)}</p>
         </div>
-        <p class="product-card__description">${escapeHtml(product.short)}</p>
-        <div class="product-card__meta">
-          <span>${escapeHtml(product.useLabel)}</span>
-          ${product.size ? `<span>${escapeHtml(product.size)}</span>` : ""}
-        </div>
-        <div class="product-card__actions">
-          <button aria-controls="detail-title" aria-haspopup="dialog" class="text-link" data-open-detail="${escapeHtml(product.id)}" type="button">
-            <svg aria-hidden="true" class="text-link__icon" fill="none" focusable="false" height="14" viewBox="0 0 24 24" width="14">
-              <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
-            </svg>
-            Ver detalle
-          </button>
-          <button aria-label="Añadir ${escapeHtml(product.name)} al carrito" class="primary-action" data-add-item="${escapeHtml(product.id)}" type="button">
-            Añadir
-          </button>
+        <p class="yv-product-card__summary">${escapeHtml(product.short)}</p>
+        <div class="yv-product-card__actions">
+          <a class="yv-text-link" href="${escapeHtml(itemUrl(product))}">Ver producto <span aria-hidden="true">→</span></a>
+          <button aria-label="Añadir ${escapeHtml(product.name)} al carrito" class="yv-add-button" data-add-item="${escapeHtml(product.id)}" type="button">Añadir</button>
         </div>
       </div>
     </article>
@@ -301,20 +295,20 @@ function catalogCardMarkup(product) {
 function cartItemMarkup(entry) {
   const { item, quantity } = entry;
   return `
-    <article class="border border-outline-variant/50 bg-surface-container-low p-5">
-      <div class="flex gap-4">
-        <img alt="${escapeHtml(item.name)}" class="h-28 w-28 bg-surface-container-lowest object-contain p-0.5" src="${escapeHtml(item.image)}" />
-        <div class="flex flex-1 flex-col">
-          <div class="flex items-start justify-between gap-4">
-            <div class="min-w-0">
-              <p class="text-[11px] uppercase tracking-[0.22em] text-on-surface-variant">${escapeHtml(item.badge)}</p>
-              <h3 class="product-name mt-1 font-headline text-base leading-snug text-primary">${escapeHtml(item.name)}</h3>
-              <p class="mt-2 text-sm text-on-surface-variant">${escapeHtml(item.scent || item.useLabel)}</p>
+    <article class="yv-cart-item">
+      <div class="yv-cart-item__layout">
+        <img alt="${escapeHtml(item.name)}" class="yv-cart-item__image" src="${escapeHtml(item.image)}" />
+        <div class="yv-cart-item__content">
+          <div class="yv-cart-item__heading">
+            <div>
+              <p class="yv-cart-item__badge">${escapeHtml(item.badge)}</p>
+              <h3 class="product-name">${escapeHtml(item.name)}</h3>
+              <p class="yv-cart-item__scent">${escapeHtml(item.scent || item.useLabel)}</p>
             </div>
-            <span class="price shrink-0 text-lg">${formatMoney(item.price * quantity)}</span>
+            <span class="price">${formatMoney(item.price * quantity)}</span>
           </div>
-          <div class="mt-4 flex items-center justify-between gap-3">
-            <div class="inline-flex items-center gap-4 border border-outline-variant/50 bg-surface-container-highest px-4 py-2">
+          <div class="yv-cart-item__actions">
+            <div class="yv-cart-item__quantity">
               <button aria-label="Disminuir cantidad de ${escapeHtml(item.name)}" class="text-primary transition hover:text-secondary" data-qty="${escapeHtml(item.id)}" data-delta="-1" type="button">
                 <span class="material-symbols-outlined text-base">remove</span>
               </button>
@@ -323,7 +317,7 @@ function cartItemMarkup(entry) {
                 <span class="material-symbols-outlined text-base">add</span>
               </button>
             </div>
-            <button class="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.22em] text-on-surface-variant transition hover:text-secondary" data-remove="${escapeHtml(item.id)}" type="button">
+            <button class="yv-cart-item__remove" data-remove="${escapeHtml(item.id)}" type="button">
               <span class="material-symbols-outlined text-base">delete</span>
               Eliminar
             </button>
@@ -337,14 +331,14 @@ function cartItemMarkup(entry) {
 function upsellMarkup(item) {
   return `
     <div class="flex items-start gap-4">
-      <button aria-controls="detail-title" aria-haspopup="dialog" aria-label="Ver detalle de ${escapeHtml(item.name)}" class="shrink-0" data-open-detail="${escapeHtml(item.id)}" type="button">
+      <a aria-label="Ver ${escapeHtml(item.name)}" class="shrink-0" href="${escapeHtml(itemUrl(item))}">
         <img alt="${escapeHtml(item.name)}" class="h-24 w-24 rounded-[22px] bg-surface-container-lowest object-contain p-0.5" src="${escapeHtml(item.image)}" />
-      </button>
+      </a>
       <div class="flex-1">
         <p class="text-xs uppercase tracking-[0.22em] text-secondary">También te puede interesar</p>
         <h3 class="product-name mt-1.5 font-headline text-xl leading-snug text-primary">${escapeHtml(item.name)}</h3>
         <p class="mt-2 text-sm leading-7 text-on-surface-variant">${escapeHtml(item.short)}</p>
-        <button class="text-link mt-3" data-open-detail="${escapeHtml(item.id)}" type="button">Ver detalle</button>
+        <a class="text-link mt-3" href="${escapeHtml(itemUrl(item))}">Ver producto</a>
         <div class="mt-4 flex items-center justify-between gap-4">
           <span class="price text-2xl">${formatMoney(item.price)}</span>
           <button class="inline-flex items-center gap-2 rounded-2xl bg-primary px-4 py-3 text-sm font-semibold text-on-primary transition hover:bg-primary-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/35" data-add-item="${escapeHtml(item.id)}" type="button">
@@ -639,22 +633,47 @@ function closeFilters() {
   syncBodyLock();
 }
 
-function openCart() {
+function cartFocusableElements() {
+  if (!els.cartDrawer) return [];
+
+  return [...els.cartDrawer.querySelectorAll(
+    'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+  )].filter((element) => {
+    const styles = window.getComputedStyle(element);
+    return styles.visibility !== "hidden" && styles.display !== "none";
+  });
+}
+
+function openCart(trigger = null) {
   closeMobileMenu({ restoreFocus: false, immediate: true });
+  if (trigger instanceof HTMLElement) lastCartTrigger = trigger;
   state.cartOpen = true;
   closeFilters();
+  els.cartDrawer?.setAttribute("aria-hidden", "false");
+  if (els.cartDrawer) els.cartDrawer.inert = false;
   els.cartDrawer?.classList.remove("translate-x-full");
   els.cartOverlay?.classList.remove("pointer-events-none", "opacity-0");
   els.cartOverlay?.classList.add("opacity-100");
   syncBodyLock();
+
+  window.requestAnimationFrame(() => {
+    cartFocusableElements()[0]?.focus({ preventScroll: true });
+  });
 }
 
-function closeCart() {
+function closeCart({ restoreFocus = true } = {}) {
+  const wasOpen = state.cartOpen;
   state.cartOpen = false;
+  els.cartDrawer?.setAttribute("aria-hidden", "true");
+  if (els.cartDrawer) els.cartDrawer.inert = true;
   els.cartDrawer?.classList.add("translate-x-full");
   els.cartOverlay?.classList.add("pointer-events-none", "opacity-0");
   els.cartOverlay?.classList.remove("opacity-100");
   syncBodyLock();
+
+  if (wasOpen && restoreFocus && lastCartTrigger?.isConnected) {
+    lastCartTrigger.focus({ preventScroll: true });
+  }
 }
 
 function detailFocusableElements() {
@@ -979,7 +998,7 @@ document.addEventListener("click", (event) => {
   if (target.matches("[data-open-filters]")) openFilters();
   if (target.matches("[data-close-filters]")) closeFilters();
 
-  if (target.matches("[data-open-cart]")) openCart();
+  if (target.matches("[data-open-cart]")) openCart(target);
   if (target.matches("[data-close-cart]")) closeCart();
 
   if (target.matches("[data-add-item]")) {
@@ -1100,6 +1119,26 @@ document.addEventListener("keydown", (event) => {
       event.preventDefault();
       last.focus();
     } else if (!event.shiftKey && (document.activeElement === last || document.activeElement === els.modal)) {
+      event.preventDefault();
+      first.focus();
+    }
+    return;
+  }
+
+  if (state.cartOpen && event.key === "Tab") {
+    const focusable = cartFocusableElements();
+    if (focusable.length === 0) {
+      event.preventDefault();
+      els.cartDrawer?.focus({ preventScroll: true });
+      return;
+    }
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && (document.activeElement === first || document.activeElement === els.cartDrawer)) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && (document.activeElement === last || document.activeElement === els.cartDrawer)) {
       event.preventDefault();
       first.focus();
     }

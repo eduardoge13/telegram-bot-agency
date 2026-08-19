@@ -1,0 +1,86 @@
+---
+import ProductCard from "../../../components/yoga-verde/ProductCard.astro";
+import YogaVerdeLayout from "../../../components/yoga-verde/YogaVerdeLayout.astro";
+import {
+  campaignMedia,
+  formatMoney,
+  productUrl,
+  products,
+  type YogaProduct,
+} from "../../../lib/yoga-verde";
+
+export function getStaticPaths() {
+  return products.map((product) => ({ params: { id: product.id }, props: { product } }));
+}
+
+interface Props { product: YogaProduct }
+const { product } = Astro.props;
+const media = campaignMedia[product.id];
+const related = products.filter((item) => item.id !== product.id && item.type === product.type).slice(0, 3);
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "Product",
+  name: product.name,
+  description: product.description,
+  image: `https://yoga-verde.srv1175749.hstgr.cloud${media?.src || product.image}`,
+  brand: { "@type": "Brand", name: "Yoga Verde" },
+  offers: {
+    "@type": "Offer",
+    priceCurrency: "MXN",
+    price: product.price,
+    availability: "https://schema.org/InStock",
+    url: `https://yoga-verde.srv1175749.hstgr.cloud${productUrl(product)}`,
+  },
+};
+---
+
+<YogaVerdeLayout
+  activePage={product.type === "facial" || product.type === "labial" ? "rostro" : product.type === "corporal" ? "cuerpo" : product.type === "cabello" ? "cabello" : "catalogo"}
+  canonicalPath={productUrl(product)}
+  description={`${product.name} ${product.scent} de Yoga Verde. ${product.short} Presentación ${product.size || "disponible"} por ${formatMoney(product.price)} MXN.`}
+  title={`${product.name} ${product.scent} | Yoga Verde`}
+>
+  <script is:inline set:html={JSON.stringify(schema)} type="application/ld+json"></script>
+  <article class="yv-product-page">
+    <div class="yv-product-page__media">
+      <img
+        alt={`${product.name} ${product.scent}`}
+        fetchpriority="high"
+        height={media?.height || 1200}
+        src={media?.src || product.image}
+        width={media?.width || 1200}
+      />
+      <p>Fotografía del producto · {product.size}</p>
+    </div>
+    <div class="yv-product-page__content">
+      <nav aria-label="Migas de pan"><a href="/yoga-verde">Inicio</a><span>/</span><a href="/yoga-verde/catalogo">Catálogo</a><span>/</span><strong>{product.name}</strong></nav>
+      <p class="yv-eyebrow">{product.typeLabel}</p>
+      <h1>{product.name}</h1>
+      <p class="yv-product-page__scent">{product.scent}</p>
+      <div class="yv-product-page__price"><strong class="price">{formatMoney(product.price)}</strong><span>{product.size}</span></div>
+      <p class="yv-product-page__description">{product.description}</p>
+      <button class="yv-primary-button" data-add-item={product.id} type="button">Añadir al carrito · {formatMoney(product.price)}</button>
+      <p class="yv-product-page__shipping">Envío gratis en compras desde $999 MXN.</p>
+
+      {product.benefits?.length ? (
+        <section class="yv-product-page__details">
+          <h2>Beneficios</h2>
+          <ul>{product.benefits.map((benefit) => <li>{benefit}</li>)}</ul>
+        </section>
+      ) : null}
+      {product.instructions ? (
+        <section class="yv-product-page__details">
+          <h2>Cómo usarlo</h2>
+          <p>{product.instructions}</p>
+        </section>
+      ) : null}
+    </div>
+  </article>
+
+  {related.length ? (
+    <section class="yv-related-products">
+      <div class="yv-section-heading"><div><p class="yv-eyebrow">Completa tu ritual</p><h2>También te puede interesar</h2></div></div>
+      <div class="yv-product-grid">{related.map((item) => <ProductCard product={item} />)}</div>
+    </section>
+  ) : null}
+</YogaVerdeLayout>

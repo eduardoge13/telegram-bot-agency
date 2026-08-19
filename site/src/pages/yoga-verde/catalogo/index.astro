@@ -1,0 +1,58 @@
+---
+import ProductCard from "../../../components/yoga-verde/ProductCard.astro";
+import YogaVerdeLayout from "../../../components/yoga-verde/YogaVerdeLayout.astro";
+import { collections, products } from "../../../lib/yoga-verde";
+
+const typeFilters = Array.from(
+  new Map(products.map((product) => [product.type, { slug: product.type, label: product.typeLabel }])).values(),
+);
+---
+
+<YogaVerdeLayout
+  activePage="catalogo"
+  canonicalPath="/yoga-verde/catalogo"
+  description="Explora el catálogo completo de Yoga Verde. Consulta precios, beneficios, tamaños y aromas de 27 productos de cosmética natural."
+  title="Catálogo completo | Yoga Verde"
+>
+  <header class="yv-page-hero yv-page-hero--catalog">
+    <div>
+      <p class="yv-edition">27 productos · Precios vigentes 2026</p>
+      <h1>Catálogo completo</h1>
+      <p>Busca por producto o filtra por ritual. Cada ficha tiene su propia página con fotografía, beneficios, presentación y precio.</p>
+    </div>
+    <img alt="Yoga Verde — Cosmética natural" height="1400" src="/yoga-verde/assets/brand/logo-yoga-verde.svg" width="1400" />
+  </header>
+
+  <section class="yv-catalog-page" id="buscar">
+    <div class="yv-catalog-tools">
+      <label class="yv-search-field">
+        <span class="material-symbols-outlined" aria-hidden="true">search</span>
+        <span class="sr-only">Buscar productos</span>
+        <input autocomplete="off" data-search-input placeholder="Buscar por nombre, ingrediente o beneficio" type="search" />
+      </label>
+      <p><strong data-product-count>{products.length}</strong> productos</p>
+    </div>
+
+    <div class="yv-catalog-shortcuts" aria-label="Colecciones">
+      {collections.map((collection) => <a href={`/yoga-verde/colecciones/${collection.slug}`}>{collection.label}</a>)}
+      <a href="/yoga-verde/kits">Kits</a>
+    </div>
+
+    <div class="yv-filter-row" aria-label="Filtrar por tipo">
+      {typeFilters.map((filter) => (
+        <button aria-pressed="false" class="filter-option" data-filter-type={filter.slug} type="button">{filter.label}</button>
+      ))}
+      <button class="yv-filter-clear" data-clear-filters type="button">Limpiar</button>
+    </div>
+    <div class="yv-active-filters" data-active-filters><span class="filter-status">Sin filtros activos</span></div>
+
+    <div class="yv-product-grid" data-products-grid>
+      {products.map((product, index) => <ProductCard product={product} priority={index < 3} />)}
+    </div>
+    <div class="yv-empty-state hidden" data-empty-state>
+      <h2>No encontramos ese producto</h2>
+      <p>Prueba con un ingrediente, una categoría o limpia los filtros.</p>
+      <button class="yv-primary-link" data-clear-filters type="button">Mostrar todo</button>
+    </div>
+  </section>
+</YogaVerdeLayout>

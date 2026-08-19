@@ -227,6 +227,28 @@ desktop and mobile screenshot/checklist before proposing deployment.
   and `main`; deployment remains `site/scripts/deploy.sh` until GitHub has a
   tested least-privilege SSH key and known-host secret.
 
+## Yoga Verde multipage storefront handoff (2026-08-18)
+
+- The client explicitly rejected a long, scroll-driven storefront. Preserve the
+  multipage architecture: home, full catalog, four collection pages, kits,
+  six kit details and 27 dedicated product pages.
+- The home is a visual index, not the complete shop. It leads with the approved
+  cera-and-honey campaign and then routes to collections, three editorial
+  products, catalog and kits.
+- Product prices and commerce data remain centralized in
+  `site/src/data/yoga-verde-store.js`. `site/src/lib/yoga-verde.ts` supplies
+  route helpers, collection definitions and campaign-image mappings without
+  duplicating the source of truth.
+- Keep the strongest catalog visuals mapped to the approved real products:
+  cera/honey, hand cream/mango, micellar water/chamomile and body butter with
+  mango/coconut. Do not fabricate packaging or alter labels.
+- Product and kit cards link to dedicated routes. The shared cart in
+  `site/public/yoga-verde/shop.js` persists in localStorage across navigation;
+  its drawer must remain usable at 320 px and hidden/inert while closed.
+- Kit detail pages must show every included product. The Ritual Facial kit is
+  the three-piece regression case: micellar water, facial cream and eye
+  contour must all be visible before release.
+
 ## Response Format Specification
 
 All successful client lookups must return this **exact format**:
